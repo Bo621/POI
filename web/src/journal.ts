@@ -29,7 +29,7 @@ export function parseJournal(raw: string | null): JournalEntry[] {
 export function addJournalEntry(
     entries: JournalEntry[],
     content: string,
-    id = crypto.randomUUID(),
+    id: string = crypto.randomUUID(),
     createdAt = new Date().toISOString(),
 ): JournalEntry[] {
     const entry = {id, content: content.trim(), createdAt};
