@@ -37,8 +37,8 @@
 | X3 | **P0** | salt 생성 — 128bit CSPRNG | `[x]` `generateSalt()` — 16바이트 `crypto.getRandomValues`. 온체인 기록 경로 없음 |
 | X4 | **P0** | E2 `scale` / E3 `eval` / E5 `result` | `[x]` `core/src/evaluate.ts`. 문자열→bigint 경로(부동소수 미사용) · half-up은 음수에서도 절댓값 기준 · int128 범위 밖 거부. **컨트랙트 경계표(op 6종 × 599/600/601)를 TS 테스트에 복제해 대조** |
 | X5 | **P0** | E9 `state` 파생 | `[x]` `core/src/state.ts`. 7상태 + `hasRevokedSettlement` 독립 표시 · 경계 `t=S0`·`t=W`·`t=W+G` 및 SETTLED/SETTLED_LATE 경계 · `activeHeadTime` 없으면 추측하지 않고 throw |
-| X6 | P1 | E7 등급 2축 (`evidenceTier` × `revealState`) | `[ ]` 온체인 저장 없이 조회 시 계산 |
-| X7 | P1 | 에러 셀렉터 → 한국어 메시지 매핑 (§10) | `[ ]` 리졸버 커스텀 에러 전부 커버 |
+| X6 | P1 | E7 등급 2축 (`evidenceTier` × `revealState`) | `[x]` `core/src/grade.ts`. 조회 시 계산 · 두 축 독립 · CT18(타인 commitment 복사본)이 `SEALED`로 남는 것까지 고정. `ORACLE_VERIFIED`는 범위 경계라 상수도 노출하지 않음 |
+| X7 | P1 | 에러 셀렉터 → 한국어 메시지 매핑 (§10) | `[x]` `core/src/errors.ts` 57종 전부. 셀렉터는 이름에서 계산(상수 미고정). **테스트가 `contracts/src/*.sol`을 직접 읽어 커버리지를 강제** — 에러를 추가하고 매핑을 잊으면 core 테스트가 깨진다 |
 
 ---
 
