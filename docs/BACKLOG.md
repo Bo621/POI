@@ -49,7 +49,7 @@
 | C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[x]` `MustBePermanent`·`WrongSchema`·`NotInitialized`·`RecipientMustBeZero`. `_initializeBase`는 internal(부분 초기화 봉쇄 방지 — codex P1). `renounceOwnership` revert(B13 구조화). 15/15 통과 |
 | C3 | **P0** | `POINoteResolver` | C2 | `[x]` `contentCommitment≠0` · attestation 레벨 `revocable=false`도 강제(§1.2) · 실제 `attest()` 경로(onlyEAS)로 검증 · `refUID=0`·payload 정확히 32바이트 강제(codex P2). 13/13 |
 | C4 | **P0** | `POIDecisionResolver` (I1~I6, I12, I14) | C2 | `[x]` 부모 5종·노트 승격·`verifiedAddressUID`·window/grace·I6d 필드 0·payload 정규 길이(codex P2). 38/38 |
-| C5 | **P0** | `POISettlementResolver` (I7~I13, I16, I17) | C4 | `[ ]` `activeHead`/`lastHead`/`revokeCount` 분리 · **`_eval` 온체인 판정 강제** · `observedAt==windowEnd` |
+| C5 | **P0** | `POISettlementResolver` (I7~I13, I16, I17) | C4 | `[x]` `activeHead`/`lastHead`/`revokeCount` 분리 · `_eval` 온체인 판정 강제(op 6종 × 599/600/601 전수) · `observedAt==windowEnd` · payload 재인코딩 대조. 35/35 (전체 123/123) |
 | C6 | **P0** | `POIChallengeResolver` (I15) | C2 | `[ ]` 동일인 활성 이의 1건, `onRevoke`에서 매핑 해제 → 재발행 가능 |
 | C7 | **P0** | metric 레지스트리 — append-only·frozen (B13) | C2 | `[x]` `POIMetricRegistry`(abstract, Decision만 상속). 재등록 `MetricFrozen` · `definitionHash=0` 거부(§11.3) · `kind≠0` 거부(B7). 10/10 |
 | C8 | P1 | 온체인 EAS ABI 대조 | — | `[ ]` `1.4.1-beta.3` 배포본과 lib `v1.4.0`의 `attest`·`getAttestation` 셀렉터·레이아웃 일치 확인 (R3) |
@@ -59,16 +59,16 @@
 
 | ID | 시나리오 | 기대 |
 |---|---|---|
-| CT01 | 타인이 정산 시도 | `NotDecisionOwner` (I10) |
-| CT02 | `revocable=false` 정산 | `MustBeRevocable` (I11) |
+| CT01 | 타인이 정산 시도 | `NotDecisionOwner` (I10) — `[x]` C5 |
+| CT02 | `revocable=false` 정산 | `MustBeRevocable` (I11) — `[x]` C5 |
 | CT03 | `expirationTime ≠ 0` | `MustBePermanent` (V10) ★ — `[x]` Base·Note 양쪽 |
-| CT04 | 관측값과 반대되는 result 제출 | `ResultMismatch` (I17) ★ |
-| CT05 | 관측값 없이 `OBSERVED` 제출 | `MustBeIndeterminate` (I16) ★ |
-| CT06 | `observedAt ≠ windowEnd` | `ObservedAtMustBeWindowEnd` ★ |
-| CT07 | S1 revoke 후 `supersedes=S1` 정정 | **통과해야 함** (B1) ★ |
-| CT08 | S1 revoke 후 `supersedes=0` 재발행 | `MustSupersede` ★ |
-| CT09 | `activeHead` 있는데 `supersedes` 발행 | `PriorStillActive` |
-| CT10 | 무관한 revoked UID로 supersede | `SupersedesNotLastHead` |
+| CT04 | 관측값과 반대되는 result 제출 | `ResultMismatch` (I17) ★ — `[x]` C5 |
+| CT05 | 관측값 없이 `OBSERVED` 제출 | `MustBeIndeterminate` (I16) ★ — `[x]` C5 |
+| CT06 | `observedAt ≠ windowEnd` | `ObservedAtMustBeWindowEnd` ★ — `[x]` C5 |
+| CT07 | S1 revoke 후 `supersedes=S1` 정정 | **통과해야 함** (B1) ★ — `[x]` C5 |
+| CT08 | S1 revoke 후 `supersedes=0` 재발행 | `MustSupersede` ★ — `[x]` C5 |
+| CT09 | `activeHead` 있는데 `supersedes` 발행 | `PriorStillActive` — `[x]` C5 |
+| CT10 | 무관한 revoked UID로 supersede | `SupersedesNotLastHead` — `[x]` C5 |
 | CT11 | `windowStart` 과거 | `WindowInPast` (I4) — `[x]` C4 |
 | CT12 | `graceSeconds` < 1시간 또는 > 30일 | `GraceOutOfRange` (I6c) — `[x]` C4 |
 | CT13 | 타인 노트를 승격 원본으로 | `NoteNotSameActor` (I3b) — `[x]` C4 |
