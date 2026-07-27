@@ -122,6 +122,19 @@ describe("salt", () => {
         assert.notEqual(a, generateSalt());
     });
 
+    it("브라우저 환경(Buffer 없음)에서도 동작한다", () => {
+        const originalBuffer = globalThis.Buffer;
+        try {
+            globalThis.Buffer = undefined as never;
+            const first = vectors.cases[0];
+            assert.ok(first);
+            assert.match(generateSalt(), /^0x[0-9a-f]{32}$/);
+            assert.equal(commitment(first), first.commitment.toLowerCase());
+        } finally {
+            globalThis.Buffer = originalBuffer;
+        }
+    });
+
     it("잘못된 길이는 거부한다", () => {
         assert.throws(() => commitment({...byName("decision_ko"), salt: "0x00"}));
     });

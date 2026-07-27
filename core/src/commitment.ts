@@ -9,7 +9,7 @@
  *
  * 고정 벡터: ../vectors/commitment.v1.json — Solidity 테스트도 같은 파일을 읽는다.
  */
-import {keccak256, concatHex, numberToHex, isAddress, type Hex} from "viem";
+import {keccak256, concatHex, numberToHex, isAddress, bytesToHex, type Hex} from "viem";
 import {canonicalize} from "./jcs.ts";
 
 export const COMMIT_TAG_PREIMAGE = {
@@ -35,7 +35,7 @@ export class CommitmentError extends Error {}
 export function generateSalt(): Hex {
     const bytes = new Uint8Array(SALT_BYTES);
     crypto.getRandomValues(bytes);
-    return `0x${Buffer.from(bytes).toString("hex")}` as Hex;
+    return bytesToHex(bytes);
 }
 
 function requireHexBytes(value: string, length: number, label: string): Hex {
@@ -62,7 +62,7 @@ export function commitmentPreimage({tag, chainId, attester, salt, payload}: Comm
 
     if (!isAddress(attester, {strict: false})) throw new CommitmentError(`attester 주소가 아니다: ${attester}`);
 
-    const jcsHex = `0x${Buffer.from(canonicalize(payload), "utf8").toString("hex")}` as Hex;
+    const jcsHex = bytesToHex(new TextEncoder().encode(canonicalize(payload)));
 
     return concatHex([
         tagHex,
