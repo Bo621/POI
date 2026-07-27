@@ -13,7 +13,6 @@ cache/
 out/
 broadcast/
 !broadcast/**/dry-run/
-lib/
 docs/book/
 
 # --- Node / 프론트 ---
