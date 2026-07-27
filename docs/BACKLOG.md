@@ -35,8 +35,8 @@
 | X1 | **P0** | **commitment 테스트 벡터 고정** (B3) | `[x]` `C = keccak256(TAG ‖ chainId ‖ attester ‖ salt ‖ JCS(payload))`. `core/vectors/commitment.v1.json` 6케이스. 기대값은 `cast keccak`(독립 경로)으로 생성 — `scripts/gen_commitment_vectors.py`. TS 19/19 · Solidity 3/3 통과 |
 | X2 | **P0** | JCS(RFC 8785) 정규화 구현/채택 | `[x]` `core/src/jcs.ts`. 키 정렬·배열 순서 보존·한글 비이스케이프·제어문자 이스케이프. `undefined`/`NaN`/`BigInt`는 거부(값이 조용히 사라지는 것을 막는다) |
 | X3 | **P0** | salt 생성 — 128bit CSPRNG | `[x]` `generateSalt()` — 16바이트 `crypto.getRandomValues`. 온체인 기록 경로 없음 |
-| X4 | **P0** | E2 `scale` / E3 `eval` / E5 `result` | `[ ]` half-up 반올림. 컨트랙트 `_eval`과 동일 결과 (op 6종 × 경계값) |
-| X5 | **P0** | E9 `state` 파생 | `[ ]` 7상태 + `revokeCount>0` 부가표시. 경계 `t=W`, `t=W+G` 테스트 |
+| X4 | **P0** | E2 `scale` / E3 `eval` / E5 `result` | `[x]` `core/src/evaluate.ts`. 문자열→bigint 경로(부동소수 미사용) · half-up은 음수에서도 절댓값 기준 · int128 범위 밖 거부. **컨트랙트 경계표(op 6종 × 599/600/601)를 TS 테스트에 복제해 대조** |
+| X5 | **P0** | E9 `state` 파생 | `[x]` `core/src/state.ts`. 7상태 + `hasRevokedSettlement` 독립 표시 · 경계 `t=S0`·`t=W`·`t=W+G` 및 SETTLED/SETTLED_LATE 경계 · `activeHeadTime` 없으면 추측하지 않고 throw |
 | X6 | P1 | E7 등급 2축 (`evidenceTier` × `revealState`) | `[ ]` 온체인 저장 없이 조회 시 계산 |
 | X7 | P1 | 에러 셀렉터 → 한국어 메시지 매핑 (§10) | `[ ]` 리졸버 커스텀 에러 전부 커버 |
 
