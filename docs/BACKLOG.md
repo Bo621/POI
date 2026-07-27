@@ -116,8 +116,8 @@ C8의 9종과 합쳐 `FOUNDRY_PROFILE=fork` 29/29). CT18은 온체인 항목이 
 
 | ID | P | 항목 | 완료 조건 |
 |---|---|---|---|
-| V1 | **P0** | verifier v1.0 골격 — decisionUID 입력 → 판정 출력 | `[ ]` E2·E4·E5를 `core/`로 계산. `verifierVersion` 문자열 고정 |
-| V2 | **P0** | 온체인 정산과 대조 | `[ ]` 불일치 시 비영(非零) 종료코드 |
+| V1 | **P0** | verifier v1.0 골격 — decisionUID 입력 → 판정 출력 | `[x]` `verifier/`. E2·E4·E5·E9 전부 `@poi/core` 재사용(두 벌을 만들지 않는다). `VERIFIER_VERSION = "poi-verifier/1.0.0"` 고정. `ChainReader` 인터페이스 분리로 테스트는 네트워크 없이 14/14 |
+| V2 | **P0** | 온체인 정산과 대조 | `[x]` `MISMATCH` → 종료코드 1 · 사용법·결정 없음 → 2 · 그 외 0. 온체인 자기정합 검사 + 독립 관측 대조. 지표 provider는 **인터페이스만** — 구현은 V3 뒤 |
 | V3 | **P0** | **metric 정의 문서 6종** (§11.3) | `[ ]` 계산식·소스·간격·UTC·결측치·half-up·데이터셋 스냅샷 해시. 문서 해시 = `definitionHash` |
 | V4 | P1 | reveal 검증 CLI | `[ ]` `(salt, payload)` → C 재계산. 타인 commitment 복사본은 실패(CT18) |
 
