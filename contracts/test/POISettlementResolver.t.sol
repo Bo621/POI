@@ -250,6 +250,15 @@ contract POISettlementResolverTest is Test {
         _attest(a);
     }
 
+    function test_Attest_RevertsOnDirtyStringPadding() public {
+        bytes memory data = _settlementData(_settlement());
+        data[data.length - 1] = 0xFF;
+        Attestation memory a = _attestation(_settlement());
+        a.data = data;
+        vm.expectRevert(POISettlementResolver.MalformedPayload.selector);
+        _attest(a);
+    }
+
     // --- I10 / I7 결정 검증 ---------------------------------------------------
 
     function test_Attest_RevertsOnMissingDecision() public {
