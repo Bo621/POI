@@ -215,3 +215,54 @@ cd web && npm run build       # 빌드가 통과해야 한다
 ```
 
 세 개 모두 통과해야 한다. `core`·`verifier` 테스트에 회귀가 없어야 한다.
+
+---
+
+## 리뷰 대응 R1 — `[P1]` 3건
+
+### 1. `web/src/bufferShim.ts`를 **삭제한다**
+
+`@poi/core`가 Node의 `Buffer`를 쓰던 것이 원인이었고, **core를 고쳤다**
+(`fix: Buffer 의존 제거`, main에 병합됨 — 이 브랜치에도 머지됨).
+web에 shim을 두면 원인이 감춰지고, core를 쓰는 다른 소비자는 계속 깨진다.
+
+- `web/src/bufferShim.ts` 삭제
+- 그것을 import하던 곳(`main.tsx` 등)에서 import 제거
+
+### 2. `npx tsc --noEmit`이 통과하지 않는다
+
+```
+../core/src/*.ts: error TS5097: An import path can only end with a '.ts' extension
+                  when 'allowImportingTsExtensions' is enabled.
+```
+
+`core`는 `.ts` 확장자를 붙여 import한다(Node의 `--experimental-strip-types` 때문이다).
+`web/tsconfig.json`이 그것을 받아들이게 한다:
+
+```json
+"moduleResolution": "bundler",
+"allowImportingTsExtensions": true,
+"noEmit": true
+```
+
+`core/tsconfig.json`을 수정하지 말 것 — 그쪽은 Node 실행 경로다.
+
+### 3. `web/test/journal.test.ts` 타입 오류
+
+```
+test/journal.test.ts(11,51): error TS2345:
+  Argument of type '"id-1"' is not assignable to parameter of type `${string}-${string}-...`
+```
+
+저널 항목 id 타입이 `crypto.randomUUID()`의 템플릿 리터럴 타입으로 좁혀져 있다.
+**테스트를 캐스팅으로 때우지 말고** `web/src/journal.ts`에서 id 타입을 `string`으로 넓힌다.
+UUID 형식은 런타임 관심사지 타입 관심사가 아니다 — 테스트가 고정 id를 쓸 수 있어야 한다.
+
+## 검증 (R1 후)
+
+```
+cd web && npx tsc --noEmit     # 오류 0
+cd web && npm test             # 16/16
+cd web && npm run build        # 통과
+cd core && npm test            # 54/54 회귀 없음
+```

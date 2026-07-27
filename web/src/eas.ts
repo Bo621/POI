@@ -1,0 +1,98 @@
+import {
+    encodeAbiParameters,
+    parseAbi,
+    type Address,
+    type Hex,
+} from "viem";
+import {EAS_ADDRESS} from "./config";
+import {getWalletClient} from "./chain";
+
+export interface DecisionFields {
+    parents: Hex[];
+    promotedFromNote: Hex;
+    verifiedAddressUID: Hex;
+    decisionCommitment: Hex;
+    triggerCommitment: Hex;
+    evidenceCommitment: Hex;
+    reasonCommitment: Hex;
+    hasExpectedOutcome: boolean;
+    outcomeMetricId: Hex;
+    outcomeOp: number;
+    outcomeThreshold: bigint;
+    windowStart: bigint;
+    windowEnd: bigint;
+    graceSeconds: number;
+}
+
+const NOTE_PARAMETERS = [{type: "bytes32", name: "contentCommitment"}] as const;
+export const DECISION_PARAMETERS = [
+    {type: "bytes32[]", name: "parents"},
+    {type: "bytes32", name: "promotedFromNote"},
+    {type: "bytes32", name: "verifiedAddressUID"},
+    {type: "bytes32", name: "decisionCommitment"},
+    {type: "bytes32", name: "triggerCommitment"},
+    {type: "bytes32", name: "evidenceCommitment"},
+    {type: "bytes32", name: "reasonCommitment"},
+    {type: "bool", name: "hasExpectedOutcome"},
+    {type: "bytes32", name: "outcomeMetricId"},
+    {type: "uint8", name: "outcomeOp"},
+    {type: "int128", name: "outcomeThreshold"},
+    {type: "uint64", name: "windowStart"},
+    {type: "uint64", name: "windowEnd"},
+    {type: "uint32", name: "graceSeconds"},
+] as const;
+
+export function encodeNoteData(contentCommitment: Hex): Hex {
+    return encodeAbiParameters(NOTE_PARAMETERS, [contentCommitment]);
+}
+
+export function encodeDecisionData(d: DecisionFields): Hex {
+    return encodeAbiParameters(DECISION_PARAMETERS, [
+        d.parents,
+        d.promotedFromNote,
+        d.verifiedAddressUID,
+        d.decisionCommitment,
+        d.triggerCommitment,
+        d.evidenceCommitment,
+        d.reasonCommitment,
+        d.hasExpectedOutcome,
+        d.outcomeMetricId,
+        d.outcomeOp,
+        d.outcomeThreshold,
+        d.windowStart,
+        d.windowEnd,
+        d.graceSeconds,
+    ]);
+}
+
+const EAS_ABI = parseAbi([
+    "function attest((bytes32 schema,(address recipient,uint64 expirationTime,bool revocable,bytes32 refUID,bytes data,uint256 value) data) request) payable returns (bytes32)",
+]);
+
+export async function attest(args: {
+    schema: Hex;
+    data: Hex;
+    revocable: boolean;
+    refUID: Hex;
+}): Promise<Hex> {
+    const wallet = getWalletClient();
+    const [account] = await wallet.requestAddresses();
+    return wallet.writeContract({
+        address: EAS_ADDRESS as Address,
+        abi: EAS_ABI,
+        functionName: "attest",
+        account,
+        args: [{
+            schema: args.schema,
+            data: {
+                recipient: "0x0000000000000000000000000000000000000000",
+                expirationTime: 0n,
+                revocable: args.revocable,
+                refUID: args.refUID,
+                data: args.data,
+                value: 0n,
+            },
+        }],
+        value: 0n,
+    });
+}
