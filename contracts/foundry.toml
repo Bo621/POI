@@ -14,7 +14,9 @@ evm_version = "cancun"
 solc_version = "0.8.30"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+# 14필드 DecisionData를 평면 튜플로 인코딩/디코딩하면 legacy 코드젠에서 stack too deep이 난다.
+# 리졸버 onAttest도 같은 수의 필드를 읽으므로 via_ir을 켠다 (C1에서 확인).
+via_ir = true
 
 remappings = [
   "forge-std/=lib/forge-std/src/",
