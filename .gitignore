@@ -1,0 +1,38 @@
+# --- Secrets (온체인 배포 키 절대 커밋 금지) ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+keystore/
+secrets/
+salt-backup*
+
+# --- Foundry ---
+cache/
+out/
+broadcast/
+!broadcast/**/dry-run/
+lib/
+docs/book/
+
+# --- Node / 프론트 ---
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+*.tsbuildinfo
+.pnpm-store/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- OS / 에디터 ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
