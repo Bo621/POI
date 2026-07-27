@@ -82,6 +82,15 @@
 
 > ★ 표시는 v3에서 새로 강제한 항목이다. **하나라도 실패하면 배포하지 않는다.**
 
+**포크 검증 완료 (2026-07-28)** — 위 `[x]`는 `MockEAS` 유닛 테스트 기준이고, 그와 별개로
+`contracts/test/fork/POIFullStack.fork.t.sol`이 **실제 EAS `1.4.1-beta.3`** 상대로 §6.6 배포 순서를
+그대로 재현한 뒤 CT01~CT17·CT19를 전부 통과시켰다 (happy path 2 + 공격 18 = 20/20,
+C8의 9종과 합쳐 `FOUNDRY_PROFILE=fork` 29/29). CT18은 온체인 항목이 아니다(V4·W8).
+
+실행: `anvil --fork-url https://sepolia-rpc.giwa.io/ --fork-block-number 31820323` 를 띄우고
+`GIWA_SEPOLIA_RPC_URL=http://127.0.0.1:8545 FOUNDRY_PROFILE=fork forge test`.
+공개 RPC에 직접 붙이면 병렬 실행이 429(레이트 리밋)에 걸린다.
+
 ---
 
 ## W. 프론트 (`web/`)
