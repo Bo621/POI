@@ -5,6 +5,8 @@
 
 상태: `[ ]` 미착수 · `[~]` 진행 · `[x]` 완료
 
+리뷰 게이트: 각 항목은 `codex review` GATE PASS(=[P1] 0건) 후에만 완료 처리한다.
+
 ---
 
 ## O. 운영·배포 (선행 조건)
@@ -51,7 +53,7 @@
 | C6 | **P0** | `POIChallengeResolver` (I15) | C2 | `[ ]` 동일인 활성 이의 1건, `onRevoke`에서 매핑 해제 → 재발행 가능 |
 | C7 | **P0** | metric 레지스트리 — append-only·frozen (B13) | C2 | `[ ]` 재등록 시 `MetricFrozen` |
 | C8 | P1 | 온체인 EAS ABI 대조 | — | `[ ]` `1.4.1-beta.3` 배포본과 lib `v1.4.0`의 `attest`·`getAttestation` 셀렉터·레이아웃 일치 확인 (R3) |
-| C9 | P1 | 배포 스크립트 `script/Deploy.s.sol` | C3~C7 | `[ ]` §6.6 순서 그대로. 드라이런 통과 |
+| C9 | P1 | 배포 스크립트 `script/Deploy.s.sol` | C3~C7 | `[ ]` §6.6 순서 그대로. 드라이런 통과. 참고: 루트 `POI_Deploy_Guide.md` |
 
 ### C-T. 반드시 통과해야 할 공격 테스트 (§12.3) — 19종
 
