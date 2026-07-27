@@ -54,7 +54,7 @@
 | C6 | **P0** | `POIChallengeResolver` (I15) | C2 | `[x]` 동일인 활성 이의 1건(`AlreadyChallenged`) · `onRevoke`에서 매핑 해제 → 재발행 가능(CT17) · 뒤늦은 중복 철회가 현재 이의를 지우지 않음 · payload 재인코딩 대조. 20/20 (전체 143/143) |
 | C7 | **P0** | metric 레지스트리 — append-only·frozen (B13) | C2 | `[x]` `POIMetricRegistry`(abstract, Decision만 상속). 재등록 `MetricFrozen` · `definitionHash=0` 거부(§11.3) · `kind≠0` 거부(B7). 10/10 |
 | C8 | P1 | 온체인 EAS ABI 대조 | — | `[x]` 포크 왕복으로 확인 — 스키마 등록·발행·되읽기·철회·`refUID` 참조·**실제 EAS가 우리 리졸버를 호출**. 9/9 (`FOUNDRY_PROFILE=fork`). ⚠️ **EAS 프리디플로이는 ERC-1967 프록시다**(impl `0xbEc660b4…`) — 업그레이드되면 이 테스트가 먼저 깨진다 |
-| C9 | P1 | 배포 스크립트 `script/Deploy.s.sol` | C3~C7 | `[ ]` §6.6 순서 그대로. 드라이런 통과. 참고: 루트 `POI_Deploy_Guide.md` |
+| C9 | P1 | 배포 스크립트 `script/Deploy.s.sol` | C3~C7 | `[x]` §6.6 1~6단계. 7(addMetric)·8(소유권 이전)은 사람 판단이라 제외. 포크 드라이런 통과 — **가스 추정 7,499,973 (≈0.0000075 ETH)**, 지갑 잔액 0.015 ETH로 충분. 포크 검증 7/7 |
 
 ### C-T. 반드시 통과해야 할 공격 테스트 (§12.3) — 19종
 
