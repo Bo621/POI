@@ -214,7 +214,6 @@ giwa_sepolia = { key = "any", url = "https://sepolia-explorer.giwa.io/api", chai
 | `solc_version` | **0.8.30** | 실제 빌드 값. EAS v1.4.0 + OZ v5.1.0 컴파일 확인 (contracts/foundry.toml과 일치) |
 | `via_ir` | **true** | C1에서 확인 — 14필드 `DecisionData` 인코딩이 legacy 코드젠에서 stack too deep |
 | `evm_version` | **cancun** | `blobBaseFee()`가 응답하므로 Ecotone 이후. 컴파일·배포 실패 시 `shanghai`로 낮출 것 |
-| `via_ir` | **false** | 켜면 컴파일이 크게 느려진다. `stack too deep`이 나면 그때 켠다 |
 
 ### 4.4 `.env`
 
@@ -475,7 +474,7 @@ fixture D  ─ 이의 시연용
 | faucet 접근 불가 | 다른 faucet 사용. 두 곳 모두 막히면 이더리움 Sepolia에서 브릿지 (`docs.giwa.io/get-started/bridging/eth`) |
 | `--verify` 실패 | 배포는 성공했을 수 있다. `forge verify-contract`로 개별 재시도. 그래도 안 되면 Blockscout UI에서 수동 업로드 |
 | `evm_version` 불일치로 배포 실패 | `cancun` → `shanghai`로 낮춰 재컴파일 |
-| `stack too deep` | `via_ir = true`. 컴파일이 느려지니 마지막 수단 |
+| `stack too deep` | `via_ir = true` — POI는 이미 켜져 있다(§4.3). 14필드 `DecisionData` 때문 |
 | 공개 RPC rate limit | Flashblocks RPC로 전환하거나 재시도 간격 확대 |
 | 스키마를 잘못 등록 | **수정 불가.** 새 스키마를 등록하고 문서의 UID를 갱신 |
 | `initialize()`를 잘못 호출 | 1회 제한이면 resolver 재배포 → 스키마 재등록. **테스트넷에서 리허설할 것** |

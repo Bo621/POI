@@ -46,7 +46,9 @@ abstract contract POIResolverBase is SchemaResolver, Ownable2Step {
     ///      그 안에서 이 함수를 호출한다. 그래야 "initialized ⇒ 모든 UID 설정 완료"가 성립한다.
     ///
     ///      재초기화를 막는 이유: 이미 발행된 attestation의 검증 전제가 소급 변경되기 때문이다.
-    function _initializeBase(bytes32 ownSchemaUID) internal {
+    ///      `onlyOwner`를 여기에 두는 이유: 파생 리졸버가 external initialize에서 실수로
+    ///      수식자를 빠뜨려도 소유권 검사가 중앙에서 강제된다.
+    function _initializeBase(bytes32 ownSchemaUID) internal onlyOwner {
         if (initialized) revert AlreadyInitialized();
         if (ownSchemaUID == 0) revert ZeroSchemaUID();
         schemaUID = ownSchemaUID;
