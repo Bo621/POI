@@ -7,6 +7,7 @@
 |---|---|---|---|---|
 | 07-27 23:50 | C4 POIDecisionResolver | ✅ 병합 | 1R · P1 0 / P2 1 | P2: 잉여 워드 payload 무시 → 정규 길이 강제. CT11~CT16 동시 충족 |
 | 07-27 23:52 | — | ⏸ 중단 | — | 사용자 요청으로 무인 루프 정지. 다음 세션에서 `/goal`로 재개 |
+| 07-28 00:0x | C5 POISettlementResolver | ✅ 병합 | 1R · P1 0 / P2 0 | 온체인 판정(B6)·activeHead/lastHead 분리(B1). CT01·CT02·CT04~CT10 충족. 123/123 |
 
 ---
 

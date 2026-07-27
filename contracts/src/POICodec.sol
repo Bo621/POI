@@ -64,7 +64,9 @@ library POICodec {
         bytes32 noteCommitment;
     }
 
-    function decodeDecision(bytes calldata data) internal pure returns (DecisionData memory) {
+    /// @dev `bytes memory`인 이유: 정산 리졸버가 `getAttestation`으로 읽어 온 결정 데이터를
+    ///      디코딩해야 하는데 그것은 memory다. `bytes.concat`이 어차피 복사하므로 손해가 없다.
+    function decodeDecision(bytes memory data) internal pure returns (DecisionData memory) {
         return abi.decode(bytes.concat(STRUCT_BODY_OFFSET, data), (DecisionData));
     }
 
