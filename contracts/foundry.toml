@@ -22,6 +22,9 @@ remappings = [
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
 ]
 
+# 공유 벡터를 읽기 위해서만 프로젝트 밖 경로를 연다 (X1)
+fs_permissions = [{access = "read", path = "../core/vectors"}]
+
 [fmt]
 line_length = 120
 tab_width = 4

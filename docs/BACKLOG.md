@@ -12,7 +12,8 @@
 | ID | P | 항목 | 선행 | 완료 조건 |
 |---|---|---|---|---|
 | O0 | — | 저장소·툴체인 세팅 | — | `[x]` forge 1.7.1 / solc 0.8.30 / evm cancun / eas v1.4.0 / OZ v5.1.0 컴파일 통과 |
-| O1 | **P0** | 배포 지갑 생성 + GIWA Sepolia 가스 확보 | — | `[ ]` `cast balance`가 0이 아님. 키는 `.env`에만 |
+| L0 | **P0** | 로컬 포크 개발 환경 (`anvil --fork-url`) | — | `[x]` chainId 91342 · EAS `1.4.1-beta.3` · Dojang `isVerified` · 10,000 ETH · `evm_increaseTime` 확인 |
+| O1 | **P0** | 배포 지갑 생성 + 파우셋 클레임 | — | `[ ]` `cast balance` ≠ 0. **G4 직전까지만 필요** (개발은 L0로 진행). 파우셋: faucet.giwa.io 0.005/24h, Nodit 0.01/24h. 키는 `.env`에만 |
 | O2 | **P0** | 법률 검토 게이트 (B14) | — | `[ ]` 정산 상태·이의 공개 범위가 기획 A.6과 충돌하지 않음을 확인. **되돌릴 수 없는 온체인 공개 전** |
 | O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[ ]` 리졸버 4종 배포 → 스키마 4종 등록(settlement·challenge만 `revocable=true`) → `initialize` → 각 리졸버 `ready` |
 | O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[ ]` `windowStart=now, windowEnd=now+10m, graceSeconds=1h` 커밋. tx 해시와 `T_overdue` 기록 |
@@ -28,9 +29,9 @@
 
 | ID | P | 항목 | 완료 조건 |
 |---|---|---|---|
-| X1 | **P0** | **commitment 테스트 벡터 고정** (B3) | `[ ]` `C = keccak256(TAG ‖ chainId ‖ attester ‖ salt ‖ JCS(payload))`. 고정 벡터 JSON을 `core/vectors/` 에 두고 **Solidity 테스트와 TS 테스트가 같은 파일을 읽어 같은 값** |
-| X2 | **P0** | JCS(RFC 8785) 정규화 구현/채택 | `[ ]` 키 정렬·유니코드 이스케이프·숫자 표기 케이스 테스트 |
-| X3 | **P0** | salt 생성 — 128bit CSPRNG | `[ ]` payload별 고유. 온체인 기록 경로 없음 |
+| X1 | **P0** | **commitment 테스트 벡터 고정** (B3) | `[x]` `C = keccak256(TAG ‖ chainId ‖ attester ‖ salt ‖ JCS(payload))`. `core/vectors/commitment.v1.json` 6케이스. 기대값은 `cast keccak`(독립 경로)으로 생성 — `scripts/gen_commitment_vectors.py`. TS 19/19 · Solidity 3/3 통과 |
+| X2 | **P0** | JCS(RFC 8785) 정규화 구현/채택 | `[x]` `core/src/jcs.ts`. 키 정렬·배열 순서 보존·한글 비이스케이프·제어문자 이스케이프. `undefined`/`NaN`/`BigInt`는 거부(값이 조용히 사라지는 것을 막는다) |
+| X3 | **P0** | salt 생성 — 128bit CSPRNG | `[x]` `generateSalt()` — 16바이트 `crypto.getRandomValues`. 온체인 기록 경로 없음 |
 | X4 | **P0** | E2 `scale` / E3 `eval` / E5 `result` | `[ ]` half-up 반올림. 컨트랙트 `_eval`과 동일 결과 (op 6종 × 경계값) |
 | X5 | **P0** | E9 `state` 파생 | `[ ]` 7상태 + `revokeCount>0` 부가표시. 경계 `t=W`, `t=W+G` 테스트 |
 | X6 | P1 | E7 등급 2축 (`evidenceTier` × `revealState`) | `[ ]` 온체인 저장 없이 조회 시 계산 |
