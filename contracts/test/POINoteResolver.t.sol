@@ -107,6 +107,30 @@ contract POINoteResolverTest is Test {
         fresh.initialize(NOTE_SCHEMA);
     }
 
+    /// @dev EAS는 refUID를 스키마에 대해 검증하지 않는다 — 노트는 독립 노드여야 한다 (codex P2).
+    function test_Attest_RevertsOnNonZeroRefUID() public {
+        Attestation memory a = _note(keccak256("content"));
+        a.refUID = keccak256("some other attestation");
+        vm.expectRevert(POINoteResolver.RefUIDMustBeZero.selector);
+        _attest(a);
+    }
+
+    /// @dev 잉여 워드가 실린 payload는 `abi.decode`가 조용히 무시한다 — 길이를 직접 막는다 (codex P2).
+    function test_Attest_RevertsOnTrailingPayloadBytes() public {
+        Attestation memory a = _note(keccak256("content"));
+        a.data = abi.encode(keccak256("content"), uint256(1));
+        vm.expectRevert(POINoteResolver.MalformedPayload.selector);
+        _attest(a);
+    }
+
+    /// @dev 짧은 payload도 마찬가지로 거부한다.
+    function test_Attest_RevertsOnShortPayload() public {
+        Attestation memory a = _note(keccak256("content"));
+        a.data = hex"deadbeef";
+        vm.expectRevert(POINoteResolver.MalformedPayload.selector);
+        _attest(a);
+    }
+
     function test_Constructor_RevertsOnZeroEAS() public {
         vm.expectRevert(InvalidEAS.selector);
         new POINoteResolver(IEAS(address(0)));

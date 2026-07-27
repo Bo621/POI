@@ -14,6 +14,11 @@ import {POICodec} from "./POICodec.sol";
 /// `revocable` 플래그가 true인 attestation은 여전히 만들어질 수 있어 표시가 어긋난다.
 contract POINoteResolver is POIResolverBase {
     error MustBeIrrevocable();
+    error RefUIDMustBeZero();
+    error MalformedPayload();
+
+    /// @dev `poi.note.v1`은 `bytes32` 하나뿐이다.
+    uint256 private constant NOTE_DATA_LENGTH = 32;
 
     constructor(IEAS eas) POIResolverBase(eas) {}
 
@@ -25,6 +30,13 @@ contract POINoteResolver is POIResolverBase {
         _guard(a, schemaUID);
 
         if (a.revocable) revert MustBeIrrevocable();
+
+        // EAS는 refUID·payload를 등록된 스키마에 대해 검증하지 않는다. 리졸버가 막지 않으면
+        // 노트에 임의의 참조가 붙거나 잉여 워드가 실린 채로 온체인에 남고,
+        // 인덱서·클라이언트마다 다르게 해석된다.
+        if (a.refUID != 0) revert RefUIDMustBeZero(); // 노트는 독립 노드다 (§5.1)
+        if (a.data.length != NOTE_DATA_LENGTH) revert MalformedPayload();
+
         if (POICodec.decodeNote(a.data) == 0) revert EmptyCommitment();
 
         return true;

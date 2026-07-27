@@ -47,7 +47,7 @@
 |---|---|---|---|---|
 | C1 | **P0** | **`_decodeDecision` offset 트릭** (§6.1) | — | `[x]` `src/POICodec.sol` — decision·settlement·challenge 3종. 순진한 `abi.decode`가 revert하는 것도 테스트로 고정. 10/10 통과 |
 | C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[x]` `MustBePermanent`·`WrongSchema`·`NotInitialized`·`RecipientMustBeZero`. `_initializeBase`는 internal(부분 초기화 봉쇄 방지 — codex P1). `renounceOwnership` revert(B13 구조화). 15/15 통과 |
-| C3 | **P0** | `POINoteResolver` | C2 | `[x]` `contentCommitment≠0` · attestation 레벨 `revocable=false`도 강제(§1.2) · 실제 `attest()` 경로(onlyEAS)로 검증. 10/10 |
+| C3 | **P0** | `POINoteResolver` | C2 | `[x]` `contentCommitment≠0` · attestation 레벨 `revocable=false`도 강제(§1.2) · 실제 `attest()` 경로(onlyEAS)로 검증 · `refUID=0`·payload 정확히 32바이트 강제(codex P2). 13/13 |
 | C4 | **P0** | `POIDecisionResolver` (I1~I6, I12, I14) | C2 | `[ ]` 부모 검증 5종 · 노트 승격 · `verifiedAddressUID` 실재성 · window/grace 범위 · `hasExpectedOutcome=false`면 필드 0 강제 |
 | C5 | **P0** | `POISettlementResolver` (I7~I13, I16, I17) | C4 | `[ ]` `activeHead`/`lastHead`/`revokeCount` 분리 · **`_eval` 온체인 판정 강제** · `observedAt==windowEnd` |
 | C6 | **P0** | `POIChallengeResolver` (I15) | C2 | `[ ]` 동일인 활성 이의 1건, `onRevoke`에서 매핑 해제 → 재발행 가능 |
