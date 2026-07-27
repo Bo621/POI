@@ -5,7 +5,8 @@
 
 상태: `[ ]` 미착수 · `[~]` 진행 · `[x]` 완료
 
-리뷰 게이트: 각 항목은 `codex review` GATE PASS(=[P1] 0건) 후에만 완료 처리한다.
+분업: 계획 = Claude · 구현 = Codex(`--profile execute`) · 리뷰 = Claude. 구현자 ≠ 리뷰어.
+리뷰 게이트: 각 항목은 Claude 리뷰 GATE PASS(=[P1] 0건) 후에만 완료 처리한다.
 
 ---
 

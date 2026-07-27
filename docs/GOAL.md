@@ -19,37 +19,80 @@
 
 ---
 
+## 분업 — 누가 무엇을 하는가
+
+| | 담당 | 이유 |
+|---|---|---|
+| 계획 (무엇을·어떤 불변식·어떤 테스트) | **Claude** | 명세 해석과 설계 판단. 애매한 것을 다루는 쪽 |
+| 구현 (계획을 코드로) | **Codex** (`--profile execute`) | 기계적 실행. 여기가 토큰이 가장 많이 드는 구간이다 |
+| 리뷰 (계획·명세 대조, 게이트) | **Claude** | **구현자 ≠ 리뷰어**. 자기 코드를 자기가 통과시키지 않는다 |
+
+Claude가 구현까지 하면 (a) 토큰이 가장 비싼 쪽에 몰리고 (b) 구현자가 리뷰어가 된다.
+둘 다 피한다. `~/.codex/AGENTS.md`의 "Task Routing"과 같은 규칙이다.
+
+---
+
 ## 루프 — 항목 하나당 한 사이클
 
 ```
-1  읽기      BACKLOG.md의 해당 행 + 명세의 해당 절만 (§ 인덱스는 아래)
-2  브랜치    git checkout -b feat/<id>-<slug>
-3  구현      테스트 먼저. 불변식 하나 = 테스트 하나
-4  검증      forge test  /  pnpm -C core test   ← 출력은 tail만
-5  커밋      브랜치에 커밋 (아래 커밋 형식)
-6  리뷰      codex review  ← 아래 명령 그대로
-7  대응      [P1] 전건 수정 + 회귀 테스트. [P2]는 판단해서 반영하거나 근거를 남기고 보류
-8  재리뷰    [P1]이 있었으면 다시 6으로. GATE PASS(=[P1] 0건)까지
-9  기록      BACKLOG.md 상태를 [x]로. 완료 조건 칸에 근거(테스트 수·핵심 결정)를 남긴다
-10 병합      main에 --no-ff 병합, push
+1  읽기      (C) BACKLOG.md의 해당 행 + 명세의 해당 절만 (§ 인덱스는 아래)
+2  브랜치    (C) git checkout -b feat/<id>-<slug>
+3  계획      (C) docs/plans/<ID>.md 작성 — 아래 계획 파일 형식
+4  구현      (X) codex exec --profile execute — 아래 명령 그대로
+5  검증      (C) forge test / pnpm -C core test   ← 출력은 tail만
+6  리뷰      (C) 계획 대조 · 명세 대조 · 테스트가 불변식을 실제로 잡는지.
+              결함은 [P1]/[P2]로 적고, 수정은 다시 4로 위임한다
+7  재검증    (C) [P1] 0건이 될 때까지 4~6 반복
+8  기록      (C) BACKLOG.md 상태를 [x]로. 완료 조건 칸에 근거를 남긴다
+9  병합      (C) main에 --no-ff 병합, push
 ```
 
-**게이트: `[P1]`이 남아 있으면 `[x]`로 표시하지 않고 병합하지 않는다.**
+**게이트: Claude 리뷰에서 `[P1]`이 남아 있으면 `[x]`로 표시하지 않고 병합하지 않는다.**
 
-### 리뷰 명령
+### 계획 파일 형식 — `docs/plans/<ID>.md`
+
+Codex가 이것만 읽고 구현할 수 있어야 한다. 명세를 다시 읽게 하지 않는다.
+
+```markdown
+# <ID> <제목>
+
+## 파일
+- 새로: contracts/src/X.sol · contracts/test/X.t.sol
+- 수정 금지: 그 외 전부
+
+## 강제할 불변식        ← 번호 · 조건 · revert할 커스텀 에러 이름
+| # | 조건 | 에러 |
+
+## 참고할 기존 코드      ← 스타일·패턴을 맞출 대상 파일 경로
+
+## 테스트 목록          ← 불변식 하나 = 테스트 하나. 이름까지 적는다
+
+## 검증
+forge test  → N/N
+```
+
+### 구현 위임 명령
 
 ```bash
-codex review "IMPORTANT: Do NOT read or execute any files under ~/.claude/, ~/.agents/, \
-.claude/skills/, or agents/. Stay focused on repository code only.
+codex exec --profile execute -s workspace-write \
+  "IMPORTANT: Do NOT read or execute any files under ~/.claude/, ~/.agents/, .claude/skills/, \
+or agents/. Stay focused on repository code only.
 
-Review the changes on this branch against the base branch main. Run 'git diff main...HEAD'. \
-This implements <ID> against docs/POI_TechSpec_v3.md <절 번호>. Verify the invariants match \
-the spec. Mark critical findings [P1] and advisory [P2]." \
-  -c 'model_reasoning_effort="high"' --enable web_search_cached < /dev/null
+Implement docs/plans/<ID>.md exactly. Read that file first — it is self-contained. \
+Do not read the spec documents. Do not touch files outside the plan's file list. \
+Do not add features the plan does not list. Run 'forge test' and make it pass. \
+Report what you changed and the final test count." < /dev/null
 ```
 
-의도적으로 명세와 다르게 간 것이 있으면 프롬프트에 한 줄로 적고 판단을 요청한다.
-(예: "one deliberate deviation: X. judge whether that is sound.")
+### 리뷰에서 Claude가 실제로 볼 것
+
+코드를 훑는 것으로는 부족하다. 이 순서로 본다.
+
+1. 계획의 불변식 표 각 행 ↔ 구현의 revert 지점 (빠진 행이 있는가)
+2. 계획의 테스트 목록 각 행 ↔ 실제 테스트 함수 (이름만 같고 다른 것을 보는가)
+3. **테스트가 진짜 잡는가** — 해당 검사를 지우면 그 테스트가 실패하는가
+4. 명세 원문과 대조 (계획을 잘못 썼을 수 있다 — 계획도 리뷰 대상이다)
+5. 계획에 없는 것이 들어왔는가 (범위 확대)
 
 ---
 
