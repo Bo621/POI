@@ -15,7 +15,7 @@
 |---|---|---|---|---|
 | O0 | — | 저장소·툴체인 세팅 | — | `[x]` forge 1.7.1 / solc 0.8.30 / evm cancun / eas v1.4.0 / OZ v5.1.0 컴파일 통과 |
 | L0 | **P0** | 로컬 포크 개발 환경 (`anvil --fork-url`) | — | `[x]` chainId 91342 · EAS `1.4.1-beta.3` · Dojang `isVerified` · 10,000 ETH · `evm_increaseTime` 확인 |
-| O1 | **P0** | 배포 지갑 생성 + 파우셋 클레임 | — | `[ ]` `cast balance` ≠ 0. **G4 직전까지만 필요** (개발은 L0로 진행). 파우셋: faucet.giwa.io 0.005/24h, Nodit 0.01/24h. 키는 `.env`에만 |
+| O1 | **P0** | 배포 지갑 생성 + 파우셋 클레임 | — | `[x]` `0x77E8DFC4…C2dfaa` — **0.015 ETH** 확인 (2026-07-27 23:5x, nonce 0). 개인키는 `.env`에만, 커밋 금지 |
 | O2 | **P0** | 법률 검토 게이트 (B14) | — | `[ ]` 정산 상태·이의 공개 범위가 기획 A.6과 충돌하지 않음을 확인. **되돌릴 수 없는 온체인 공개 전** |
 | O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[ ]` 리졸버 4종 배포 → 스키마 4종 등록(settlement·challenge만 `revocable=true`) → `initialize` → 각 리졸버 `ready` |
 | O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[ ]` `windowStart=now, windowEnd=now+10m, graceSeconds=1h` 커밋. tx 해시와 `T_overdue` 기록 |

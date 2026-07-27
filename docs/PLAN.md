@@ -75,7 +75,7 @@ reveals/     공개된 (salt, payload) — F5
 | 게이트 | 시점 | 조건 | 검증 명령 |
 |---|---|---|---|
 | **L0** | D-0 (7/27) | **로컬 포크 환경** — 실제 EAS·Dojang 바이트코드 상대로 가스 없이 개발 | `[x]` `anvil --fork-url $GIWA_SEPOLIA_RPC_URL` → chainId 91342, `EAS.version()` = `1.4.1-beta.3`, `isVerified()` 동작, 계정 10,000 ETH, `evm_increaseTime`으로 grace 점프 확인 |
-| **G0** | **G4 직전** | 배포 지갑에 가스 확보 + 법률 검토 게이트(B14) 확인 | `cast balance $DEPLOYER --rpc-url giwa_sepolia` |
+| **G0** | **G4 직전** | 배포 지갑에 가스 확보 + 법률 검토 게이트(B14) 확인 | `[~]` 가스 **확보됨** — `0x77E8DFC4…C2dfaa` 0.015 ETH (실측). **O2 법률 게이트만 남음** |
 | **G1** | D-0 | `_decodeDecision` 단위 테스트 통과 | `forge test --mt test_DecodeDecision -vv` |
 | **G2** | D-0 | commitment 테스트 벡터 고정 (컨트랙트·TS 양쪽 동일값) | `[x]` `forge test --mt test_CommitmentVector` (3) + `pnpm -C core test` (19) |
 | **G3** | D+1 오전 | 공격 테스트 19종 전부 통과 | `forge test` |
@@ -120,7 +120,7 @@ D+4  7/31  예비일 — 문서 반영(D1~D9) · 제출
 | # | 리스크 | 영향 | 대응 |
 |---|---|---|---|
 | R1 | **배포가 D+1 오전을 넘김** | OVERDUE 녹화 불가 | fixture만이라도 먼저 올린다. 리졸버 없이 커밋은 불가하므로 **배포가 곧 마감** — G4를 최우선 고정 |
-| R2 | 테스트넷 가스 미확보 | **배포만 지연** (개발은 포크로 계속) | 파우셋 2곳: [faucet.giwa.io](https://faucet.giwa.io/) 0.005 ETH/24h · [Nodit](https://faucet.lambda256.io/giwa-sepolia) 0.01 ETH/24h. L2 가스 0.001 gwei라 0.005 ETH로 충분 |
+| ~~R2~~ | ~~테스트넷 가스 미확보~~ **해소** | — | 파우셋 2곳: [faucet.giwa.io](https://faucet.giwa.io/) 0.005 ETH/24h · [Nodit](https://faucet.lambda256.io/giwa-sepolia) 0.01 ETH/24h. L2 가스 0.001 gwei라 0.005 ETH로 충분 |
 | R3 | EAS `1.4.1-beta.3` ↔ lib `v1.4.0` 미묘한 차이 | 배포 후 revert | **포크(L0)에서 실제 바이트코드 상대로 전 경로 실행** — C8이 통과하면 사실상 해소 |
 | R4 | metric 정의 문서 6종 미작성 | `definitionHash`가 0 → 등록 금지(§11.3) | D+3 전에 초안이라도 작성. 문서 없는 지표는 등록하지 않는다 |
 | R5 | salt 분실 | 공개 영구 불가 | 프론트가 백업 완료 체크 없이는 다음 단계로 못 가게 강제(W3) |
