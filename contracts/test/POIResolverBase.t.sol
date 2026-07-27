@@ -10,6 +10,11 @@ import {POIResolverBase} from "../src/POIResolverBase.sol";
 contract BaseHarness is POIResolverBase {
     constructor(IEAS eas) POIResolverBase(eas) {}
 
+    /// @dev 각 리졸버는 필요한 UID를 전부 받는 external initialize 하나만 노출한다.
+    function initialize(bytes32 ownSchemaUID) external onlyOwner {
+        _initializeBase(ownSchemaUID);
+    }
+
     /// @dev `_guard`는 internal + calldata라 외부 진입점이 필요하다.
     function guard(Attestation calldata a) external view ready {
         _guard(a, schemaUID);
@@ -18,6 +23,28 @@ contract BaseHarness is POIResolverBase {
     /// @dev 초기화 여부와 무관하게 가드만 보는 경로 — `ready`와 `_guard`를 분리해 확인한다.
     function guardWithSchema(Attestation calldata a, bytes32 expected) external pure {
         _guard(a, expected);
+    }
+
+    function onAttest(Attestation calldata, uint256) internal pure override returns (bool) {
+        return true;
+    }
+
+    function onRevoke(Attestation calldata, uint256) internal pure override returns (bool) {
+        return true;
+    }
+}
+
+/// @dev 의존 스키마 UID를 갖는 리졸버(예: Settlement은 DECISION_SCHEMA도 필요)를 흉내낸다.
+///      베이스가 1인자 initialize를 노출했다면 여기서 부분 초기화가 가능해진다.
+contract DependentHarness is POIResolverBase {
+    bytes32 public dependencyUID;
+
+    constructor(IEAS eas) POIResolverBase(eas) {}
+
+    function initialize(bytes32 ownSchemaUID, bytes32 dependency) external onlyOwner {
+        _requireNonZeroUID(dependency);
+        dependencyUID = dependency;
+        _initializeBase(ownSchemaUID);
     }
 
     function onAttest(Attestation calldata, uint256) internal pure override returns (bool) {
@@ -146,6 +173,32 @@ contract POIResolverBaseTest is Test {
     function test_Ownership_RenounceDisabled() public {
         vm.expectRevert(POIResolverBase.RenounceDisabled.selector);
         r.renounceOwnership();
+    }
+
+    // --- 부분 초기화 차단 (codex review P1) ------------------------------------
+
+    /// @dev ★ 베이스가 `initialize(bytes32)`를 public으로 노출하면, 의존 UID를 갖는 리졸버에서
+    ///      그것이 오버로드로 살아남아 부분 초기화가 가능해진다. 그 상태로 `initialized`가 잠기면
+    ///      완전 초기화는 `AlreadyInitialized`로 영구 봉쇄된다. 그 진입점 자체가 없어야 한다.
+    function test_Initialize_NoPartialInitEntryPoint() public {
+        DependentHarness d = new DependentHarness(IEAS(EAS));
+
+        (bool ok,) = address(d).call(abi.encodeWithSignature("initialize(bytes32)", SCHEMA));
+        assertFalse(ok, "1-arg initialize must not exist on a dependent resolver");
+        assertFalse(d.initialized());
+
+        d.initialize(SCHEMA, keccak256("dependency"));
+        assertTrue(d.initialized());
+        assertEq(d.schemaUID(), SCHEMA);
+        assertEq(d.dependencyUID(), keccak256("dependency"));
+    }
+
+    /// @dev 의존 UID가 0이면 초기화 자체가 실패해야 한다 — 절반만 설정된 상태를 남기지 않는다.
+    function test_Initialize_RevertsOnZeroDependency() public {
+        DependentHarness d = new DependentHarness(IEAS(EAS));
+        vm.expectRevert(POIResolverBase.ZeroSchemaUID.selector);
+        d.initialize(SCHEMA, bytes32(0));
+        assertFalse(d.initialized());
     }
 
     function test_IsNotPayable() public view {

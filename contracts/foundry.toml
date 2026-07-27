@@ -34,3 +34,6 @@ bracket_spacing = false
 
 [rpc_endpoints]
 giwa_sepolia = "${GIWA_RPC_URL}"
+
+[etherscan]
+giwa_sepolia = {key = "any", url = "https://sepolia-explorer.giwa.io/api", chain = 91342}

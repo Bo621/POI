@@ -194,11 +194,11 @@ forge-std/=lib/forge-std/src/
 src = "src"
 out = "out"
 libs = ["lib", "node_modules"]
-solc_version = "0.8.29"
+solc_version = "0.8.30"
 evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true    # 14필드 DecisionData 인코딩이 legacy 코드젠에서 stack too deep
 
 [rpc_endpoints]
 giwa_sepolia = "${GIWA_SEPOLIA_RPC_URL}"
@@ -211,7 +211,8 @@ giwa_sepolia = { key = "any", url = "https://sepolia-explorer.giwa.io/api", chai
 
 | 항목 | 값 | 근거 |
 |---|---|---|
-| `solc_version` | **0.8.29** | EAS 패키지 권장 버전. OZ v5(≥0.8.20)도 충족 |
+| `solc_version` | **0.8.30** | 실제 빌드 값. EAS v1.4.0 + OZ v5.1.0 컴파일 확인 (contracts/foundry.toml과 일치) |
+| `via_ir` | **true** | C1에서 확인 — 14필드 `DecisionData` 인코딩이 legacy 코드젠에서 stack too deep |
 | `evm_version` | **cancun** | `blobBaseFee()`가 응답하므로 Ecotone 이후. 컴파일·배포 실패 시 `shanghai`로 낮출 것 |
 | `via_ir` | **false** | 켜면 컴파일이 크게 느려진다. `stack too deep`이 나면 그때 켠다 |
 

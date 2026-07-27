@@ -21,7 +21,7 @@
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
 | O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
-| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[ ]` GIWA Sepolia 검증 엔드포인트 확인 후 verify |
+| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[~]` 엔드포인트 확인 — `https://sepolia-explorer.giwa.io/api` (chain 91342), `foundry.toml [etherscan]`에 반영. 배포 후 verify만 남음 |
 
 ---
 
@@ -43,8 +43,8 @@
 
 | ID | P | 항목 | 선행 | 완료 조건 |
 |---|---|---|---|---|
-| C1 | **P0** | **`_decodeDecision` offset 트릭** (§6.1) | — | `[ ]` `bytes.concat(abi.encode(uint256(0x20)), data)` 단위 테스트 통과. **주석 필수** |
-| C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[ ]` `expirationTime≠0`→`MustBePermanent`, 스키마 불일치→`WrongSchema`, 미초기화→`NotInitialized` |
+| C1 | **P0** | **`_decodeDecision` offset 트릭** (§6.1) | — | `[x]` `src/POICodec.sol` — decision·settlement·challenge 3종. 순진한 `abi.decode`가 revert하는 것도 테스트로 고정. 10/10 통과 |
+| C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[x]` `MustBePermanent`·`WrongSchema`·`NotInitialized`·`RecipientMustBeZero`. `_initializeBase`는 internal(부분 초기화 봉쇄 방지 — codex P1). `renounceOwnership` revert(B13 구조화). 15/15 통과 |
 | C3 | **P0** | `POINoteResolver` | C2 | `[ ]` `contentCommitment≠0`, 비철회 스키마 |
 | C4 | **P0** | `POIDecisionResolver` (I1~I6, I12, I14) | C2 | `[ ]` 부모 검증 5종 · 노트 승격 · `verifiedAddressUID` 실재성 · window/grace 범위 · `hasExpectedOutcome=false`면 필드 0 강제 |
 | C5 | **P0** | `POISettlementResolver` (I7~I13, I16, I17) | C4 | `[ ]` `activeHead`/`lastHead`/`revokeCount` 분리 · **`_eval` 온체인 판정 강제** · `observedAt==windowEnd` |

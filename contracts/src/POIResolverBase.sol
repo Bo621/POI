@@ -37,14 +37,26 @@ abstract contract POIResolverBase is SchemaResolver, Ownable2Step {
 
     constructor(IEAS eas) SchemaResolver(eas) Ownable(msg.sender) {}
 
-    /// @notice 담당 스키마 UID를 한 번만 설정한다. 파생 리졸버는 필요한 UID를 더 받도록 확장한다.
-    /// @dev 재초기화를 막는 이유: 이미 발행된 attestation의 검증 전제가 소급 변경되기 때문이다.
-    function initialize(bytes32 ownSchemaUID) public virtual onlyOwner {
+    /// @notice 담당 스키마 UID를 한 번만 설정한다.
+    /// @dev **internal인 이유가 있다.** public이면 파생 리졸버가 `initialize(bytes32, bytes32)`를
+    ///      추가할 때 오버로드가 되어 1인자 버전이 그대로 노출된다. 그것을 먼저 호출하면
+    ///      의존 스키마 UID가 0인 채로 `initialized`가 잠기고, 완전 초기화 경로는
+    ///      `AlreadyInitialized`로 영구 봉쇄된다 — 배포 중 한 번의 실수가 복구 불가가 된다.
+    ///      각 리졸버는 **필요한 UID를 전부 받는 external initialize 하나**만 노출하고
+    ///      그 안에서 이 함수를 호출한다. 그래야 "initialized ⇒ 모든 UID 설정 완료"가 성립한다.
+    ///
+    ///      재초기화를 막는 이유: 이미 발행된 attestation의 검증 전제가 소급 변경되기 때문이다.
+    function _initializeBase(bytes32 ownSchemaUID) internal {
         if (initialized) revert AlreadyInitialized();
         if (ownSchemaUID == 0) revert ZeroSchemaUID();
         schemaUID = ownSchemaUID;
         initialized = true;
         emit Initialized(ownSchemaUID);
+    }
+
+    /// @dev 의존 UID를 받는 리졸버가 0을 넣고 초기화하는 것을 막는 공통 검사.
+    function _requireNonZeroUID(bytes32 uid) internal pure {
+        if (uid == 0) revert ZeroSchemaUID();
     }
 
     /// @notice 모든 POI attestation에 공통 적용되는 가드.
