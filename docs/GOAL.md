@@ -74,7 +74,8 @@ forge test  → N/N
 ### 구현 위임 명령
 
 ```bash
-codex exec --profile execute -s workspace-write \
+# codex 0.145는 --profile을 거부한다(legacy profile 충돌). 설정은 인라인으로 준다.
+codex exec -s workspace-write -c model_reasoning_effort="low" -c service_tier="flex" \
   "IMPORTANT: Do NOT read or execute any files under ~/.claude/, ~/.agents/, .claude/skills/, \
 or agents/. Stay focused on repository code only.
 
