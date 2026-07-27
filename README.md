@@ -25,6 +25,21 @@ docs/        기획서·기술명세
 GIWA Sepolia — chainId **91342**, RPC `https://sepolia-rpc.giwa.io/`.
 EAS `0x4200…0021`, SchemaRegistry `0x4200…0020`, DojangScroll `0xd5077b…7B9` (전부 프록시 — 구현 주소 하드코딩 금지).
 
+## 구현 진행
+
+```
+/goal C4     백로그 항목 하나를 구현 → 테스트 → codex 리뷰 게이트 → 병합까지
+/goal        다음 P0 항목 자동 선택
+```
+
+| 파일 | 역할 |
+|---|---|
+| [`docs/GOAL.md`](docs/GOAL.md) | 실행 방식 — 루프, 토큰 규칙, 명세 절 인덱스, 고정된 결정 |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | 상태 — 항목별 완료 조건과 진행 |
+| [`docs/PLAN.md`](docs/PLAN.md) | 순서 — 게이트, 일정, 리스크 |
+
+리뷰 게이트: 각 항목은 `codex review`가 `[P1]` 0건이어야 완료 처리한다.
+
 ## 설정
 
 ```bash
