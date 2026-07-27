@@ -430,6 +430,26 @@ contract POIDecisionResolverTest is Test {
         _attest(a);
     }
 
+    /// @dev 잉여 워드가 붙은 payload는 `abi.decode`가 무시해 불변식을 전부 통과한다 (codex P2).
+    function test_Attest_RevertsOnTrailingPayloadBytes() public {
+        Attestation memory a = _attestation(_decision());
+        a.data = bytes.concat(a.data, bytes32(uint256(1)));
+        vm.expectRevert(POIDecisionResolver.MalformedPayload.selector);
+        _attest(a);
+    }
+
+    /// @dev 부모가 있는 경우에도 정규 길이가 맞아야 한다.
+    function test_Attest_RevertsOnTrailingPayloadBytesWithParents() public {
+        POICodec.DecisionData memory d = _decision();
+        d.parents = new bytes32[](2);
+        d.parents[0] = _parent(ALICE, NOW - 2 days);
+        d.parents[1] = _parent(ALICE, NOW - 1 days);
+        Attestation memory a = _attestation(d);
+        a.data = bytes.concat(a.data, bytes32(uint256(7)));
+        vm.expectRevert(POIDecisionResolver.MalformedPayload.selector);
+        _attest(a);
+    }
+
     function test_Attest_RevertsBeforeInitialize() public {
         POIDecisionResolver fresh = new POIDecisionResolver(IEAS(address(eas)));
         Attestation memory a = _attestation(_decision());

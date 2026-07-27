@@ -20,10 +20,18 @@ contract POIDecisionResolver is POIMetricRegistry {
     uint32 internal constant MAX_GRACE = 30 days;
     uint8 internal constant MAX_OP = 5;
 
+    /// @dev `poi.decision.v1` 평면 튜플의 정규 길이 = 헤드 14워드 + parents 길이워드 + 원소들.
+    ///      EAS는 data를 스키마에 대해 검증하지 않으므로, 뒤에 잉여 워드를 붙여도
+    ///      `abi.decode`는 조용히 무시한다. 그대로 두면 불변식은 전부 통과하는데
+    ///      온체인에는 비정규 payload가 영구히 남고, 엄격한 클라이언트는 그것을 거부한다.
+    uint256 internal constant DECISION_HEAD_BYTES = 14 * 32;
+    uint256 internal constant PARENTS_LENGTH_BYTES = 32;
+
     /// @notice 승격 원본 노트를 검증하기 위해 필요하다 (§5.1).
     bytes32 public noteSchemaUID;
 
     error MustBeIrrevocable();
+    error MalformedPayload();
     error TooManyParents();
     error RefUIDMismatch();
     error ParentNotFound();
@@ -61,6 +69,10 @@ contract POIDecisionResolver is POIMetricRegistry {
         if (a.revocable) revert MustBeIrrevocable();
 
         POICodec.DecisionData memory d = POICodec.decodeDecision(a.data);
+
+        if (a.data.length != DECISION_HEAD_BYTES + PARENTS_LENGTH_BYTES + 32 * d.parents.length) {
+            revert MalformedPayload();
+        }
 
         // I1 — 결정과 트리거는 비어 있을 수 없다. 근거·이유는 선택이므로 검사하지 않는다.
         if (d.decisionCommitment == 0 || d.triggerCommitment == 0) revert EmptyCommitment();
