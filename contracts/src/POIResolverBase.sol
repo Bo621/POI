@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.30;
+
+import {SchemaResolver} from "@ethereum-attestation-service/eas-contracts/contracts/resolver/SchemaResolver.sol";
+import {IEAS, Attestation} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+
+/// @title POIResolverBase — 모든 POI 리졸버의 공통 가드 (POI_TechSpec_v3.md §6.2, B5)
+/// @notice C2. v2.1은 부모의 `expirationTime`만 검사하고 자기 자신은 검사하지 않았다.
+///
+/// 배포 순서상 스키마 UID는 생성자에서 알 수 없다 — 스키마 등록에 리졸버 주소가 필요하고
+/// 리졸버는 스키마 UID를 알아야 하는 순환이다(§6.6). 그래서 `immutable`이 원리적으로 불가능하고,
+/// 대신 `initialize()` + `ready` 가드로 **1~6 사이의 창**을 막는다.
+/// 이 가드가 없으면 스키마 UID가 0인 상태로 검증 없는 attestation이 발행된다.
+abstract contract POIResolverBase is SchemaResolver, Ownable2Step {
+    /// @notice `initialize()` 완료 여부. false인 동안 모든 발행이 revert한다.
+    bool public initialized;
+
+    /// @notice 이 리졸버가 담당하는 스키마 UID.
+    bytes32 public schemaUID;
+
+    error NotInitialized();
+    error AlreadyInitialized();
+    error MustBePermanent();
+    error WrongSchema();
+    error EmptyCommitment();
+    error RecipientMustBeZero();
+    error ZeroSchemaUID();
+    error RenounceDisabled();
+
+    event Initialized(bytes32 indexed schemaUID);
+
+    modifier ready() {
+        if (!initialized) revert NotInitialized();
+        _;
+    }
+
+    constructor(IEAS eas) SchemaResolver(eas) Ownable(msg.sender) {}
+
+    /// @notice 담당 스키마 UID를 한 번만 설정한다.
+    /// @dev **internal인 이유가 있다.** public이면 파생 리졸버가 `initialize(bytes32, bytes32)`를
+    ///      추가할 때 오버로드가 되어 1인자 버전이 그대로 노출된다. 그것을 먼저 호출하면
+    ///      의존 스키마 UID가 0인 채로 `initialized`가 잠기고, 완전 초기화 경로는
+    ///      `AlreadyInitialized`로 영구 봉쇄된다 — 배포 중 한 번의 실수가 복구 불가가 된다.
+    ///      각 리졸버는 **필요한 UID를 전부 받는 external initialize 하나**만 노출하고
+    ///      그 안에서 이 함수를 호출한다. 그래야 "initialized ⇒ 모든 UID 설정 완료"가 성립한다.
+    ///
+    ///      재초기화를 막는 이유: 이미 발행된 attestation의 검증 전제가 소급 변경되기 때문이다.
+    ///      `onlyOwner`를 여기에 두는 이유: 파생 리졸버가 external initialize에서 실수로
+    ///      수식자를 빠뜨려도 소유권 검사가 중앙에서 강제된다.
+    function _initializeBase(bytes32 ownSchemaUID) internal onlyOwner {
+        if (initialized) revert AlreadyInitialized();
+        if (ownSchemaUID == 0) revert ZeroSchemaUID();
+        schemaUID = ownSchemaUID;
+        initialized = true;
+        emit Initialized(ownSchemaUID);
+    }
+
+    /// @dev 의존 UID를 받는 리졸버가 0을 넣고 초기화하는 것을 막는 공통 검사.
+    function _requireNonZeroUID(bytes32 uid) internal pure {
+        if (uid == 0) revert ZeroSchemaUID();
+    }
+
+    /// @notice 모든 POI attestation에 공통 적용되는 가드.
+    /// @dev `expirationTime != 0` 금지가 핵심이다(B5·V10) — "영구 기록"을 주장하려면
+    ///      만료를 허용해서는 안 된다. 스키마 일치 검사는 리졸버가 다른 스키마에
+    ///      재사용되는 것을 막는다. `recipient`는 POI에 수취인 개념이 없어 0으로 고정한다.
+    function _guard(Attestation calldata a, bytes32 expectedSchema) internal pure {
+        if (a.schema != expectedSchema) revert WrongSchema();
+        if (a.expirationTime != 0) revert MustBePermanent();
+        if (a.recipient != address(0)) revert RecipientMustBeZero();
+    }
+
+    /// @dev POI 리졸버는 값을 받지 않는다.
+    function isPayable() public pure override returns (bool) {
+        return false;
+    }
+
+    /// @notice 소유권 포기를 **구조적으로 막는다** (B13).
+    /// @dev 명세는 "renounce 하지 않는다"를 절차로 두지만, 절차는 실수로 깨진다.
+    ///      소유자가 사라지면 Phase 1에서 지표를 추가할 수 없고 되돌릴 방법도 없다.
+    ///      소유권 이전(multisig)은 `transferOwnership` + `acceptOwnership`으로 계속 가능하다.
+    function renounceOwnership() public pure override {
+        revert RenounceDisabled();
+    }
+}

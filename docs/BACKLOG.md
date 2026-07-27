@@ -5,6 +5,8 @@
 
 상태: `[ ]` 미착수 · `[~]` 진행 · `[x]` 완료
 
+리뷰 게이트: 각 항목은 `codex review` GATE PASS(=[P1] 0건) 후에만 완료 처리한다.
+
 ---
 
 ## O. 운영·배포 (선행 조건)
@@ -21,7 +23,7 @@
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
 | O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
-| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[ ]` GIWA Sepolia 검증 엔드포인트 확인 후 verify |
+| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[~]` 엔드포인트 확인 — `https://sepolia-explorer.giwa.io/api` (chain 91342), `foundry.toml [etherscan]`에 반영. 배포 후 verify만 남음 |
 
 ---
 
@@ -43,15 +45,15 @@
 
 | ID | P | 항목 | 선행 | 완료 조건 |
 |---|---|---|---|---|
-| C1 | **P0** | **`_decodeDecision` offset 트릭** (§6.1) | — | `[ ]` `bytes.concat(abi.encode(uint256(0x20)), data)` 단위 테스트 통과. **주석 필수** |
-| C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[ ]` `expirationTime≠0`→`MustBePermanent`, 스키마 불일치→`WrongSchema`, 미초기화→`NotInitialized` |
+| C1 | **P0** | **`_decodeDecision` offset 트릭** (§6.1) | — | `[x]` `src/POICodec.sol` — decision·settlement·challenge 3종. 순진한 `abi.decode`가 revert하는 것도 테스트로 고정. 10/10 통과 |
+| C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[x]` `MustBePermanent`·`WrongSchema`·`NotInitialized`·`RecipientMustBeZero`. `_initializeBase`는 internal(부분 초기화 봉쇄 방지 — codex P1). `renounceOwnership` revert(B13 구조화). 15/15 통과 |
 | C3 | **P0** | `POINoteResolver` | C2 | `[ ]` `contentCommitment≠0`, 비철회 스키마 |
 | C4 | **P0** | `POIDecisionResolver` (I1~I6, I12, I14) | C2 | `[ ]` 부모 검증 5종 · 노트 승격 · `verifiedAddressUID` 실재성 · window/grace 범위 · `hasExpectedOutcome=false`면 필드 0 강제 |
 | C5 | **P0** | `POISettlementResolver` (I7~I13, I16, I17) | C4 | `[ ]` `activeHead`/`lastHead`/`revokeCount` 분리 · **`_eval` 온체인 판정 강제** · `observedAt==windowEnd` |
 | C6 | **P0** | `POIChallengeResolver` (I15) | C2 | `[ ]` 동일인 활성 이의 1건, `onRevoke`에서 매핑 해제 → 재발행 가능 |
 | C7 | **P0** | metric 레지스트리 — append-only·frozen (B13) | C2 | `[ ]` 재등록 시 `MetricFrozen` |
 | C8 | P1 | 온체인 EAS ABI 대조 | — | `[ ]` `1.4.1-beta.3` 배포본과 lib `v1.4.0`의 `attest`·`getAttestation` 셀렉터·레이아웃 일치 확인 (R3) |
-| C9 | P1 | 배포 스크립트 `script/Deploy.s.sol` | C3~C7 | `[ ]` §6.6 순서 그대로. 드라이런 통과 |
+| C9 | P1 | 배포 스크립트 `script/Deploy.s.sol` | C3~C7 | `[ ]` §6.6 순서 그대로. 드라이런 통과. 참고: 루트 `POI_Deploy_Guide.md` |
 
 ### C-T. 반드시 통과해야 할 공격 테스트 (§12.3) — 19종
 

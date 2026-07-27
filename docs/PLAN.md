@@ -74,7 +74,7 @@ reveals/     공개된 (salt, payload) — F5
 
 | 게이트 | 시점 | 조건 | 검증 명령 |
 |---|---|---|---|
-| **L0** | D-0 (7/27) | **로컬 포크 환경** — 실제 EAS·Dojang 바이트코드 상대로 가스 없이 개발 | `[x]` `anvil --fork-url $GIWA_RPC_URL` → chainId 91342, `EAS.version()` = `1.4.1-beta.3`, `isVerified()` 동작, 계정 10,000 ETH, `evm_increaseTime`으로 grace 점프 확인 |
+| **L0** | D-0 (7/27) | **로컬 포크 환경** — 실제 EAS·Dojang 바이트코드 상대로 가스 없이 개발 | `[x]` `anvil --fork-url $GIWA_SEPOLIA_RPC_URL` → chainId 91342, `EAS.version()` = `1.4.1-beta.3`, `isVerified()` 동작, 계정 10,000 ETH, `evm_increaseTime`으로 grace 점프 확인 |
 | **G0** | **G4 직전** | 배포 지갑에 가스 확보 + 법률 검토 게이트(B14) 확인 | `cast balance $DEPLOYER --rpc-url giwa_sepolia` |
 | **G1** | D-0 | `_decodeDecision` 단위 테스트 통과 | `forge test --mt test_DecodeDecision -vv` |
 | **G2** | D-0 | commitment 테스트 벡터 고정 (컨트랙트·TS 양쪽 동일값) | `[x]` `forge test --mt test_CommitmentVector` (3) + `pnpm -C core test` (19) |
