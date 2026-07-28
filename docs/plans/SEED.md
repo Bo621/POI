@@ -761,3 +761,55 @@ bash scripts/dev_up.sh                       # RPC 환경변수 없이도 돌아
 - `web/.env.local` 생성 (`VITE_EAS_ADDRESS` 포함)
 - `cast call <settlement resolver> "activeHead(bytes32)(bytes32)" <f1.decisionUID>` ≠ 0
 - `cast call <settlement resolver> "revokeCount(bytes32)(uint32)" <f2.decisionUID>` == 1
+
+---
+
+## 리뷰 대응 R9 — SchemaRegistry 주소가 고정돼 있다
+
+시드는 완주했고 온체인 상태도 기준을 만족한다:
+
+```
+activeHead(F1)   = 0x66a62206…   ≠ 0        ✓
+activeHead(F2)   = 0x6712ef1a…   ≠ 0        ✓  (정정된 S2)
+revokeCount(F2)  = 1                        ✓
+activeHead(F4)   = 0x00…0  (미정산)         ✓
+```
+
+시계 어긋남 안내도 화면에서 동작했다("기기 시각이 체인과 2509초 차이납니다").
+
+그런데 **상태 조회가 실패한다.**
+
+```
+The contract function "getSchema" returned no data ("0x").
+Contract Call: address: 0x4200000000000000000000000000000000000020
+```
+
+R8이 `VITE_EAS_ADDRESS`만 추가하고 SchemaRegistry는 `0x42…20`으로 고정된 채 남겼다.
+포크가 아니므로 로컬 SchemaRegistry는 다른 주소에 있다.
+
+`web/src/config.ts`는 이미 고쳤다(`VITE_SCHEMA_REGISTRY_ADDRESS`·`VITE_DOJANG_ADDRESS` 추가).
+**남은 것은 스크립트 쪽이다.**
+
+- `scripts/dev_up.sh`가 `web/.env.local`에 `VITE_SCHEMA_REGISTRY_ADDRESS`를 쓴다.
+- `docs/fixtures/seed.json`에 `addresses` 블록을 추가한다 — 지금은 `eas`·`schemas`·
+  `fixtures`만 있어 리졸버 주소를 확인하려면 `.env.local`을 열어야 한다.
+  계획서 §4가 요구한 항목이다.
+
+  ```json
+  "addresses": {
+    "schemaRegistry": "0x…", "eas": "0x…",
+    "note": "0x…", "decision": "0x…", "settlement": "0x…", "challenge": "0x…"
+  }
+  ```
+
+- Dojang은 로컬에 없다. `isVerified` 조회가 실패해도 **"확인 불가"로 떨어지고
+  앱이 죽지 않아야 한다** — 화면에서 확인할 것.
+
+### 검증
+
+```bash
+bash scripts/dev_up.sh && cd web && npm run dev
+```
+
+`seed.json`의 `f4.decisionUID`를 상태 조회에 넣으면 **인장 `기한초과`(인주색)** 가
+나와야 한다. 오류 문구가 나오면 고쳐진 것이 아니다.
