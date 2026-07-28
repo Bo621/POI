@@ -220,7 +220,9 @@ execute_phase() {
 }
 
 "${ROOT_DIR}/scripts/dev_down.sh"
-anvil --port 8545 --chain-id 91342 >"${ANVIL_LOG}" 2>&1 &
+REAL_NOW="$(date +%s)"
+T0_TARGET="$(( REAL_NOW - 10800 ))"
+anvil --port 8545 --chain-id 91342 --timestamp "${T0_TARGET}" >"${ANVIL_LOG}" 2>&1 &
 ANVIL_PID=$!
 printf '%s\n' "${ANVIL_PID}" >"${PID_FILE}"
 
@@ -232,9 +234,6 @@ for _ in {1..60}; do
 done
 cast block-number --rpc-url "${LOCAL_RPC}" >/dev/null
 
-REAL_NOW="$(date +%s)"
-OBSERVATION_START="$(( (REAL_NOW - 3600) / 60 * 60 ))"
-OBSERVATION_END="$(( OBSERVATION_START + 600 ))"
 T0="$(cast block latest --rpc-url "${LOCAL_RPC}" --json | jq -r '.timestamp')"
 WINDOW_START="$(( T0 + 1800 ))"
 WINDOW_END="$(( T0 + 2400 ))"
@@ -242,8 +241,8 @@ GRACE_SECONDS=3600
 FINAL_TS="$(( WINDOW_END + GRACE_SECONDS + 300 ))"
 F5_WINDOW_START="$(( FINAL_TS + 7200 ))"
 
-PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${OBSERVATION_START}" "${OBSERVATION_END}")"
-DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${OBSERVATION_START}" "${OBSERVATION_END}")"
+PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${WINDOW_START}" "${WINDOW_END}")"
+DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${WINDOW_START}" "${WINDOW_END}")"
 PRICE_THRESHOLD="$(( PRICE_VALUE - 1000000 ))"
 DRAWDOWN_THRESHOLD="$(( DRAWDOWN_VALUE + 50 ))"
 
@@ -291,7 +290,7 @@ F2_UID="${ATTEST_UIDS[1]}"
 F4_UID="${ATTEST_UIDS[2]}"
 F5_UID="${ATTEST_UIDS[3]}"
 
-set_time "$((T0 + 2500))"
+set_time "$((WINDOW_END + 100))"
 calculate_phase 2 "${PHASE2_LOG}" \
     SEED_SETTLEMENT_SCHEMA_UID="${SETTLEMENT_SCHEMA}" SEED_WINDOW_END="${WINDOW_END}" \
     SEED_PRICE_VALUE="${PRICE_VALUE}" SEED_DRAWDOWN_VALUE="${DRAWDOWN_VALUE}" \
@@ -304,7 +303,7 @@ fi
 F1_SETTLEMENT="${ATTEST_UIDS[0]}"
 F2_S1="${ATTEST_UIDS[1]}"
 
-set_time "$((T0 + 2600))"
+set_time "$((WINDOW_END + 200))"
 calculate_phase 3 "${PHASE3_LOG}" \
     SEED_DECISION_SCHEMA_UID="${DECISION_SCHEMA}" \
     SEED_SETTLEMENT_SCHEMA_UID="${SETTLEMENT_SCHEMA}" \
@@ -363,6 +362,42 @@ if (( VERIFY_FAILED != 0 )); then
     exit 1
 fi
 
+{
+    printf 'POI_EAS_ADDRESS=%s\n' "${EAS}"
+    printf 'POI_SETTLEMENT_RESOLVER_ADDRESS=%s\n' "${SETTLEMENT_RESOLVER}"
+    printf 'POI_METRIC_REGISTRY_ADDRESS=%s\n' "${DECISION_RESOLVER}"
+} >"${ROOT_DIR}/.env.verifier"
+
+verify_with_cli() {
+    local name=$1
+    local uid=$2
+    local output
+    local status=0
+    local verdict
+    local snapshot_hash
+    output="$(cd "${ROOT_DIR}" && env \
+        POI_EAS_ADDRESS="${EAS}" \
+        POI_SETTLEMENT_RESOLVER_ADDRESS="${SETTLEMENT_RESOLVER}" \
+        POI_METRIC_REGISTRY_ADDRESS="${DECISION_RESOLVER}" \
+        node --experimental-strip-types verifier/src/cli.ts \
+        "${uid}" --rpc "${LOCAL_RPC}" --json)" || status=$?
+    if (( status != 0 )); then
+        echo "verifier(${name}) 실패 (종료코드 ${status}):" >&2
+        printf '%s\n' "${output}" >&2
+        exit 1
+    fi
+    verdict="$(jq -r '.verdict // empty' <<<"${output}")"
+    snapshot_hash="$(jq -r '.independent.snapshotHash // empty' <<<"${output}")"
+    if [[ "${verdict}" != "MATCH" || -z "${snapshot_hash}" ]]; then
+        echo "verifier(${name}) 결과 불일치: verdict=${verdict}, snapshotHash=${snapshot_hash}" >&2
+        exit 1
+    fi
+    printf '%s %s\n' "${verdict}" "${snapshot_hash}"
+}
+
+read -r F1_VERDICT F1_SNAPSHOT_HASH < <(verify_with_cli F1 "${F1_UID}")
+read -r F2_VERDICT F2_SNAPSHOT_HASH < <(verify_with_cli F2 "${F2_UID}")
+
 mkdir -p "${ROOT_DIR}/docs/fixtures"
 {
     printf '{\n'
@@ -372,8 +407,7 @@ mkdir -p "${ROOT_DIR}/docs/fixtures"
     printf '  "addresses": {"schemaRegistry": "%s", "eas": "%s", "note": "%s", "decision": "%s", "settlement": "%s", "challenge": "%s"},\n' \
         "${SCHEMA_REGISTRY}" "${EAS}" "${NOTE_RESOLVER}" "${DECISION_RESOLVER}" "${SETTLEMENT_RESOLVER}" "${CHALLENGE_RESOLVER}"
     printf '  "t0": "%s",\n' "${T0}"
-    printf '  "observationWindow": {"start": "%s", "end": "%s", "purpose": "최근 실제 Upbit 관측값 조회"},\n' "${OBSERVATION_START}" "${OBSERVATION_END}"
-    printf '  "fixtureWindow": {"start": "%s", "end": "%s", "purpose": "로컬 UI 시드이며 verifier 대조용이 아님"},\n' "${WINDOW_START}" "${WINDOW_END}"
+    printf '  "window": {"start": "%s", "end": "%s", "graceSeconds": %s},\n' "${WINDOW_START}" "${WINDOW_END}" "${GRACE_SECONDS}"
     printf '  "observations": {"BTC_PRICE_KRW_AT_END": "%s", "BTC_MAX_DRAWDOWN_IN_WINDOW": "%s"},\n' "${PRICE_VALUE}" "${DRAWDOWN_VALUE}"
     printf '  "schemas": {"note": "%s", "decision": "%s", "settlement": "%s", "challenge": "%s"},\n' "${NOTE_SCHEMA}" "${DECISION_SCHEMA}" "${SETTLEMENT_SCHEMA}" "${CHALLENGE_SCHEMA}"
     printf '  "fixtures": {\n'
@@ -409,4 +443,7 @@ printf '\n시드 완료 (T0=%s)\n' "${T0}"
 printf 'F1 SETTLED  %s\nF2 SETTLED+철회  %s\nF4 OVERDUE  %s\nF5 PENDING  %s\n' \
     "${F1_UID}" "${F2_UID}" "${F4_UID}" "${F5_UID}"
 printf 'CT18 copy  %s\n' "${F_COPY_UID}"
-printf '검증: poi-verify %s --rpc %s --json\n' "${F1_UID}" "${LOCAL_RPC}"
+printf 'verifier: %s  F1 snapshotHash=%s\n' "${F1_VERDICT}" "${F1_SNAPSHOT_HASH}"
+printf 'verifier: %s  F2 snapshotHash=%s\n' "${F2_VERDICT}" "${F2_SNAPSHOT_HASH}"
+printf '검증 F1: set -a; source .env.verifier; set +a; node --experimental-strip-types verifier/src/cli.ts %s --rpc %s --json\n' "${F1_UID}" "${LOCAL_RPC}"
+printf '검증 F2: set -a; source .env.verifier; set +a; node --experimental-strip-types verifier/src/cli.ts %s --rpc %s --json\n' "${F2_UID}" "${LOCAL_RPC}"

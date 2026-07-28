@@ -100,11 +100,11 @@ A로 저널 작성 → 노트 승격 → salt 백업 → 결정 커밋을 수행
 요약에 출력된 명령 또는 다음 형식으로 실행한다.
 
 ```bash
-poi-verify <f1.decisionUID> --rpc http://127.0.0.1:8545 --json
+set -a; source .env.verifier; set +a; node --experimental-strip-types verifier/src/cli.ts <f1.decisionUID> --rpc http://127.0.0.1:8545 --json
 ```
 
-- 기대 화면: 로컬 시드는 UI 확인용이므로 verifier의 실제 `MATCH` 증명은 실제 배포 뒤에
-  수행한다. F2 상태를 조회하면 철회된 S1이 아니라 활성 S2를 사용한다.
+- 기대 화면: F1과 F2 모두 종료코드 0과 `verdict: "MATCH"`를 반환하고 요약의
+  `snapshotHash`가 직접 실행한 결과와 같다. F2는 철회된 S1이 아니라 활성 S2를 사용한다.
 - 어긋나면: provider 관측 구간, metric definition hash, active settlement head가
   `seed.json`과 같은지 확인한다.
 
