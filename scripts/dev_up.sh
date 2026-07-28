@@ -53,7 +53,16 @@ require_value() {
 }
 
 set_time() {
-    cast rpc evm_setNextBlockTimestamp "$1" --rpc-url "${LOCAL_RPC}" >/dev/null
+    local target=$1
+    local now_ts
+    local delta
+    now_ts="$(cast block latest --rpc-url "${LOCAL_RPC}" --json | jq -r '.timestamp')"
+    delta="$(( target - now_ts ))"
+    if (( delta <= 0 )); then
+        echo "체인 시각을 되돌릴 수 없습니다 (현재=${now_ts}, 목표=${target})." >&2
+        exit 1
+    fi
+    cast rpc evm_increaseTime "${delta}" --rpc-url "${LOCAL_RPC}" >/dev/null
     cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null
 }
 
@@ -65,15 +74,14 @@ run_phase() {
         cd "${ROOT_DIR}/contracts"
         env SEED_PHASE="${phase}" SEED_KEY_A="${KEY_A}" SEED_KEY_B="${KEY_B}" "$@" \
             forge script script/SeedFixtures.s.sol:SeedFixtures \
-            --sig "runSeed()" --rpc-url "${LOCAL_RPC}" --broadcast -vv
+            --sig "runSeed()" --rpc-url "${LOCAL_RPC}" --broadcast --slow -vv
     ) | tee "${output}"
+    cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null
 }
 
 "${ROOT_DIR}/scripts/dev_down.sh"
-# --block-time 1 이 없으면 forge script --broadcast 가 확인 블록을 기다리며 멈춘다.
-# anvil 기본은 온디맨드 채굴이라 트랜잭션이 없으면 새 블록이 나오지 않는다.
 anvil --fork-url "${RPC_URL}" --fork-block-number "${FORK_BLOCK}" \
-    --port 8545 --chain-id 91342 --block-time 1 >"${ANVIL_LOG}" 2>&1 &
+    --port 8545 --chain-id 91342 >"${ANVIL_LOG}" 2>&1 &
 ANVIL_PID=$!
 printf '%s\n' "${ANVIL_PID}" >"${PID_FILE}"
 

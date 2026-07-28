@@ -306,3 +306,78 @@ RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
 - `web/.env.local`이 생성돼 있다
 - `cast call <settlement resolver> "activeHead(bytes32)(bytes32)" <f1.decisionUID>` 가 0이 아니다
 - `cast call <settlement resolver> "revokeCount(bytes32)(uint32)" <f2.decisionUID>` 가 1이다
+
+---
+
+## 리뷰 대응 R2 — 확인 블록 문제의 진짜 해법 + 실패 원인이 안 보인다
+
+### 1. `--slow`로도 멈춘다. 블록 티커가 답이다 (검증됨)
+
+R1의 `--slow`는 **효과가 없었다.** 블록이 60초간 정지한 것을 확인했다
+(`31820341`에서 멈춤, 트랜잭션 17건).
+
+살아 있는 프로세스에 대고 `cast rpc evm_mine`을 한 번 호출하자 **forge가 즉시 완료**했다.
+원인이 확정됐다: **forge는 마지막 트랜잭션의 확인(confirmation) 블록을 기다리고,
+온디맨드 anvil은 트랜잭션이 없으면 블록을 만들지 않는다.**
+
+`--block-time`은 anvil을 패닉시키므로(R1) 쓸 수 없다. 그래서 **블록 티커**를 쓴다.
+
+```bash
+# forge script를 돌리는 동안 백그라운드에서 블록을 찍어준다
+start_ticker() {
+    ( while :; do cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null 2>&1; sleep 1; done ) &
+    TICKER_PID=$!
+}
+stop_ticker() { [ -n "${TICKER_PID:-}" ] && kill "${TICKER_PID}" 2>/dev/null || true; TICKER_PID=""; }
+```
+
+- 각 `forge script` 호출 **직전에 start, 직후에 stop**한다.
+- `trap`에서도 반드시 죽인다 — 남으면 체인 시각이 계속 흘러 다음 단계의 타임라인이 깨진다.
+- 티커가 도는 동안 블록마다 시각이 1초씩 오르므로, **각 phase의 트랜잭션 수만큼 시각이
+  앞당겨진다.** 타임라인을 잡을 때 이 여유를 고려한다(아래 2번과 함께).
+
+### 2. `[P1]` 결정 발행 하나가 revert하는데 이유가 화면에 안 나온다
+
+실행 결과: `Error: Transaction Failure: 0xa64274…` — **어떤 불변식에 걸렸는지 알 수 없다.**
+
+브로드캐스트 기록을 디코딩해 보면 그 트랜잭션은 `poi.decision.v1` 발행이고
+`windowStart = T0+60`, `windowEnd = T0+660`, `graceSeconds = 3600`,
+`outcomeThreshold = 1`이다.
+
+**가장 유력한 원인은 `WindowInPast`(I4)다.** 티커/채굴로 체인 시각이 흘러
+발행 시점이 `windowStart`를 넘어섰을 수 있다. `windowStart = T0 + 60`은
+phase 1의 트랜잭션 수(리졸버 4종 배포 + 스키마 4종 등록 + initialize 4회 + addMetric 2회 +
+결정 4건 ≈ 18건)를 고려하면 **여유가 너무 적다.**
+
+두 가지를 함께 고친다.
+
+**(a) 여유를 늘린다.** 모든 결정의 `windowStart`를 `T0 + 60` → **`T0 + 1800`**(30분)으로
+바꾸고, 그에 맞춰 뒤 단계도 민다.
+
+```
+T0        = 분 경계로 내림( 실제 now - 10800 )      # 3시간 전으로 넉넉히
+windowStart = T0 + 1800
+windowEnd   = T0 + 2400          # 10분 구간
+phase 2   @ T0 + 2500
+phase 3   @ T0 + 2600
+F4 OVERDUE 도달 = windowEnd + 3600 = T0 + 6000
+F5 windowStart  = T0 + 14400,  windowEnd = T0 + 100800
+최종      @ 실제 now (= T0 + 10800)  →  F4 OVERDUE ✓,  F5 PENDING ✓
+```
+
+관측 구간 `[T0+1800, T0+2400]`은 실행 시점 기준 **약 2시간 20분 전**이므로 업비트 봉이 존재한다.
+
+**(b) 실패하면 원인을 출력한다.** `forge script` 실패 시 스크립트가 그냥 죽지 말고,
+브로드캐스트 JSON에서 실패한 트랜잭션 해시를 찾아 `cast run <hash> --rpc-url ...`을
+실행해 **revert 사유를 그대로 출력**한다. 그래야 다음에 추측하지 않는다.
+
+anvil을 죽이기 **전에** 실행해야 한다 — 지금 트랩은 먼저 죽여서 조사가 불가능하다.
+`KEEP_ANVIL_ON_FAILURE=1` 환경변수를 두어, 설정되면 실패해도 anvil을 남긴다.
+
+### 검증
+
+```bash
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
+```
+
+**끝까지 완주해 요약을 출력해야 한다.** 실패하면 revert 사유가 화면에 나와야 한다.
