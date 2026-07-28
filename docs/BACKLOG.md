@@ -49,7 +49,7 @@
 | C1 | **P0** | **`_decodeDecision` offset 트릭** (§6.1) | — | `[x]` `src/POICodec.sol` — decision·settlement·challenge 3종. 순진한 `abi.decode`가 revert하는 것도 테스트로 고정. 10/10 통과 |
 | C2 | **P0** | `POIResolverBase` — `_guard` / `ready` / `Ownable2Step` | C1 | `[x]` `MustBePermanent`·`WrongSchema`·`NotInitialized`·`RecipientMustBeZero`. `_initializeBase`는 internal(부분 초기화 봉쇄 방지 — codex P1). `renounceOwnership` revert(B13 구조화). 15/15 통과 |
 | C3 | **P0** | `POINoteResolver` | C2 | `[x]` `contentCommitment≠0` · attestation 레벨 `revocable=false`도 강제(§1.2) · 실제 `attest()` 경로(onlyEAS)로 검증 · `refUID=0`·payload 정확히 32바이트 강제(codex P2). 13/13 |
-| C4 | **P0** | `POIDecisionResolver` (I1~I6, I12, I14) | C2 | `[x]` 부모 5종·노트 승격·`verifiedAddressUID`·window/grace·I6d 필드 0·payload 정규 길이(codex P2). 38/38 |
+| C4 | **P0** | `POIDecisionResolver` (I1~I6, I12, I14) | C2 | `[x]` 부모 5종·노트 승격·`verifiedAddressUID`·window/grace·I6d 필드 0·payload 정규 길이(codex P2). **+ 만료·철회된 검증 UID 거부**(명세에 없음 — Dojang 검증이 30일 만료라 B4 주장이 거짓이 될 수 있어 추가, 사용자 승인). 44/44 |
 | C5 | **P0** | `POISettlementResolver` (I7~I13, I16, I17) | C4 | `[x]` `activeHead`/`lastHead`/`revokeCount` 분리 · `_eval` 온체인 판정 강제(op 6종 × 599/600/601 전수) · `observedAt==windowEnd` · payload 재인코딩 대조. 35/35 (전체 123/123) |
 | C6 | **P0** | `POIChallengeResolver` (I15) | C2 | `[x]` 동일인 활성 이의 1건(`AlreadyChallenged`) · `onRevoke`에서 매핑 해제 → 재발행 가능(CT17) · 뒤늦은 중복 철회가 현재 이의를 지우지 않음 · payload 재인코딩 대조. 20/20 (전체 143/143) |
 | C7 | **P0** | metric 레지스트리 — append-only·frozen (B13) | C2 | `[x]` `POIMetricRegistry`(abstract, Decision만 상속). 재등록 `MetricFrozen` · `definitionHash=0` 거부(§11.3) · `kind≠0` 거부(B7). 10/10 |
@@ -79,6 +79,7 @@
 | CT17 | Challenge 철회 후 재발행 | **통과해야 함** (B8) ★ — `[x]` C6 |
 | CT18 | 타인 commitment 복사 후 reveal 검증 | **실패해야 함** (B3) ★ |
 | CT19 | 등록된 metric 재등록 | `MetricFrozen` (B13) — `[x]` `test_AddMetric_RevertsOnReregistration` |
+| CT20 | 만료된 검증 UID로 커밋 | `VerifiedAddressExpired` — `[x]` C4-R2 (명세 외 추가) |
 
 > ★ 표시는 v3에서 새로 강제한 항목이다. **하나라도 실패하면 배포하지 않는다.**
 
