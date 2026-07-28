@@ -1,5 +1,5 @@
 import {messageFromRevert, RESULT, scale, settlementResult, type Op, type Result} from "@poi/core";
-import {useState, type FormEvent} from "react";
+import {useEffect, useState, type FormEvent} from "react";
 import {encodeAbiParameters, isHex, type Address, type Hex} from "viem";
 import {SCHEMAS, isDeployed} from "./config";
 import {attest, revoke as revokeAttestation, type AttestResult} from "./eas";
@@ -80,8 +80,12 @@ function errorMessage(error: unknown): string {
         : error instanceof Error ? error.message : "정산 발행에 실패했습니다.";
 }
 
-export function Settlement({address}: {address?: Address}) {
-    const [decisionUID, setDecisionUID] = useState("");
+export function Settlement({address, decisionUID: fixedDecisionUID, onSuccess}: {
+    address?: Address;
+    decisionUID?: Hex;
+    onSuccess?: () => void;
+}) {
+    const [decisionUID, setDecisionUID] = useState(fixedDecisionUID ?? "");
     const [observedValue, setObservedValue] = useState("");
     const [missing, setMissing] = useState(false);
     const [source, setSource] = useState("");
@@ -91,6 +95,10 @@ export function Settlement({address}: {address?: Address}) {
     const [receipt, setReceipt] = useState<AttestResult>();
     const [revokeTxHash, setRevokeTxHash] = useState<Hex>();
     const [status, setStatus] = useState("");
+
+    useEffect(() => {
+        if (fixedDecisionUID) setDecisionUID(fixedDecisionUID);
+    }, [fixedDecisionUID]);
 
     async function prepare(event: FormEvent) {
         event.preventDefault();
@@ -142,6 +150,7 @@ export function Settlement({address}: {address?: Address}) {
             });
             setReceipt(result);
             setStatus("");
+            onSuccess?.();
         } catch (error) {
             setStatus(errorMessage(error));
         }
@@ -161,12 +170,12 @@ export function Settlement({address}: {address?: Address}) {
     }
 
     return (
-        <section className="doc-section">
-            <h2>정산</h2>
+        <section className={fixedDecisionUID ? undefined : "doc-section"}>
+            {!fixedDecisionUID && <h2>정산</h2>}
             <p className="doc-note">관측 시점: 구간 종료 시각(고정)</p>
             <p className="notice notice--quiet">결과는 관측값으로부터 컨트랙트가 판정합니다. 직접 고를 수 없습니다.</p>
             <form className="doc-form" onSubmit={prepare}>
-                <div className="field"><label htmlFor="settlement-decision">decisionUID</label><input className="uid" id="settlement-decision" value={decisionUID} onChange={(e) => setDecisionUID(e.target.value)} /></div>
+                {!fixedDecisionUID && <div className="field"><label htmlFor="settlement-decision">decisionUID</label><input className="uid" id="settlement-decision" value={decisionUID} onChange={(e) => setDecisionUID(e.target.value)} /></div>}
                 <label className="check-field" htmlFor="settlement-missing"><input id="settlement-missing" type="checkbox" checked={missing} onChange={(e) => setMissing(e.target.checked)} />관측값 없음</label>
                 {!missing && <div className="field"><label htmlFor="settlement-value">관측값</label><input id="settlement-value" value={observedValue} onChange={(e) => setObservedValue(e.target.value)} /></div>}
                 <div className="field"><label htmlFor="settlement-source">출처</label><input id="settlement-source" value={source} onChange={(e) => setSource(e.target.value)} /></div>

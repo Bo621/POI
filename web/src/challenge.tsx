@@ -1,4 +1,4 @@
-import {useState, type FormEvent} from "react";
+import {useEffect, useState, type FormEvent} from "react";
 import {encodeAbiParameters, type Address, type Hex} from "viem";
 import {SCHEMAS, isDeployed} from "./config";
 import {attest, revoke as revokeAttestation, type AttestResult} from "./eas";
@@ -20,8 +20,12 @@ interface DisplayChallenge extends ChallengeLog {
     verified: boolean | "unknown";
 }
 
-export function Challenge({address}: {address?: Address}) {
-    const [settlementUID, setSettlementUID] = useState("");
+export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess}: {
+    address?: Address;
+    settlementUID?: Hex;
+    onSuccess?: () => void;
+}) {
+    const [settlementUID, setSettlementUID] = useState(fixedSettlementUID ?? "");
     const [claimedResult, setClaimedResult] = useState(0);
     const [hasValue, setHasValue] = useState(false);
     const [observedValue, setObservedValue] = useState("0");
@@ -32,6 +36,10 @@ export function Challenge({address}: {address?: Address}) {
     const [receipt, setReceipt] = useState<AttestResult>();
     const [revokeTxHash, setRevokeTxHash] = useState<Hex>();
     const [status, setStatus] = useState("");
+
+    useEffect(() => {
+        if (fixedSettlementUID) setSettlementUID(fixedSettlementUID);
+    }, [fixedSettlementUID]);
 
     async function load() {
         if (!/^0x[0-9a-fA-F]{64}$/.test(settlementUID)) {
@@ -75,6 +83,7 @@ export function Challenge({address}: {address?: Address}) {
             });
             setReceipt(result);
             setStatus("");
+            onSuccess?.();
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "이의 발행에 실패했습니다.");
         }
@@ -95,7 +104,7 @@ export function Challenge({address}: {address?: Address}) {
             <h2>이의</h2>
             <p className="notice notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
             <form className="doc-form" onSubmit={publish}>
-                <div className="field"><label htmlFor="challenge-settlement">settlementUID</label><input className="uid" id="challenge-settlement" value={settlementUID} onChange={(e) => setSettlementUID(e.target.value)} /></div>
+                {!fixedSettlementUID && <div className="field"><label htmlFor="challenge-settlement">settlementUID</label><input className="uid" id="challenge-settlement" value={settlementUID} onChange={(e) => setSettlementUID(e.target.value)} /></div>}
                 <div className="field"><label htmlFor="challenge-result">claimedResult</label><select id="challenge-result" value={claimedResult} onChange={(e) => setClaimedResult(Number(e.target.value))}>
                     <option value={0}>OBSERVED</option><option value={1}>NOT_OBSERVED</option><option value={2}>INDETERMINATE</option>
                 </select></div>

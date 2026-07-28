@@ -631,3 +631,31 @@ decisionDetail.tsx:70    <button className="btn-commit" type="button" disabled={
 ```
 cd web && npm run test:e2e     # 28/28, skipped 0
 ```
+
+---
+
+## 단계 5 리뷰 대응 R6 — 상세에서 이의 목록이 자동으로 뜨지 않는다
+
+`challenge.tsx:40`
+
+```tsx
+useEffect(() => { if (fixedSettlementUID) setSettlementUID(fixedSettlementUID); }, [fixedSettlementUID]);
+```
+
+UID를 세팅만 하고 **`load()`를 부르지 않는다.** 그래서 상세 화면에서 사용자가
+`목록 조회`를 눌러야 이의가 보인다.
+
+**이의는 그 기록의 일부다.** 상세를 열었을 때 이미 보여야 한다 —
+심사자가 버튼을 찾아 눌러야 한다면 "이 정산에 이의가 있다"는 사실을 놓친다.
+
+### 고칠 것
+
+- `fixedSettlementUID`가 주어지면 **자동으로 `load()`**를 부른다.
+- 단일 페이지 모드(UID를 입력받는 경우)는 지금처럼 `목록 조회` 버튼을 유지한다.
+- 자동 로드 중에는 `"불러오는 중…"`, 실패하면 기존 재시도 문구.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 28/28, skipped 0
+```

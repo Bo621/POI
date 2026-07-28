@@ -1,5 +1,5 @@
 import {RESULT, STATE, deriveState, evidenceTier, formatGrade, REVEAL_STATE, type PoiState} from "@poi/core";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import type {Address, Hex} from "viem";
 import {CHAIN, EAS_ADDRESS, RESOLVERS, SCHEMAS, SCHEMA_REGISTRY_ADDRESS} from "./config";
 import {buildDag, type DagResult} from "./graph";
@@ -11,13 +11,13 @@ import {
     readMetricDefinition,
     readSettlement,
     readSettlementState,
-    readVerified,
-    type ChallengeLog,
 } from "./read";
 import {Reveal} from "./reveal.tsx";
 import {describeState} from "./status";
 import {ZERO_UID} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
+import {Settlement as SettlementForm} from "./settlement";
+import {Challenge} from "./challenge";
 
 type Decision = Awaited<ReturnType<typeof readDecision>>;
 type Settlement = Awaited<ReturnType<typeof readSettlement>>;
@@ -44,35 +44,7 @@ function CopyButton({text, children}: {text: string; children: string}) {
     }}>{copied ? "복사됨" : children}</button>;
 }
 
-function Challenges({settlementUID, address}: {settlementUID: Hex; address?: Address}) {
-    const [items, setItems] = useState<(ChallengeLog & {verified: boolean | "unknown"})[]>();
-    const [failed, setFailed] = useState(false);
-    async function load() {
-        setFailed(false);
-        try {
-            const logs = (await readChallengeLogs(SCHEMAS.challenge as Hex))
-                .filter((item) => item.refUID.toLowerCase() === settlementUID.toLowerCase() && item.revocationTime === 0n);
-            setItems(await Promise.all(logs.map(async item => ({...item, verified: await readVerified(item.attester)}))));
-        } catch {
-            setFailed(true);
-        }
-    }
-    useEffect(() => { void load(); }, [settlementUID]);
-    return <div>
-        <h3>이의</h3>
-        <p className="notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
-        {failed && <p className="form-status" role="alert">이의 목록을 불러오지 못했습니다. <button className="btn" onClick={load}>다시 시도</button></p>}
-        <ul className="record-list">{items?.map(item => <li key={item.uid}>
-            <span className="hex">{item.uid}</span> · <span className="hex">{item.attester}</span> ·
-            {item.verified === true ? " 검증 지갑" : item.verified === false ? " 미검증 지갑" : " 확인 불가"} ·
-            {" "}{resultLabel(item.claimedResult ?? RESULT.INDETERMINATE)} · 출처 {item.source ?? ""}
-        </li>)}</ul>
-        <button className="btn-commit" type="button" disabled={!address}>이의 제기</button>
-        {!address && <p className="doc-note">지갑을 연결해야 이의를 제기할 수 있습니다.</p>}
-    </div>;
-}
-
-function SettlementBlock({record, address, previous = false}: {record: Settlement; address?: Address; previous?: boolean}) {
+function SettlementBlock({record, address, previous = false, onSuccess}: {record: Settlement; address?: Address; previous?: boolean; onSuccess: () => void}) {
     return <div>
         <dl className="doc-fields">
             <dt>{previous ? "이전" : "현재 (활성)"}</dt><dd className="hex">{record.uid}</dd>
@@ -82,7 +54,7 @@ function SettlementBlock({record, address, previous = false}: {record: Settlemen
             <dt>관측 시각</dt><dd className="timestamp">{time(record.observedAt)}</dd>
             <dt>발행자</dt><dd className="hex">{record.attester}</dd>
         </dl>
-        <ErrorBoundary label="이의"><Challenges settlementUID={record.uid} address={address} /></ErrorBoundary>
+        <ErrorBoundary label="이의"><Challenge settlementUID={record.uid} address={address} onSuccess={onSuccess} /></ErrorBoundary>
     </div>;
 }
 
@@ -97,10 +69,16 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [dag, setDag] = useState<DagResult>();
     const [dagError, setDagError] = useState(false);
     const [metric, setMetric] = useState<{decimals: number; definitionHash: Hex}>();
+    const [refreshKey, setRefreshKey] = useState(0);
+    const loadedUID = useRef<Hex>();
 
     useEffect(() => {
         let current = true;
-        setError(""); setDecision(undefined); setHeads(undefined); setActive(undefined);
+        setError("");
+        if (loadedUID.current !== uid) {
+            loadedUID.current = uid;
+            setDecision(undefined); setHeads(undefined); setActive(undefined); setPrevious(undefined);
+        }
         void (async () => {
             try {
                 const attestation = await getAttestation(uid);
@@ -134,7 +112,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             }
         })();
         return () => { current = false; };
-    }, [uid]);
+    }, [uid, refreshKey]);
 
     if (!decision || !heads || now === undefined) return <main><header className="doc-header"><a href="#/">← 홈</a><h1>결정 상세</h1></header><p className="form-status" role="alert">{error || "불러오는 중…"}</p></main>;
     const state = deriveState({
@@ -170,11 +148,12 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             <dt>유예</dt><dd>{decision.graceSeconds}초</dd>
         </dl></section>
         <ErrorBoundary label="정산"><section className="doc-section"><h2>정산</h2>
-            {owner && <button className="btn-commit" type="button">정산하기</button>}
+            {owner && <SettlementForm decisionUID={uid} address={address} onSuccess={() => setRefreshKey(value => value + 1)} />}
+            {address && !owner && <p className="doc-note">결정 작성자만 정산할 수 있습니다.</p>}
             {!address && <><button className="btn-commit" type="button" disabled>정산하기</button><p className="doc-note">지갑을 연결해야 정산할 수 있습니다.</p></>}
             {settlementError && <p className="form-status">확인 불가 <button className="btn" onClick={() => window.location.reload()}>다시 시도</button></p>}
-            {active ? <SettlementBlock record={active} address={address} /> : <p className="doc-note">활성 정산이 없습니다.</p>}
-            {previous && <details><summary>이전 정산 (철회됨)</summary><SettlementBlock record={previous} address={address} previous /></details>}
+            {active ? <SettlementBlock record={active} address={address} onSuccess={() => setRefreshKey(value => value + 1)} /> : <p className="doc-note">활성 정산이 없습니다.</p>}
+            {previous && <details><summary>이전 정산 (철회됨)</summary><SettlementBlock record={previous} address={address} previous onSuccess={() => setRefreshKey(value => value + 1)} /></details>}
             <p className="notice--quiet">결과는 관측값으로부터 컨트랙트가 판정합니다. 직접 고를 수 없습니다.</p>
         </section></ErrorBoundary>
         <ErrorBoundary label="공개"><Reveal attestationUID={uid} /></ErrorBoundary>

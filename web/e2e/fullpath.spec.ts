@@ -97,7 +97,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await expectNoAlert(decision, "결정 발행 alert");
     const decisionUID = await receiptUID(decision);
 
-    const status = section(pageA, "상태");
+    const status = pageA.locator("header.doc-header").locator("+ .status-result");
     await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
 
     const currentTime = await chainNow();
@@ -107,7 +107,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await expect(pageA.getByRole("navigation").getByText(
         new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
     )).toBeVisible();
-    const awaiting = section(pageA, "상태");
+    const awaiting = pageA.locator("header.doc-header").locator("+ .status-result");
     await expect(awaiting.getByRole("img", {name: "상태: 정산 대기"})).toBeVisible({timeout: 20_000});
 
     const settlement = section(pageA, "정산");
@@ -126,7 +126,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const pageB = await connect(context, accounts.B);
     await pageB.goto(`/#/d/${decisionUID}`);
     const challenge = section(pageB, "이의");
-    await challenge.getByLabel("settlementUID", {exact: true}).fill(settlementUID);
+    await expect(challenge.getByLabel("settlementUID", {exact: true})).toHaveCount(0);
     await challenge.getByLabel("출처").fill("FULL-PATH challenge");
     await challenge.getByRole("button", {name: "이의 발행"}).click();
     const challengeUID = await receiptUID(challenge);
