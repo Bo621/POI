@@ -30,5 +30,6 @@ export function Nav({route, wallet, onWalletChange}: {
             </a>)}
         </div>
         <Wallet state={wallet} onChange={onWalletChange} />
+        <span className="site-nav__chain" aria-label="chainId 91342">· 91342</span>
     </nav>;
 }

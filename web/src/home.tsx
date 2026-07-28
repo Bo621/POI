@@ -7,8 +7,8 @@ import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {navigate} from "./router";
 import {getChainTime, readDecision, readSettlementState} from "./read";
 import {readRecent} from "./recentStore";
-import {describeState} from "./status";
 import {loadRecords, needsAction, type RecordRow} from "./records";
+import {RecordRowView} from "./recordRow";
 
 const UID_PATTERN = /^0x[0-9a-f]{64}$/i;
 const envExamples = (import.meta.env.VITE_EXAMPLE_UIDS ?? "")
@@ -21,6 +21,7 @@ const exampleUIDs = (envExamples.length > 0 ? envExamples : seedExamples) as Hex
 interface DecisionSummary {
     uid: Hex;
     state: PoiState;
+    hasRevoked: boolean;
 }
 
 async function loadSummaries(uids: Hex[]): Promise<DecisionSummary[]> {
@@ -41,33 +42,33 @@ async function loadSummaries(uids: Hex[]): Promise<DecisionSummary[]> {
                 activeHeadTime: heads.activeHeadTime,
                 revokeCount: heads.revokeCount,
             }, now).state,
+            hasRevoked: heads.revokeCount > 0n,
         };
     }));
 }
 
-function short(uid: string): string {
-    return `${uid.slice(0, 10)}…${uid.slice(-6)}`;
-}
-
 function SummaryList({rows}: {rows: DecisionSummary[]}) {
-    return <ul className="record-list">{rows.map((row) => <li key={row.uid}>
-        <dl className="doc-fields">
-            <dt>상태</dt><dd className={row.state === "OVERDUE" ? "revocation-note" : ""}>{describeState(row.state)}</dd>
-            <dt>UID</dt><dd className="hex">{short(row.uid)}</dd>
-        </dl>
-        <a className="btn" href={`#/d/${row.uid}`}>보기 →</a>
-    </li>)}</ul>;
+    return <ul className="record-list">{rows.map((row) =>
+        <RecordRowView
+            key={row.uid}
+            uid={row.uid}
+            state={row.state}
+            warning={row.hasRevoked ? "정산 철회 이력 있음" : undefined}
+        />
+    )}</ul>;
 }
 
 function WalletRows({rows}: {rows: RecordRow[]}) {
-    return <ul className="record-list">{rows.map((row) => <li key={row.uid}>
-        <dl className="doc-fields">
-            <dt>상태</dt><dd className={row.state === "OVERDUE" ? "revocation-note" : ""}>{describeState(row.state)}</dd>
-            <dt>UID</dt><dd className="hex">{short(row.uid)}</dd>
-            <dt>커밋 시각</dt><dd className="hex">{new Date(Number(row.committedAt) * 1000).toLocaleString("ko-KR")}</dd>
-        </dl>
-        <a className="btn" href={`#/d/${row.uid}`}>{row.state === "AWAITING" ? "정산하기 →" : "보기 →"}</a>
-    </li>)}</ul>;
+    return <ul className="record-list">{rows.map((row) =>
+        <RecordRowView
+            key={row.uid}
+            uid={row.uid}
+            state={row.state}
+            action={row.state === "AWAITING" ? "정산하기 →" : "보기 →"}
+            detail={new Date(Number(row.committedAt) * 1000).toLocaleString("ko-KR")}
+            warning={row.hasRevoked ? "정산 철회 이력 있음" : undefined}
+        />
+    )}</ul>;
 }
 
 export function Home({address}: {address?: Address}) {
@@ -121,11 +122,12 @@ export function Home({address}: {address?: Address}) {
         {recentRows.length > 0 && <section className="doc-section"><h2>최근 열어본 증서</h2>
             <ul className="record-list">{recentRows.map((row) => {
                 const visit = recent.find((item) => item.uid.toLowerCase() === row.uid.toLowerCase());
-                return <li key={row.uid}><dl className="doc-fields">
-                    <dt>상태</dt><dd className={row.state === "OVERDUE" ? "revocation-note" : ""}>{describeState(row.state)}</dd>
-                    <dt>UID</dt><dd className="hex">{short(row.uid)}</dd>
-                    <dt>마지막 조회</dt><dd>{visit ? new Date(visit.at).toLocaleString("ko-KR") : ""}</dd>
-                </dl><a className="btn" href={`#/d/${row.uid}`}>보기 →</a></li>;
+                return <RecordRowView
+                    key={row.uid}
+                    uid={row.uid}
+                    state={row.state}
+                    detail={visit ? `마지막 조회 ${new Date(visit.at).toLocaleString("ko-KR")}` : undefined}
+                />;
             })}</ul>
         </section>}
 

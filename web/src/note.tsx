@@ -21,7 +21,10 @@ interface PendingNote {
     salt: Hex;
 }
 
-export function Note({address}: {address?: Address}) {
+export function Note({address, onProgressChange}: {
+    address?: Address;
+    onProgressChange?: (progress: {journalCount: number; notePublished: boolean}) => void;
+}) {
     const [entries, setEntries] = useState<JournalEntry[]>([]);
     const [content, setContent] = useState("");
     const [pending, setPending] = useState<PendingNote>();
@@ -35,6 +38,10 @@ export function Note({address}: {address?: Address}) {
             setStatus(error instanceof Error ? error.message : "저널을 불러오지 못했습니다.");
         }
     }, []);
+
+    useEffect(() => {
+        onProgressChange?.({journalCount: entries.length, notePublished: receipt !== undefined});
+    }, [entries.length, receipt, onProgressChange]);
 
     function save(next: JournalEntry[]) {
         const validated = listJournalEntries(next);

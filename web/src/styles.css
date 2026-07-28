@@ -16,6 +16,7 @@
     --space-6: 1.5rem;
     --space-9: clamp(2rem, 1.5rem + 2vw, 3.5rem);
     --space-12: clamp(3rem, 2rem + 4vw, 6rem);
+    --nav-height: 4.25rem;
     --paper: oklch(0.977 0.008 85);
     --paper-sunk: oklch(0.955 0.010 85);
     --ink: oklch(0.255 0.012 60);
@@ -35,6 +36,7 @@
 
 html {
     background: var(--paper);
+    scroll-padding-block-start: var(--nav-height);
 }
 
 body {
@@ -55,13 +57,15 @@ select {
 main {
     width: min(68ch, calc(100% - 2rem));
     margin-inline: auto;
-    padding-block: var(--space-12);
+    padding-block: calc(var(--nav-height) + var(--space-9)) var(--space-12);
 }
 
 .site-nav {
-    position: sticky;
+    position: fixed;
     z-index: 10;
     inset-block-start: 0;
+    inset-inline: 0;
+    min-block-size: var(--nav-height);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -85,6 +89,11 @@ main {
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-3);
+}
+
+.site-nav__chain {
+    color: var(--ink-faint);
+    font: 400 var(--text-xs)/1.5 var(--font-mono);
 }
 
 .site-nav__links a[aria-current="page"] {
@@ -151,9 +160,13 @@ p {
 
 .doc-section {
     position: relative;
-    margin-top: var(--space-9);
+    margin-top: var(--space-6);
     padding-top: var(--space-6);
     border-top: 2px solid var(--rule-strong);
+}
+
+.doc-section:first-of-type {
+    margin-block-start: var(--space-6);
 }
 
 .doc-section::before {
@@ -193,6 +206,18 @@ p {
 summary {
     color: var(--ink-soft);
     font-size: var(--text-sm);
+}
+
+.record-progress li {
+    color: var(--ink-faint);
+}
+
+.record-progress li[aria-current="step"] {
+    color: var(--seal);
+}
+
+.record-progress li[aria-current="step"] span {
+    color: var(--seal);
 }
 
 details.field-group > summary {
@@ -420,6 +445,24 @@ button:disabled {
     border-bottom: 1px solid var(--rule);
 }
 
+.record-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.record-row__uid {
+    min-inline-size: 0;
+}
+
+.record-row__detail {
+    display: grid;
+    gap: var(--space-1);
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
+}
+
 .record-list p {
     margin-top: 0;
 }
@@ -474,6 +517,12 @@ button:disabled {
     letter-spacing: 0.04em;
     text-align: center;
     transform: rotate(-6deg);
+}
+
+.seal--sm {
+    --seal-size: 2.5rem;
+    border-width: 1.5px;
+    font-size: var(--text-xs);
 }
 
 .seal--ink {
@@ -558,6 +607,10 @@ pre {
 }
 
 @media (max-width: 34rem) {
+    :root {
+        --nav-height: 7.25rem;
+    }
+
     .record-progress {
         grid-template-columns: 1fr;
     }
@@ -574,6 +627,20 @@ pre {
     .status-result {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .record-row {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .record-row__detail {
+        grid-column: 2 / -1;
+    }
+
+    .record-row__action {
+        grid-column: 3;
+        grid-row: 1;
+        justify-self: start;
     }
 }
 

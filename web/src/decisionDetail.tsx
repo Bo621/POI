@@ -1,4 +1,4 @@
-import {RESULT, STATE, deriveState, evidenceTier, formatGrade, REVEAL_STATE, type PoiState} from "@poi/core";
+import {RESULT, deriveState, evidenceTier, formatGrade, REVEAL_STATE} from "@poi/core";
 import {useEffect, useRef, useState} from "react";
 import type {Address, Hex} from "viem";
 import {CHAIN, EAS_ADDRESS, RESOLVERS, SCHEMAS, SCHEMA_REGISTRY_ADDRESS} from "./config";
@@ -13,25 +13,16 @@ import {
     readSettlementState,
 } from "./read";
 import {Reveal} from "./reveal.tsx";
-import {describeState} from "./status";
 import {ZERO_UID} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
 import {Settlement as SettlementForm} from "./settlement";
 import {Challenge} from "./challenge";
 import {rememberDecision} from "./recentStore";
+import {stateLabel} from "./stateLabel";
 
 type Decision = Awaited<ReturnType<typeof readDecision>>;
 type Settlement = Awaited<ReturnType<typeof readSettlement>>;
 
-const stateSeal: Record<PoiState, {text: string; tone: string; label: string}> = {
-    [STATE.NOT_REQUIRED]: {text: "해당없음", tone: "faint", label: "해당 없음"},
-    [STATE.PENDING]: {text: "대기", tone: "ink", label: "대기"},
-    [STATE.OBSERVING]: {text: "관측중", tone: "ink", label: "관측 중"},
-    [STATE.AWAITING]: {text: "정산대기", tone: "ink", label: "정산 대기"},
-    [STATE.OVERDUE]: {text: "기한초과", tone: "seal", label: "기한 초과"},
-    [STATE.SETTLED]: {text: "정산완료", tone: "indigo", label: "정산 완료"},
-    [STATE.SETTLED_LATE]: {text: "지연정산", tone: "indigo", label: "지연 정산"},
-};
 const resultLabel = (result: number) => result === RESULT.OBSERVED ? "OBSERVED"
     : result === RESULT.NOT_OBSERVED ? "NOT_OBSERVED" : "INDETERMINATE";
 const short = (value: string) => `${value.slice(0, 10)}…${value.slice(-6)}`;
@@ -125,7 +116,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         windowEnd: decision.windowEnd, graceSeconds: BigInt(decision.graceSeconds),
         activeHead: heads.activeHead, activeHeadTime: heads.activeHeadTime, revokeCount: heads.revokeCount,
     }, now);
-    const seal = stateSeal[state.state];
+    const label = stateLabel(state.state);
     const grade = formatGrade(evidenceTier(decision.evidenceCommitment), REVEAL_STATE.SEALED);
     const owner = address?.toLowerCase() === decision.attester.toLowerCase();
     return <main>
@@ -137,8 +128,8 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         </header>
         {error && <p className="notice" role="alert">! {error}</p>}
         <ErrorBoundary label="상태"><section className="status-result">
-            <div className={`seal seal--${seal.tone} seal--stamping`} role="img" aria-label={`상태: ${seal.label}`}>{seal.text}</div>
-            <dl className="doc-fields"><dt>상태</dt><dd>{describeState(state.state)}</dd><dt>등급</dt><dd>{grade}</dd></dl>
+            <div className={`seal seal--${label.tone} seal--stamping`} role="img" aria-label={`상태: ${label.ariaLabel}`}>{label.seal}</div>
+            <dl className="doc-fields"><dt>상태</dt><dd>{label.seal}</dd><dt>등급</dt><dd>{grade}</dd></dl>
         </section></ErrorBoundary>
         {state.hasRevokedSettlement && <p className="revocation-note">정산 철회 이력 있음</p>}
         <section className="doc-section"><h2>커밋</h2><dl className="doc-fields">

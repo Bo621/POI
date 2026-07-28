@@ -118,12 +118,13 @@ export function buildDecisionPayload(form: DecisionForm, now = Math.floor(Date.n
     };
 }
 
-export function Decision({address, verification, chainNow, skewSeconds, onPublished}: {
+export function Decision({address, verification, chainNow, skewSeconds, onPublished, onEditingChange}: {
     address?: Address;
     verification: VerificationSnapshot;
     chainNow: bigint | undefined;
     skewSeconds: number | undefined;
     onPublished?: (uid: Hex) => void;
+    onEditingChange?: (editing: boolean) => void;
 }) {
     const [decision, setDecision] = useState("");
     const [trigger, setTrigger] = useState("");
@@ -148,6 +149,18 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
         setWindowStart((value) => value ?? initialNow + 300);
         setWindowEnd((value) => value ?? initialNow + 3900);
     }, [chainNow]);
+
+    useEffect(() => {
+        onEditingChange?.(
+            decision.trim().length > 0
+            || trigger.trim().length > 0
+            || evidence.trim().length > 0
+            || reason.trim().length > 0
+            || parentsText.trim().length > 0
+            || promoted.trim().length > 0
+            || hasOutcome,
+        );
+    }, [decision, trigger, evidence, reason, parentsText, promoted, hasOutcome, onEditingChange]);
 
     function prepare(event: FormEvent) {
         event.preventDefault();
