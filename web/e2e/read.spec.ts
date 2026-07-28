@@ -1,5 +1,5 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, injectWallet, requireSeed, rpcUrl, seed, seedUnavailable} from "./fixtures";
+import {accounts, requireSeed, seed, seedUnavailable} from "./fixtures";
 
 test.skip(!seed, seedUnavailable);
 
@@ -53,20 +53,12 @@ test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없
 });
 
 test.describe("Reveal commitment 대조", () => {
-    test.beforeEach(async ({page}) => {
-        await injectWallet(page, accounts.A, rpcUrl);
-        await page.goto("/");
-        await page.getByRole("button", {name: "지갑 연결"}).click();
-        await expect(section(page, "지갑").getByText(/0xf39f…2266/i)).toBeVisible();
-    });
-
     async function fillReveal(page: Page, uid: string): Promise<Locator> {
         const reveal = section(page, "공개");
         const data = requireSeed();
         await reveal.getByLabel("attestationUID").fill(uid);
         await reveal.getByLabel("salt").fill(data.f1Reveal.salt);
         await reveal.getByLabel("payload (JSON)").fill(JSON.stringify(data.f1Reveal.payload));
-        await reveal.getByLabel("온체인 commitment").fill(data.fixtures.f_copy.decisionCommitment);
         return reveal;
     }
 
@@ -79,6 +71,7 @@ test.describe("Reveal commitment 대조", () => {
     test("CT18 사본은 불일치하고 다운로드할 수 없다", async ({page}) => {
         const reveal = await fillReveal(page, requireSeed().fixtures.f_copy.decisionUID);
         await expect(reveal.getByText(/일치하지 않습니다/)).toBeVisible();
+        await expect(reveal.locator("#reveal-attester")).toHaveText(accounts.B);
         await expect(reveal.getByRole("button", {name: "RevealFile 다운로드"})).toBeDisabled();
     });
 });

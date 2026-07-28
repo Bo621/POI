@@ -2,18 +2,18 @@
   "generatedBy": "scripts/dev_up.sh",
   "eas": {"version": "lib v1.4.0", "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512", "schemaRegistryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3"},
   "addresses": {"schemaRegistry": "0x5fbdb2315678afecb367f032d93f642f64180aa3", "eas": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512", "note": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0", "decision": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9", "settlement": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9", "challenge": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"},
-  "t0": "0x6a68287d",
-  "observationWindow": {"start": "1785207360", "end": "1785207960", "purpose": "최근 실제 Upbit 관측값 조회"},
-  "fixtureWindow": {"start": "1785212805", "end": "1785213405", "purpose": "로컬 UI 시드이며 verifier 대조용이 아님"},
-  "observations": {"BTC_PRICE_KRW_AT_END": "92154000", "BTC_MAX_DRAWDOWN_IN_WINDOW": "0"},
+  "t0": "0x6a68299b",
+  "observationWindow": {"start": "1785207660", "end": "1785208260", "purpose": "최근 실제 Upbit 관측값 조회"},
+  "fixtureWindow": {"start": "1785213091", "end": "1785213691", "purpose": "로컬 UI 시드이며 verifier 대조용이 아님"},
+  "observations": {"BTC_PRICE_KRW_AT_END": "92157000", "BTC_MAX_DRAWDOWN_IN_WINDOW": "0"},
   "schemas": {"note": "0x7c46682107b07f5242b6b77354ee3ad5260ef055e972dc9b3d0f1241d882a537", "decision": "0xba131ebf36651a68742033e73ed656936858a5a912c07613f0c997c875fbf486", "settlement": "0x7ed0779346f0fe41b576ee7cc8af2525812fa80ed84e0993fd037d09b073b4f4", "challenge": "0x4a36108163be43f9b3dab2e4bf51b422e05adfa80c38293cffe479840f3cf14b"},
   "fixtures": {
-    "f1": {"decisionUID": "0x788c88d8d35ca7ba32709d602996b52c082f4793e6724a0ddcbbae0e229002b2", "settlementUID": "0x187588f198583407f4eac5f4c759621432f86cf736fbd84267c51c4a4231f562", "expectedState": "SETTLED"},
-    "f2": {"decisionUID": "0x2a3f13d74c70fd68e6d64bd52a4e7568f2bb3887a7e6556af49d199945772e62", "revokedSettlementUID": "0x78079080d12969380ef79f43d31b5d976054e6a9502a52617e3b69b0ee0c187a", "activeSettlementUID": "0xc8a12aeb4fd2209758a400e6bfa7152677dd3a206cfa337c28910506768f865d", "expectedState": "SETTLED", "hasRevokedSettlement": true},
-    "f4": {"decisionUID": "0x68cef94f78584213dd86cff75cc79534b541d50f92eab66e716f5092b5a9ccc4", "expectedState": "OVERDUE"},
-    "f5": {"decisionUID": "0x35b9953bc8bc0146a99d592c1a7de6e43de0b395cedf5d69b85b3cd02ec095f4", "expectedState": "PENDING"},
-    "f_copy": {"decisionUID": "0x6cfff650976416bc836995c5fee572504f6bf3b1502518d5142427a3fec45ebb", "decisionCommitment": "0x1b415c7acf1ede2666dac1d1a286ebb59c8ff100e0f4b31e545f402ce4b08099", "copiedFromDecisionUID": "0x788c88d8d35ca7ba32709d602996b52c082f4793e6724a0ddcbbae0e229002b2", "expectation": "A의 salt/payload로 대조하면 attester가 B이므로 실패한다"}
+    "f1": {"decisionUID": "0x9eff4481681848d9bda0ee859e0ddb5c2934e69a97d942adc31f13f4a5497828", "settlementUID": "0x5d9a0b9a209e55f8e7f8336079033eb5a3c4bbc79078bbb57510e49a93e709c3", "expectedState": "SETTLED"},
+    "f2": {"decisionUID": "0x777535eb58bad4053504442a5fc5a95e670bc55d3c496acaba77a2021a248e30", "revokedSettlementUID": "0x1e733dbdcae1313c58cb3eb81658091ecf41a92f35c976cd756d301f1a87afdb", "activeSettlementUID": "0x1112c72ff4cb57aafb264e075cd4f285dc6c33512e6e67575bb8e2b482ebb34e", "expectedState": "SETTLED", "hasRevokedSettlement": true},
+    "f4": {"decisionUID": "0x9c3f5b312a1801f249b76261021c0938c1556da12ae0cd21f23636b1f661bb5f", "expectedState": "OVERDUE"},
+    "f5": {"decisionUID": "0x781726ec3b8901058e6322a51076136cb7a3323c300129a9a21f00360a9c3dbb", "expectedState": "PENDING"},
+    "f_copy": {"decisionUID": "0xfa3cafd8a5225421a77ba47ae71828933e87de49f8fe4998aca91654dad85553", "decisionCommitment": "0x1b415c7acf1ede2666dac1d1a286ebb59c8ff100e0f4b31e545f402ce4b08099", "copiedFromDecisionUID": "0x9eff4481681848d9bda0ee859e0ddb5c2934e69a97d942adc31f13f4a5497828", "expectation": "A의 salt/payload로 대조하면 attester가 B이므로 실패한다"}
   },
-  "challengeUID": "0xc014f769fae7f47298c8985a2cd2c85ef91fb59f2e54efcb54bf4ab86a391df8",
+  "challengeUID": "0x97802bd104133622b764e4ac6e3c74b03cbb7937906dbbc87c9e8a90ac7bde8f",
   "f1Reveal": {"salt": "0x00112233445566778899aabbccddeeff", "payload": {"fixture": "F1", "intent": "seed-success"}}
 }

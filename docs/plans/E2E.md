@@ -276,3 +276,35 @@ bash scripts/dev_up.sh
 cd web && npm run test:e2e     # 15/15
 cd web && npm test && npx tsc --noEmit && npm run build
 ```
+
+---
+
+## 리뷰 대응 R3 — 마지막 1건은 대소문자 비교
+
+R2 이후 14/15. 남은 실패는 **CT18이 실제로는 동작한다는 것을 보여준다.**
+
+```
+Expected: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+Received: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+```
+
+화면에 표시된 attester는 **B가 맞다**(EIP-55 체크섬 표기). 불일치 판정도 정상이다.
+테스트가 소문자로 비교하고 있을 뿐이다.
+
+### 고칠 것
+
+1. `web/e2e/read.spec.ts` — attester 비교를 **대소문자 무시**로.
+   `toHaveText(new RegExp(addr, "i"))` 또는 양쪽을 `toLowerCase()`로 맞춘다.
+   **주소 비교는 어디서나 대소문자를 무시해야 한다** — EIP-55 체크섬은 표기일 뿐이다.
+   E2E 전체에서 주소를 비교하는 다른 자리도 같은 기준으로 훑을 것.
+
+2. `docs/fixtures/seed.json`의 `accounts`가 `null`이다.
+   계획서 §4가 A·B·C 주소를 요구했다. 시드가 채우게 한다.
+   E2E가 anvil 기본 주소 상수 대신 이 값을 쓰게 한다.
+
+### 검증
+
+```
+bash scripts/dev_up.sh
+cd web && npm run test:e2e     # 15/15 — 전부 통과해야 한다
+```
