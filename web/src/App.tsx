@@ -1,6 +1,7 @@
 import {useState} from "react";
 import type {Address, Hex} from "viem";
 import {CHAIN, isDeployed} from "./config";
+import {useChainTime} from "./chainClock";
 import {Decision} from "./decision";
 import {Dag} from "./dag";
 import {Challenge} from "./challenge";
@@ -12,6 +13,7 @@ import {Passport} from "./passport";
 import {Wallet, ZERO_UID, type VerificationSnapshot, type WalletState} from "./wallet";
 
 export default function App() {
+    const {now, skewSeconds} = useChainTime();
     const [address, setAddress] = useState<Address>();
     const [verification, setVerification] = useState<VerificationSnapshot>({
         verified: false,
@@ -37,10 +39,10 @@ export default function App() {
             )}
             <Wallet onChange={updateWallet} />
             <Note address={address} />
-            <Decision address={address} verification={verification} />
+            <Decision address={address} verification={verification} chainNow={now} skewSeconds={skewSeconds} />
             <Settlement address={address} />
             <Challenge address={address} />
-            <Status />
+            <Status now={now} skewSeconds={skewSeconds} />
             <Reveal />
             <Dag />
             <Passport />

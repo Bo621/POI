@@ -32,6 +32,21 @@ export const accounts = seed?.accounts as Seed["accounts"];
 
 export const rpcUrl = "http://127.0.0.1:8545";
 
+export async function chainNow(): Promise<number> {
+    const response = await fetch(rpcUrl, {
+        method: "POST",
+        headers: {"content-type": "application/json"},
+        body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "eth_getBlockByNumber",
+            params: ["latest", false],
+        }),
+    });
+    const payload = await response.json() as {result: {timestamp: string}};
+    return Number.parseInt(payload.result.timestamp, 16);
+}
+
 export async function injectWallet(page: Page, address: Address, rpc: string): Promise<void> {
     await page.addInitScript(({account, rpcUrl}) => {
         let requestId = 0;

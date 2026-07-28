@@ -1,6 +1,7 @@
-import {useState, type FormEvent} from "react";
+import {useEffect, useState, type FormEvent} from "react";
 import {commitment, messageFromRevert} from "@poi/core";
 import {bytesToHex, isHex, type Address, type Hex} from "viem";
+import {clockSkewNotice} from "./chainClock";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {attest, encodeDecisionData, type AttestResult, type DecisionFields} from "./eas";
 import {Receipt} from "./receipt";
@@ -129,11 +130,12 @@ function revertMessage(error: unknown): string {
     return error instanceof Error ? error.message : "발행에 실패했습니다.";
 }
 
-export function Decision({address, verification}: {
+export function Decision({address, verification, chainNow, skewSeconds}: {
     address?: Address;
     verification: VerificationSnapshot;
+    chainNow: bigint | undefined;
+    skewSeconds: number | undefined;
 }) {
-    const now = Math.floor(Date.now() / 1000);
     const [decision, setDecision] = useState("");
     const [trigger, setTrigger] = useState("");
     const [evidence, setEvidence] = useState("");
@@ -142,8 +144,8 @@ export function Decision({address, verification}: {
     const [metricId, setMetricId] = useState("");
     const [op, setOp] = useState(0);
     const [threshold, setThreshold] = useState("0");
-    const [windowStart, setWindowStart] = useState(now + 300);
-    const [windowEnd, setWindowEnd] = useState(now + 3900);
+    const [windowStart, setWindowStart] = useState<number>();
+    const [windowEnd, setWindowEnd] = useState<number>();
     const [grace, setGrace] = useState(DAY);
     const [parentsText, setParentsText] = useState("");
     const [promoted, setPromoted] = useState("");
@@ -151,9 +153,17 @@ export function Decision({address, verification}: {
     const [receipt, setReceipt] = useState<AttestResult>();
     const [status, setStatus] = useState("");
 
+    useEffect(() => {
+        if (chainNow === undefined) return;
+        const initialNow = Number(chainNow);
+        setWindowStart((value) => value ?? initialNow + 300);
+        setWindowEnd((value) => value ?? initialNow + 3900);
+    }, [chainNow]);
+
     function prepare(event: FormEvent) {
         event.preventDefault();
         setStatus("");
+        if (chainNow === undefined || windowStart === undefined || windowEnd === undefined) return;
         if (!address) {
             setStatus("먼저 지갑을 연결해 주세요.");
             return;
@@ -178,7 +188,7 @@ export function Decision({address, verification}: {
             salts,
         };
         try {
-            buildDecisionPayload(form);
+            buildDecisionPayload(form, Number(chainNow));
             setPending(form);
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "입력값을 확인해 주세요.");
@@ -186,9 +196,9 @@ export function Decision({address, verification}: {
     }
 
     async function publish() {
-        if (!pending || !isDeployed()) return;
+        if (!pending || !isDeployed() || chainNow === undefined) return;
         try {
-            const payload = buildDecisionPayload(pending);
+            const payload = buildDecisionPayload(pending, Number(chainNow));
             const result = await attest({
                 schema: SCHEMAS.decision as Hex,
                 data: encodeDecisionData(payload.fields),
@@ -202,6 +212,8 @@ export function Decision({address, verification}: {
             setStatus(revertMessage(error));
         }
     }
+
+    const skewNotice = clockSkewNotice(skewSeconds);
 
     return (
         <section className="doc-section">
@@ -235,8 +247,8 @@ export function Decision({address, verification}: {
                             <div className="field"><label htmlFor="decision-metric">metricId</label><input className="uid" id="decision-metric" value={metricId} onChange={(e) => setMetricId(e.target.value)} /></div>
                             <div className="field"><label htmlFor="decision-op">op</label><input id="decision-op" type="number" min="0" max="255" value={op} onChange={(e) => setOp(Number(e.target.value))} /></div>
                             <div className="field"><label htmlFor="decision-threshold">threshold</label><input id="decision-threshold" value={threshold} onChange={(e) => setThreshold(e.target.value)} /></div>
-                            <div className="field"><label htmlFor="decision-window-start">windowStart (Unix 초)</label><input id="decision-window-start" type="number" value={windowStart} onChange={(e) => setWindowStart(Number(e.target.value))} /></div>
-                            <div className="field"><label htmlFor="decision-window-end">windowEnd (Unix 초)</label><input id="decision-window-end" type="number" value={windowEnd} onChange={(e) => setWindowEnd(Number(e.target.value))} /></div>
+                            <div className="field"><label htmlFor="decision-window-start">windowStart (Unix 초)</label><input id="decision-window-start" type="number" value={windowStart ?? ""} onChange={(e) => setWindowStart(Number(e.target.value))} /></div>
+                            <div className="field"><label htmlFor="decision-window-end">windowEnd (Unix 초)</label><input id="decision-window-end" type="number" value={windowEnd ?? ""} onChange={(e) => setWindowEnd(Number(e.target.value))} /></div>
                             <div className="field"><label htmlFor="decision-grace">graceSeconds</label><input id="decision-grace" type="number" value={grace} onChange={(e) => setGrace(Number(e.target.value))} /></div>
                         </fieldset>
                     )}
@@ -245,8 +257,10 @@ export function Decision({address, verification}: {
                     <div className="field"><label htmlFor="decision-parents">부모 UID (공백/줄바꿈 구분, 최대 8)</label><textarea className="hex" id="decision-parents" rows={2} value={parentsText} onChange={(e) => setParentsText(e.target.value)} /></div>
                     <div className="field"><label htmlFor="decision-promoted">승격 노트 UID (선택)</label><input className="uid" id="decision-promoted" value={promoted} onChange={(e) => setPromoted(e.target.value)} /></div>
                 </div>
-                <button className="btn" type="submit" disabled={!isDeployed()}>salt 생성 및 백업</button>
+                <button className="btn" type="submit" disabled={!isDeployed() || chainNow === undefined}>salt 생성 및 백업</button>
             </form>
+            {chainNow === undefined && <p className="doc-note">체인 시각을 확인하는 중입니다.</p>}
+            {skewNotice && <p className="notice--quiet">{skewNotice}</p>}
             {status && <p className="form-status" role="alert">{status}</p>}
             <Receipt label="결정 커밋" uid={receipt?.uid} txHash={receipt?.txHash} />
             {pending && (

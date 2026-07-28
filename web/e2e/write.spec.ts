@@ -1,5 +1,5 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, injectWallet, requireSeed, rpcUrl, seed, seedUnavailable} from "./fixtures";
+import {accounts, chainNow, injectWallet, requireSeed, rpcUrl, seed, seedUnavailable} from "./fixtures";
 
 test.skip(!seed, seedUnavailable);
 
@@ -18,23 +18,15 @@ async function connect(page: Page, account = accounts.A): Promise<void> {
 
 async function fillValidOutcome(page: Page): Promise<void> {
     const decision = section(page, "결정 커밋");
-    const chainTimestamp = await page.evaluate(async (url) => {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {"content-type": "application/json"},
-            body: JSON.stringify({jsonrpc: "2.0", id: 1, method: "eth_getBlockByNumber", params: ["latest", false]}),
-        });
-        const payload = await response.json() as {result: {timestamp: string}};
-        return Number.parseInt(payload.result.timestamp, 16);
-    }, rpcUrl);
-    await decision.getByLabel("결정 내용").fill(`E2E 결정 ${Date.now()}`);
+    const chainTimestamp = await chainNow();
+    await decision.getByLabel("결정 내용").fill(`E2E 결정 ${chainTimestamp}`);
     await decision.getByLabel("trigger").fill("E2E trigger");
     await decision.getByLabel("예상 결과 선언").check();
     await decision.getByLabel("metricId").fill(
         "0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf",
     );
-    await decision.getByLabel("windowStart (Unix 초)").fill(String(chainTimestamp + 300));
-    await decision.getByLabel("windowEnd (Unix 초)").fill(String(chainTimestamp + 3900));
+    await decision.getByLabel("windowStart (Unix 초)").fill(String(chainTimestamp + 1800));
+    await decision.getByLabel("windowEnd (Unix 초)").fill(String(chainTimestamp + 5400));
     await decision.getByLabel("graceSeconds").fill("3600");
 }
 
@@ -50,7 +42,7 @@ test("지갑 연결 주소가 축약 표기된다", async ({page}) => {
 
 test("저널 저장은 로컬 목록에 나타난다", async ({page}) => {
     const journal = section(page, "저널과 노트");
-    const text = `E2E 저널 ${Date.now()}`;
+    const text = `E2E 저널 ${await chainNow()}`;
     await journal.getByLabel("저널 내용").fill(text);
     await journal.getByRole("button", {name: "저널 저장"}).click();
     await expect(journal.getByText(text, {exact: true})).toBeVisible();
@@ -86,7 +78,7 @@ test("과거 windowStart는 한국어 오류로 발행을 막는다", async ({pa
     await fillValidOutcome(page);
     const decision = section(page, "결정 커밋");
     await decision.getByLabel("windowStart (Unix 초)").fill(
-        String(Math.floor(Date.now() / 1000) - 60),
+        String(await chainNow() - 60),
     );
     await decision.getByRole("button", {name: "salt 생성 및 백업"}).click();
     await expect(decision.getByRole("alert")).toHaveText("관측 구간 시작은 발행 시점 이후여야 합니다.");
