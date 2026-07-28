@@ -11,12 +11,26 @@ import {Settlement} from "./settlement";
 import {Status} from "./status";
 import {Passport} from "./passport";
 import {useRoute} from "./router";
+import {DecisionDetail} from "./decisionDetail";
+import {Verify} from "./verify";
 import {Wallet, ZERO_UID, type VerificationSnapshot, type WalletState} from "./wallet";
 
 export default function App() {
     const route = useRoute();
-    void route;
+    if (route.name === "decision") return <RoutedDecision uid={route.uid} />;
+    if (route.name === "verify") return <Verify />;
+    if (route.name === "passport") return <main><header className="doc-header"><a href="#/">← 홈</a><h1>Strategy Passport</h1><p className="hex">{route.address}</p></header><Passport address={route.address} /></main>;
+    if (route.name === "notFound") return <main><header className="doc-header"><h1>없는 화면입니다.</h1></header>
+        <p>{route.raw.startsWith("#/d/") ? "UID는 0x로 시작하는 66자여야 합니다." : route.raw}</p><a href="#/">홈으로</a></main>;
     return <SinglePage />;
+}
+
+function RoutedDecision({uid}: {uid: Hex}) {
+    const [address, setAddress] = useState<Address>();
+    return <>
+        <div className="route-wallet"><Wallet onChange={(state) => setAddress(state.address)} /></div>
+        <DecisionDetail uid={uid} address={address} />
+    </>;
 }
 
 function SinglePage() {

@@ -67,4 +67,21 @@ test("짧은 UID 경로에서도 앱과 URL이 유지된다", async ({page}) => 
     await page.goto("/#/d/0x123");
 
     await expectAppAt(page, "#/d/0x123");
+    await expect(page.getByText("UID는 0x로 시작하는 66자여야 합니다.")).toBeVisible();
+});
+
+test("검증하기에서 UID를 열면 결정 상세로 이동한다", async ({page}) => {
+    const uid = requireSeed().fixtures.f1.decisionUID;
+    await page.goto("/#/verify");
+    await page.getByLabel("decisionUID").fill(uid);
+    await page.getByRole("button", {name: "열기"}).click();
+    await expectAppAt(page, `#/d/${uid}`);
+});
+
+test("상세 화면 링크를 복사한다", async ({page, context}) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    const uid = requireSeed().fixtures.f1.decisionUID;
+    await page.goto(`/#/d/${uid}`);
+    await page.getByRole("button", {name: "이 화면 링크 복사"}).click();
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(page.url());
 });

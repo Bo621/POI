@@ -6,8 +6,8 @@ import {buildRevealFile, checkReveal, revealFilename} from "./reveal";
 
 const TAGS: DecisionCommitTag[] = ["DECISION", "TRIGGER", "EVIDENCE", "REASON"];
 
-export function Reveal() {
-    const [attestationUID, setAttestationUID] = useState("");
+export function Reveal({attestationUID: initialUID}: {attestationUID?: Hex}) {
+    const [attestationUID, setAttestationUID] = useState(initialUID ?? "");
     const [tag, setTag] = useState<DecisionCommitTag>("DECISION");
     const [salt, setSalt] = useState("");
     const [payloadText, setPayloadText] = useState("");

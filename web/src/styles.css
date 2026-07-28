@@ -58,6 +58,11 @@ main {
     padding-block: var(--space-12);
 }
 
+.route-wallet {
+    width: min(68ch, calc(100% - 2rem));
+    margin-inline: auto;
+}
+
 .doc-header {
     margin-bottom: var(--space-12);
     padding-bottom: var(--space-6);

@@ -305,3 +305,61 @@ Received: "#/%EC%97%86%EB%8A%94%EA%B2%BD%EB%A1%9C"
 ```
 cd web && npm test && npm run test:e2e     # 23/23, skipped 0
 ```
+
+---
+
+## 단계 4 리뷰 대응 R1 — `[P1]` 상세 화면이 백지가 된다
+
+`#/d/<f1>`로 들어가면 **화면 전체가 비어 있다**(`#root`의 자식이 0).
+Playwright로 `pageerror`를 잡아 확인했다.
+
+```
+PAGEERROR: activeHead가 있으면 activeHeadTime이 필요하다
+The above error occurred in the <DecisionDetail> component
+Consider adding an error boundary…
+```
+
+두 개의 결함이 겹쳐 있다.
+
+### `[P1]` 1. `activeHeadTime`을 넘기지 않는다
+
+`core`의 `deriveState`는 `activeHead ≠ 0`인데 `activeHeadTime`이 없으면 **일부러 던진다** —
+SETTLED와 SETTLED_LATE를 가르는 유일한 입력이라 추측하면 안 되기 때문이다(X5의 설계).
+`decisionDetail.tsx`가 그 값을 조회하지 않고 부른다.
+
+활성 정산 attestation의 `time`을 읽어 넘긴다. `status.tsx`가 이미 그렇게 하고 있으므로
+**그 조회 로직을 `web/src/records.ts`나 `read.ts`로 뽑아 둘 다 쓰게 한다.**
+같은 조회가 두 벌이 되면 한쪽만 고쳐진다.
+
+### `[P1]` 2. 에러 경계가 없어 앱 전체가 사라진다
+
+컴포넌트 하나가 던지면 **React가 트리 전체를 언마운트**한다.
+이 화면의 존재 이유가 "심사자에게 줄 URL"인데 **백지가 나온다.**
+게다가 콘솔을 열지 않으면 원인도 알 수 없다.
+
+`web/src/errorBoundary.tsx`를 만든다.
+
+```tsx
+export class ErrorBoundary extends React.Component<
+    {label: string; children: React.ReactNode},
+    {message?: string}
+> { … }
+```
+
+- 잡으면 그 자리에 `.notice`로
+  `"{label}을(를) 표시하지 못했습니다."` + 오류 메시지 + `[다시 시도]`(상태 초기화).
+- **`App.tsx` 최상위에 하나**, 그리고 `decisionDetail.tsx`의 **각 절마다 하나**
+  (상태·정산·이의·공개·계보·검증 근거). R1-3이 요구한 독립 실패 경계가 이것이다.
+- 최상위 경계는 헤더·네비게이션을 남기고 본문만 대체한다. **백지가 되지 않게.**
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 전부 통과, skipped 0
+```
+
+그리고 **일부러 던지게 만든 상태**에서 앱이 백지가 되지 않고 해당 절만 오류로 바뀌는지
+확인한다(임시로 throw를 넣어 보고 되돌린다).
+
+`routing.spec.ts`에 단언을 추가한다: 딥링크 진입 시 `#root`가 **비어 있지 않다.**
+지금 그 단언이 없어서 이 결함이 "타임아웃"으로만 보였다.

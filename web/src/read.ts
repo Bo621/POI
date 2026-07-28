@@ -62,6 +62,8 @@ export interface ChallengeLog {
     attester: Address;
     refUID: Hex;
     revocationTime: bigint;
+    claimedResult?: number;
+    source?: string;
 }
 
 const SETTLEMENT_PARAMETERS = [
@@ -73,6 +75,10 @@ const SETTLEMENT_PARAMETERS = [
     {type: "uint64", name: "observedAt"},
     {type: "string", name: "verifierVersion"},
     {type: "bytes32", name: "supersedes"},
+] as const;
+const CHALLENGE_PARAMETERS = [
+    {type: "bytes32"}, {type: "uint8"}, {type: "bool"}, {type: "int128"},
+    {type: "string"}, {type: "uint64"}, {type: "bytes32"},
 ] as const;
 
 async function resolverFor(schema: Hex): Promise<Address> {
@@ -175,6 +181,20 @@ export async function readMetricDecimals(decisionSchema: Hex, metricId: Hex): Pr
     return Number(metric[1]);
 }
 
+export async function readMetricDefinition(decisionSchema: Hex, metricId: Hex): Promise<{
+    decimals: number;
+    definitionHash: Hex;
+}> {
+    const address = await resolverFor(decisionSchema);
+    const metric = await withRetry(() => publicClient.readContract({
+        address,
+        abi: DECISION_RESOLVER_ABI,
+        functionName: "metrics",
+        args: [metricId],
+    }));
+    return {decimals: Number(metric[1]), definitionHash: metric[3]};
+}
+
 export async function readChallengeLogs(challengeSchema: Hex): Promise<ChallengeLog[]> {
     const logs = await withRetry(() => publicClient.getLogs({
         address: EAS_ADDRESS,
@@ -186,11 +206,14 @@ export async function readChallengeLogs(challengeSchema: Hex): Promise<Challenge
     return Promise.all(logs.map(async (log) => {
         const uid = log.args.uid!;
         const attestation = await getAttestation(uid);
+        const values = decodeAbiParameters(CHALLENGE_PARAMETERS, attestation.data);
         return {
             uid,
             attester: log.args.attester!,
             refUID: attestation.refUID,
             revocationTime: attestation.revocationTime,
+            claimedResult: Number(values[1]),
+            source: values[4],
         };
     }));
 }

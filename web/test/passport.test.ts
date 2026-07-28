@@ -9,8 +9,8 @@ const row = (digit: string, committedAt: bigint): PassportRow => ({
     uid: uid(digit),
     committedAt,
     state: STATE.SETTLED,
-    evidenceCommitment: uid("9"),
-    hasExpectedOutcome: true,
+    hasRevoked: false,
+    grade: "EVIDENCE_COMMITTED · SEALED",
 });
 
 describe("passport helpers", () => {
