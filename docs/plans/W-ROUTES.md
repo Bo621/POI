@@ -701,3 +701,25 @@ Locator: heading '정산' … getByRole('button', {name:'정산 발행'})
 ```
 cd web && npm run test:e2e     # 26/26, skipped 0
 ```
+
+---
+
+## 단계 7 리뷰 대응 R1 — `목록 조회` 버튼은 이제 없다
+
+```
+waiting for … heading '이의' … getByRole('button', {name:'목록 조회'})
+```
+
+R6에서 상세의 이의 목록을 **자동 로드**로 바꿨고, 단계 7에서 단일 페이지를 지우면서
+`목록 조회` 버튼이 있던 모드가 사라졌다. 테스트가 아직 그 버튼을 누른다.
+
+**고칠 것**: `fullpath.spec.ts`에서 그 클릭을 제거하고 **목록이 저절로 나타나는 것**을
+기다린다(`expect(...).toBeVisible()`). 단언 자체는 그대로다.
+
+`web/e2e` 전체에서 `목록 조회`를 찾는 다른 자리가 있는지 함께 확인할 것.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 26/26, skipped 0
+```

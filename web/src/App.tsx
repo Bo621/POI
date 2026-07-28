@@ -3,12 +3,7 @@ import type {Address, Hex} from "viem";
 import {CHAIN, isDeployed} from "./config";
 import {useChainTime} from "./chainClock";
 import {Decision} from "./decision";
-import {Dag} from "./dag";
-import {Challenge} from "./challenge";
 import {Note} from "./note";
-import {Reveal} from "./reveal.tsx";
-import {Settlement} from "./settlement";
-import {Status} from "./status";
 import {describeState} from "./status";
 import {Passport} from "./passport";
 import {navigate, useRoute} from "./router";
@@ -123,28 +118,4 @@ function MePage({address}: {address?: Address}) {
         </>}
         {error && <p className="form-status" role="alert">{error}</p>}
     </main>;
-}
-
-function SinglePage({wallet}: {wallet: WalletState}) {
-    const {now, skewSeconds} = useChainTime();
-
-    return (
-        <main>
-            <header className="doc-header">
-                <h1>POI 판단 증서</h1>
-                <p className="doc-meta">{CHAIN.name} · chainId {CHAIN.id}</p>
-            </header>
-            {!isDeployed() && (
-                <p className="notice" role="status">컨트랙트가 아직 배포되지 않았습니다. 스키마 UID가 설정될 때까지 발행할 수 없습니다.</p>
-            )}
-            <Note address={wallet.address} />
-            <Decision address={wallet.address} verification={wallet} chainNow={now} skewSeconds={skewSeconds} />
-            <Settlement address={wallet.address} />
-            <Challenge address={wallet.address} />
-            <Status now={now} skewSeconds={skewSeconds} />
-            <Reveal />
-            <Dag />
-            <Passport />
-        </main>
-    );
 }

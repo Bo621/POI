@@ -20,12 +20,11 @@ interface DisplayChallenge extends ChallengeLog {
     verified: boolean | "unknown";
 }
 
-export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess}: {
+export function Challenge({address, settlementUID, onSuccess}: {
     address?: Address;
-    settlementUID?: Hex;
+    settlementUID: Hex;
     onSuccess?: () => void;
 }) {
-    const [settlementUID, setSettlementUID] = useState(fixedSettlementUID ?? "");
     const [claimedResult, setClaimedResult] = useState(0);
     const [hasValue, setHasValue] = useState(false);
     const [observedValue, setObservedValue] = useState("0");
@@ -38,11 +37,8 @@ export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess
     const [status, setStatus] = useState("");
 
     useEffect(() => {
-        if (fixedSettlementUID) {
-            setSettlementUID(fixedSettlementUID);
-            void load(fixedSettlementUID);
-        }
-    }, [fixedSettlementUID]);
+        void load(settlementUID);
+    }, [settlementUID]);
 
     async function load(targetUID = settlementUID) {
         if (!/^0x[0-9a-fA-F]{64}$/.test(targetUID)) {
@@ -108,7 +104,6 @@ export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess
             <h2>이의</h2>
             <p className="notice notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
             <form className="doc-form" onSubmit={publish}>
-                {!fixedSettlementUID && <div className="field"><label htmlFor="challenge-settlement">settlementUID</label><input className="uid" id="challenge-settlement" value={settlementUID} onChange={(e) => setSettlementUID(e.target.value)} /></div>}
                 <div className="field"><label htmlFor="challenge-result">claimedResult</label><select id="challenge-result" value={claimedResult} onChange={(e) => setClaimedResult(Number(e.target.value))}>
                     <option value={0}>OBSERVED</option><option value={1}>NOT_OBSERVED</option><option value={2}>INDETERMINATE</option>
                 </select></div>
@@ -120,7 +115,6 @@ export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess
                 {!address && <p className="notice notice--quiet">지갑을 연결해야 이의를 발행할 수 있습니다.</p>}
                 <div className="button-row">
                     <button className="btn-commit" type="submit" disabled={!address || !isDeployed()}>이의 발행</button>
-                    <button className="btn" type="button" onClick={() => void load()} disabled={!isDeployed()}>목록 조회</button>
                 </div>
             </form>
             {status && <p className="form-status" role="status">{status}</p>}

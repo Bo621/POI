@@ -21,3 +21,24 @@ skip되면 명령은 실패한다.
 | 14 | `write.spec.ts` | 30분 유예 기간은 한국어 오류와 함께 결정 발행을 막는다. |
 | 15 | `write.spec.ts` | 결정 소유자가 아닌 계정의 정산을 한국어 오류와 함께 막는다. |
 | 16 | `fullpath.spec.ts` | 저널 저장·노트 승격·결정 발행·시간 경과·정산·이의·공개 파일 다운로드의 전체 성공 경로가 완주된다. |
+
+## 현재 테스트 대응표
+
+| 행위 # | 현재 테스트 |
+|---|---|
+| 1 | `read.spec.ts` — `배포 안내가 없고 F1은 정산완료다` |
+| 2 | `read.spec.ts` — `F4는 기한초과다` |
+| 3 | `read.spec.ts` — `F2는 정산완료이며 철회 이력이 있다` |
+| 4 | `read.spec.ts` — `F5는 대기다` |
+| 5 | `read.spec.ts` — `이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다` |
+| 6 | `read.spec.ts` — `Reveal commitment 대조` / `F1은 일치한다` |
+| 7 | `read.spec.ts` — `Reveal commitment 대조` / `CT18 사본은 불일치하고 다운로드할 수 없다` |
+| 8 | `read.spec.ts` — `DAG에 노드와 조회 완전성 안내가 나온다` |
+| 9 | `read.spec.ts` — `Passport에 목록과 비순위 안내가 나온다` |
+| 10 | `write.spec.ts` — `지갑 연결 주소가 축약 표기된다` |
+| 11 | `write.spec.ts` — `저널 저장은 로컬 목록에 나타난다` |
+| 12 | `write.spec.ts` — `결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다` |
+| 13 | `write.spec.ts` — `과거 windowStart는 한국어 오류로 발행을 막는다` |
+| 14 | `write.spec.ts` — `30분 graceSeconds는 한국어 오류로 발행을 막는다` |
+| 15 | `write.spec.ts` — `B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다` |
+| 16 | `fullpath.spec.ts` — `저널부터 reveal 다운로드까지 전체 성공 경로를 완주한다` |

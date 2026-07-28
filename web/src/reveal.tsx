@@ -6,8 +6,7 @@ import {buildRevealFile, checkReveal, revealFilename} from "./reveal";
 
 const TAGS: DecisionCommitTag[] = ["DECISION", "TRIGGER", "EVIDENCE", "REASON"];
 
-export function Reveal({attestationUID: initialUID}: {attestationUID?: Hex}) {
-    const [attestationUID, setAttestationUID] = useState(initialUID ?? "");
+export function Reveal({attestationUID}: {attestationUID: Hex}) {
     const [tag, setTag] = useState<DecisionCommitTag>("DECISION");
     const [salt, setSalt] = useState("");
     const [payloadText, setPayloadText] = useState("");
@@ -83,7 +82,7 @@ export function Reveal({attestationUID: initialUID}: {attestationUID?: Hex}) {
             <h2>공개</h2>
             <p className="notice notice--quiet">다운로드한 파일을 저장소의 reveals/에 넣어 push하세요. 자동 업로드는 하지 않습니다.</p>
             <div className="doc-form">
-            <div className="field"><label htmlFor="reveal-attestation">attestationUID</label><input className="uid" id="reveal-attestation" value={attestationUID} onChange={(e) => setAttestationUID(e.target.value)} /></div>
+            <div className="field"><label htmlFor="reveal-attestation">attestationUID</label><input className="uid" id="reveal-attestation" value={attestationUID} readOnly /></div>
             <div className="field"><label htmlFor="reveal-attester">attester</label><output className="hex" id="reveal-attester">{target?.attester ?? ""}</output></div>
             <div className="field"><label htmlFor="reveal-tag">항목</label><select id="reveal-tag" value={tag} onChange={(e) => setTag(e.target.value as DecisionCommitTag)}>
                 {TAGS.map((value) => <option key={value}>{value}</option>)}
