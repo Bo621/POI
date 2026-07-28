@@ -1,6 +1,12 @@
 import {describe, expect, it} from "vitest";
-import {decodeAbiParameters, type Hex} from "viem";
-import {DECISION_PARAMETERS, encodeDecisionData, type DecisionFields} from "../src/eas";
+import {
+    BaseError,
+    ContractFunctionRevertedError,
+    decodeAbiParameters,
+    RawContractError,
+    type Hex,
+} from "viem";
+import {DECISION_PARAMETERS, encodeDecisionData, revertData, type DecisionFields} from "../src/eas";
 
 const uid = (byte: string) => `0x${byte.repeat(64)}` as Hex;
 
@@ -41,5 +47,23 @@ describe("encodeDecisionData", () => {
             fields.graceSeconds,
         ]);
         expect((encoded.length - 2) / 2).toBe(14 * 32 + 32 + 32 * fields.parents.length);
+    });
+});
+
+describe("revertData", () => {
+    it("ContractFunctionRevertedError의 raw data를 cause 체인에서 찾는다", () => {
+        const data = "0x12345678" as Hex;
+        const cause = new ContractFunctionRevertedError({
+            abi: [],
+            data,
+            functionName: "attest",
+        });
+        expect(revertData(new BaseError("simulation failed", {cause}))).toBe(data);
+    });
+
+    it("RawContractError의 중첩 data를 cause 체인에서 찾는다", () => {
+        const data = "0x87654321" as Hex;
+        const cause = new RawContractError({data: {data}});
+        expect(revertData(new BaseError("simulation failed", {cause}))).toBe(data);
     });
 });

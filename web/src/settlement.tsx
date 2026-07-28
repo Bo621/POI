@@ -102,7 +102,8 @@ export function Settlement({address}: {address?: Address}) {
                 readDecision(uid),
                 readSettlementHeads(SCHEMAS.settlement as Hex, uid),
             ]);
-            if (!address || record.attester.toLowerCase() !== address.toLowerCase()) {
+            if (!address) throw new Error("먼저 지갑을 연결해 주세요.");
+            if (record.attester.toLowerCase() !== address.toLowerCase()) {
                 throw new Error("결정 작성자만 정산할 수 있습니다.");
             }
             const decimals = await readMetricDecimals(SCHEMAS.decision as Hex, record.outcomeMetricId);

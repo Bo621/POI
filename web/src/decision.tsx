@@ -1,6 +1,6 @@
 import {useEffect, useState, type FormEvent} from "react";
-import {commitment, messageFromRevert} from "@poi/core";
-import {bytesToHex, isHex, type Address, type Hex} from "viem";
+import {commitment} from "@poi/core";
+import {bytesToHex, type Address, type Hex} from "viem";
 import {clockSkewNotice} from "./chainClock";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {attest, encodeDecisionData, type AttestResult, type DecisionFields} from "./eas";
@@ -118,18 +118,6 @@ export function buildDecisionPayload(form: DecisionForm, now = Math.floor(Date.n
     };
 }
 
-function revertMessage(error: unknown): string {
-    const data = (error as {data?: unknown})?.data;
-    if (typeof data === "string" && isHex(data)) {
-        return messageFromRevert(data) ?? "발행에 실패했습니다.";
-    }
-    const nestedData = (error as {cause?: {data?: unknown}})?.cause?.data;
-    if (typeof nestedData === "string" && isHex(nestedData)) {
-        return messageFromRevert(nestedData) ?? "발행에 실패했습니다.";
-    }
-    return error instanceof Error ? error.message : "발행에 실패했습니다.";
-}
-
 export function Decision({address, verification, chainNow, skewSeconds}: {
     address?: Address;
     verification: VerificationSnapshot;
@@ -209,7 +197,7 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
             setStatus("");
             setPending(undefined);
         } catch (error) {
-            setStatus(revertMessage(error));
+            setStatus(error instanceof Error ? error.message : "발행에 실패했습니다.");
         }
     }
 

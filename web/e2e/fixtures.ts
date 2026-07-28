@@ -47,6 +47,25 @@ export async function chainNow(): Promise<number> {
     return Number.parseInt(payload.result.timestamp, 16);
 }
 
+export async function advanceChain(rpc: string, seconds: number): Promise<void> {
+    let requestId = 0;
+    const call = async (method: string, params: unknown[]): Promise<void> => {
+        const response = await fetch(rpc, {
+            method: "POST",
+            headers: {"content-type": "application/json"},
+            body: JSON.stringify({jsonrpc: "2.0", id: ++requestId, method, params}),
+        });
+        const payload = await response.json() as {
+            error?: {message: string};
+        };
+        if (payload.error) throw new Error(payload.error.message);
+    };
+
+    await call("evm_increaseTime", [seconds]);
+    // Keep mining sequential with transactions: Anvil 1.7.1 can panic if they overlap.
+    await call("evm_mine", []);
+}
+
 export async function injectWallet(page: Page, address: Address, rpc: string): Promise<void> {
     await page.addInitScript(({account, rpcUrl}) => {
         let requestId = 0;
