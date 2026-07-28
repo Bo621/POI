@@ -124,7 +124,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await pageA.close();
     const pageB = await connect(context, accounts.B);
     await pageB.goto(`/#/d/${decisionUID}`);
-    const challenge = section(pageB, "이의");
+    const challenge = pageB.getByRole("heading", {name: "이의", exact: true, level: 3}).locator("..");
     await expect(challenge.getByLabel("settlementUID", {exact: true})).toHaveCount(0);
     await challenge.getByLabel("출처").fill("FULL-PATH challenge");
     await challenge.getByRole("button", {name: "이의 발행"}).click();

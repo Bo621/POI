@@ -104,7 +104,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
 
     return (
         <section className="doc-section">
-            <h2>이의</h2>
+            <h3>이의</h3>
             <p className="notice notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
             <form className="doc-form" onSubmit={publish}>
                 <div className="field"><label htmlFor="challenge-result">claimedResult</label><select id="challenge-result" value={claimedResult} onChange={(e) => setClaimedResult(Number(e.target.value))}>

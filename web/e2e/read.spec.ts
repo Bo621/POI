@@ -66,7 +66,7 @@ test("F5는 다음 시간 경계에서 새로고침 없이 인장이 바뀐다",
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
     await page.goto(`/#/d/${requireSeed().fixtures.f1.decisionUID}`);
-    const challenge = page.getByRole("heading", {name: "이의", exact: true}).locator("..");
+    const challenge = page.getByRole("heading", {name: "이의", exact: true, level: 3}).locator("..");
     const item = challenge.locator("ul.record-list > li");
     await expect(item).toHaveCount(1);
     await expect(item).toContainText(shortAddressRe(accounts.B));
