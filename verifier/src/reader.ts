@@ -36,12 +36,21 @@ export interface OnChainSettlement {
     supersedes: Hex;
 }
 
+export interface OnChainMetric {
+    allowed: boolean;
+    decimals: number;
+    kind: number;
+    definitionHash: Hex;
+    frozen: boolean;
+}
+
 export interface ChainReader {
+    getChainTime(): Promise<bigint>;
     getDecision(uid: Hex): Promise<OnChainDecision | undefined>;
     getActiveHead(decisionUID: Hex): Promise<Hex>;
     getRevokeCount(decisionUID: Hex): Promise<number>;
     getSettlement(uid: Hex): Promise<OnChainSettlement | undefined>;
-    getMetricDecimals(metricId: Hex): Promise<number>;
+    getMetric(metricId: Hex): Promise<OnChainMetric>;
 }
 
 export interface ViemReaderConfig {
@@ -102,6 +111,10 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
     });
 
     return {
+        async getChainTime() {
+            const block = await publicClient.getBlock();
+            return block.timestamp;
+        },
         async getDecision(uid) {
             const attestation = await getAttestation(uid);
             if (/^0x0+$/i.test(attestation.uid)) return undefined;
@@ -158,14 +171,20 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
                 supersedes: decoded[7],
             };
         },
-        async getMetricDecimals(metricId) {
+        async getMetric(metricId) {
             const metric = await publicClient.readContract({
                 address: config.metricRegistryAddress,
                 abi: METRIC_REGISTRY_ABI,
                 functionName: "metrics",
                 args: [metricId],
             });
-            return metric[1];
+            return {
+                allowed: metric[0],
+                decimals: metric[1],
+                kind: metric[2],
+                definitionHash: metric[3],
+                frozen: metric[4],
+            };
         },
     };
 }
