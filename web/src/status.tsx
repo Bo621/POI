@@ -128,6 +128,10 @@ export function Status() {
                     </dl>
                 </div>
             )}
+            {result && <>
+                <p className="doc-note">왼쪽은 근거 첨부 여부, 오른쪽은 공개 여부입니다. 둘은 독립입니다.</p>
+                <p className="doc-note">공개 여부는 reveals/에 올라온 파일을 사람이 확인해야 합니다. 이 화면은 항상 SEALED로 표시합니다.</p>
+            </>}
             {result?.hasRevokedSettlement && <p className="revocation-note">정산 철회 이력 있음</p>}
             {skewNotice && <p className="notice--quiet">{skewNotice}</p>}
             {error && <p className="form-status" role="alert">{error}</p>}
