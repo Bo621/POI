@@ -1,0 +1,110 @@
+# W-WORDING `정산` → `결과 등록`
+
+사용자가 "정산이 무슨 뜻이냐"고 물었다. **그 질문 자체가 신호다.**
+한국어에서 정산은 돈을 주고받는 계산인데 POI에는 돈이 오가지 않는다.
+
+## 바꾸는 것 / 안 바꾸는 것
+
+| | |
+|---|---|
+| **바꾼다** | 화면에 보이는 모든 문구 — 절 제목·버튼·인장·상태·안내·오류 메시지 |
+| **안 바꾼다** | 스키마 `poi.settlement.v1` · 컨트랙트 `POISettlementResolver` · 필드/변수 `settlement*` · verifier 출력 · `docs/POI_*.md` · `core`의 상태 상수(`SETTLED` 등) |
+
+온체인 식별자와 명세는 이미 고정됐다. 바꾸면 재배포와 명세 수정이 따라온다.
+**코드의 `settlement`은 그대로 두고 표시 문구만 바꾼다.**
+
+`기록`은 이미 쓰고 있으므로(`기록하기`·`내 기록`·`기록 열기`) 쓰지 않는다.
+
+## 확정된 문구
+
+| 자리 | 문구 |
+|---|---|
+| 절 제목 | **결과 등록** |
+| 발행 버튼 | **결과 등록하기** (모달/확인 단계는 **등록 발행**) |
+| 철회 버튼 | **등록 철회** |
+| 정정 안내 | `"철회된 이전 등록을 정정합니다"` |
+| 부가 표시 | **「결과 등록 철회 이력 있음」** |
+
+### 인장 7상태 (`stateLabel.ts` 한 곳에서 정의. `aria-label`도 같은 문구)
+
+```
+NOT_REQUIRED   해당없음
+PENDING        대기
+OBSERVING      관측중
+AWAITING       등록대기
+OVERDUE        기한초과
+SETTLED        등록완료
+SETTLED_LATE   지연등록
+```
+
+### 풀어 쓰는 설명 (목록·상세의 보조 문구)
+
+```
+NOT_REQUIRED   예상 결과를 선언하지 않음
+PENDING        관측 구간 시작 전
+OBSERVING      관측 구간 진행 중
+AWAITING       구간이 끝나 결과를 등록할 수 있습니다
+OVERDUE        유예까지 지나 등록 기한이 지났습니다
+SETTLED        결과가 등록됨
+SETTLED_LATE   기한 후에 등록됨
+```
+
+## 절 머리에 한 줄 설명을 넣는다
+
+지금 화면에는 `결과는 관측값으로부터 컨트랙트가 판정합니다`만 있고
+**"이게 무엇을 하는 절인지"가 없다.** 사용자가 물어본 이유다.
+
+`결과 등록` 절 제목 아래 `.doc-note`:
+
+```
+선언한 예상 결과가 실제로 어떻게 됐는지 온체인에 남깁니다.
+넣는 것은 관측값과 출처뿐이고, 맞았는지 여부는 컨트랙트가 계산합니다.
+```
+
+`#/verify`와 홈의 소개에도 같은 취지의 한 줄이 필요하면 넣는다.
+
+## 영문 식별자가 노출되는 자리
+
+`settlementUID`·`decisionUID`·`poi.settlement.v1`·`poi-verify` 명령 등은
+**그대로 두고 옆에 한국어 설명**을 붙인다.
+
+```
+settlementUID   결과 등록 기록의 온체인 식별자
+```
+
+심사자가 명세·익스플로러·verifier 출력과 대조할 때 같은 말을 봐야 한다.
+번역해 버리면 대조가 어려워진다.
+
+## 훑을 범위
+
+`web/src` 전체에서 `정산`이 들어간 **표시 문구**를 전수로 찾는다.
+변수명·함수명·타입명·파일명의 `settlement`은 **건드리지 않는다.**
+
+특히 놓치기 쉬운 자리:
+
+- `core/src/errors.ts`의 한국어 에러 메시지 (`"자신의 결정만 정산할 수 있습니다"` 등)
+  → **`core`는 표시 문구를 갖는 유일한 예외다.** 여기도 바꾼다.
+  단 **에러 이름(`NotDecisionOwner` 등)은 그대로**다.
+- `web/src/stateLabel.ts`
+- `decisionDetail.tsx`·`settlement.tsx`·`challenge.tsx`·`home.tsx`·`records.tsx`·`recordRow.tsx`
+- `verify.tsx`의 안내
+- `docs/TEST_SCENARIO.md`의 기대 화면 문구
+- `web/e2e/*`의 단언 문구
+
+## 하지 말 것
+
+- 코드의 `settlement` 식별자를 바꾸지 말 것.
+- `docs/POI_*.md`·`docs/metrics/*.md`를 수정하지 말 것.
+- `core`의 상태 상수(`SETTLED`·`AWAITING` …)를 바꾸지 말 것 — 이름은 그대로, **표시 문구만**.
+- verifier CLI의 영문 출력(`MATCH`·`verdict`)을 바꾸지 말 것.
+
+## 검증
+
+```
+cd core && npm test                 # 62/62 (errors.test.ts의 커버리지 하네스가 그대로 통과해야 한다)
+cd web && npx tsc --noEmit && npm test && npm run build
+bash scripts/dev_up.sh && cd web && npm run test:e2e    # 26/26, skipped 0
+```
+
+그리고 `web/src`에 **표시 문구로서의 `정산`이 하나도 남지 않았는지** 확인한다
+(주석과 식별자는 제외).
