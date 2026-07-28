@@ -69,7 +69,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const decisionText = `FULL-PATH 결정 ${timestamp}`;
     const decision = section(pageA, "결정 커밋");
     const decisionTime = await chainNow();
-    const windowEnd = decisionTime + 240;
+    const windowEnd = decisionTime + 720;
     await decision.getByLabel("결정 내용").fill(decisionText);
     await decision.getByLabel("trigger").fill("FULL-PATH trigger");
     await openDetails(decision, "예상 결과 선언 (선택)");
@@ -77,7 +77,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await decision.getByLabel("metricId").fill(METRIC_ID);
     await decision.getByLabel("op").fill("0");
     await decision.getByLabel("threshold").fill("90000000");
-    await decision.getByLabel("windowStart (Unix 초)").fill(String(decisionTime + 120));
+    await decision.getByLabel("windowStart (Unix 초)").fill(String(decisionTime + 600));
     await decision.getByLabel("windowEnd (Unix 초)").fill(String(windowEnd));
     await decision.getByLabel("graceSeconds").fill("3600");
     await openDetails(decision, "계보 (선택)");

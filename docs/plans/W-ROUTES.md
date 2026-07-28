@@ -814,3 +814,42 @@ windowEnd   = chainNow + 720
 ```
 cd web && npm run test:e2e     # 26/26, skipped 0
 ```
+
+---
+
+## 단계 7 리뷰 대응 R5 — 발행 후 UID는 URL에서 얻는다
+
+화면에 표시된 결정이 **테스트가 만든 것이 아니라 시드의 F5**였다
+(스냅샷의 UID가 `seed.json`의 `f5.decisionUID`와 같고, 관측 구간이 24시간이다).
+
+원인: 단계 5에서 **발행 성공 시 `#/d/<uid>`로 이동**하도록 바꿨다.
+그래서 `#/record`의 결정 절은 언마운트되는데, 테스트는 아직 **그 절의 영수증에서 UID를 읽는다.**
+
+```ts
+await publishDecision.click();
+const decisionUID = await receiptUID(decision);   // ← 사라진 절에서 읽는다
+```
+
+### 고칠 것
+
+발행 직후 **URL을 단언하고 거기서 UID를 얻는다.** 새 동선에 맞고 더 강한 검사다.
+
+```ts
+await publishDecision.click();
+await expect(pageA).toHaveURL(/#\/d\/0x[0-9a-f]{64}$/i);
+const decisionUID = (new URL(pageA.url()).hash.match(/0x[0-9a-f]{64}/i) ?? [])[0];
+expect(decisionUID).toBeTruthy();
+```
+
+- 이후 단계는 **이미 상세 화면에 있으므로** 따로 이동하지 않는다.
+- 상태 인장·정산·이의·공개 모두 그 화면에서 이어간다.
+- 노트 발행도 같은 방식으로 이동하는지 확인하고, 이동한다면 같은 처리를 한다.
+  이동하지 않는다면 노트는 지금처럼 영수증에서 읽는다.
+
+`expectNoAlert`는 발행 **전에** 부르거나, 이동 후 상세 화면 기준으로 부른다.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 26/26, skipped 0
+```
