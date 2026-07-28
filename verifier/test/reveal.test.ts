@@ -7,8 +7,8 @@ import {
     REVEAL,
     RevealError,
     revealDecision,
+    revealExitCode,
     type DecisionCommitTag,
-    type RevealReport,
 } from "../src/reveal.ts";
 
 const uid = (byte: string): Hex => `0x${byte.repeat(64)}`;
@@ -19,10 +19,8 @@ const SALT = "0x00112233445566778899aabbccddeeff";
 const PAYLOAD = {fixture: "F1", intent: "seed-success"};
 const ZERO_UID = uid("0");
 
-const exitCode = (report: RevealReport): number =>
-    report.verdict === REVEAL.MISMATCH ? 1
-        : report.verdict === REVEAL.NOT_COMMITTED ? 3
-            : 0;
+/** 출하되는 매핑을 그대로 쓴다. 여기서 다시 구현하면 계약이 검증되지 않는다. */
+const exitCode = revealExitCode;
 
 function decision(
     attester = address("a"),

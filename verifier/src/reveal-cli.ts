@@ -6,8 +6,8 @@ import {createViemReader} from "./reader.ts";
 import {
     REVEAL,
     revealDecision,
+    revealExitCode,
     type DecisionCommitTag,
-    type RevealReport,
 } from "./reveal.ts";
 
 const USAGE = "사용법: poi-reveal <decisionUID> --salt <hex> --payload <파일|-> [--tag TAG] [--rpc <url>] [--json]";
@@ -24,12 +24,6 @@ async function readPayload(path: string): Promise<unknown> {
         })
         : await readFile(path, "utf8");
     return JSON.parse(source);
-}
-
-export function revealExitCode(report: RevealReport): number {
-    if (report.verdict === REVEAL.MISMATCH) return 1;
-    if (report.verdict === REVEAL.NOT_COMMITTED) return 3;
-    return 0;
 }
 
 export async function main(argv = process.argv.slice(2)): Promise<number> {
