@@ -19,8 +19,16 @@ export const SCHEMAS = {
     challenge: import.meta.env.VITE_CHALLENGE_SCHEMA_UID ?? "",
 };
 
+export const RESOLVERS = {
+    note: import.meta.env.VITE_NOTE_RESOLVER ?? "",
+    decision: import.meta.env.VITE_DECISION_RESOLVER ?? "",
+    settlement: import.meta.env.VITE_SETTLEMENT_RESOLVER ?? "",
+    challenge: import.meta.env.VITE_CHALLENGE_RESOLVER ?? "",
+};
+
 export const DOJANG_SCHEMA_UID = import.meta.env.VITE_DOJANG_SCHEMA_UID ?? "";
 
 export function isDeployed(): boolean {
-    return Object.values(SCHEMAS).every((uid) => /^0x[0-9a-fA-F]{64}$/.test(uid));
+    return Object.values(SCHEMAS).every((uid) => /^0x[0-9a-fA-F]{64}$/.test(uid))
+        && Object.values(RESOLVERS).every((address) => /^0x[0-9a-fA-F]{40}$/.test(address));
 }

@@ -9,8 +9,14 @@ import {
 import {useEffect, useState, type FormEvent} from "react";
 import type {Hex} from "viem";
 import {SCHEMAS, isDeployed} from "./config";
-import {readDecision, readSettlement, readSettlementHeads} from "./read";
+import {getChainTime, readDecision, readSettlement, readSettlementHeads} from "./read";
 import {ZERO_UID} from "./wallet";
+
+export function clockSkewNotice(chainNow: bigint, browserNow: bigint): string | undefined {
+    const difference = chainNow >= browserNow ? chainNow - browserNow : browserNow - chainNow;
+    if (difference < 60n) return undefined;
+    return `기기 시각이 체인과 ${difference}초 차이납니다. 표시는 체인 시각을 기준으로 합니다.`;
+}
 
 export function describeState(state: PoiState): string {
     const labels: Record<PoiState, string> = {
@@ -39,12 +45,18 @@ interface LoadedStatus {
 export function Status() {
     const [decisionUID, setDecisionUID] = useState("");
     const [loaded, setLoaded] = useState<LoadedStatus>();
-    const [now, setNow] = useState(() => BigInt(Math.floor(Date.now() / 1000)));
+    const [now, setNow] = useState<bigint>();
     const [error, setError] = useState("");
 
     useEffect(() => {
-        const timer = window.setInterval(() => setNow(BigInt(Math.floor(Date.now() / 1000))), 1000);
-        return () => window.clearInterval(timer);
+        const tick = window.setInterval(() => setNow((value) => value === undefined ? value : value + 1n), 1000);
+        const sync = window.setInterval(() => {
+            void getChainTime().then(setNow).catch(() => undefined);
+        }, 15_000);
+        return () => {
+            window.clearInterval(tick);
+            window.clearInterval(sync);
+        };
     }, []);
 
     async function load(event: FormEvent) {
@@ -53,11 +65,13 @@ export function Status() {
         try {
             if (!/^0x[0-9a-fA-F]{64}$/.test(decisionUID)) throw new Error("결정 UID를 확인해 주세요.");
             const uid = decisionUID as Hex;
-            const [decision, heads] = await Promise.all([
+            const [decision, heads, chainTime] = await Promise.all([
                 readDecision(uid),
                 readSettlementHeads(SCHEMAS.settlement as Hex, uid),
+                getChainTime(),
             ]);
             const active = heads.activeHead === ZERO_UID ? undefined : await readSettlement(heads.activeHead);
+            setNow(chainTime);
             setLoaded({
                 hasExpectedOutcome: decision.hasExpectedOutcome,
                 windowStart: decision.windowStart,
@@ -73,7 +87,10 @@ export function Status() {
         }
     }
 
-    const result = loaded ? deriveState(loaded, now) : undefined;
+    const result = loaded && now !== undefined ? deriveState(loaded, now) : undefined;
+    const skewNotice = now === undefined
+        ? undefined
+        : clockSkewNotice(now, BigInt(Math.floor(Date.now() / 1000)));
     const seal = result ? {
         [STATE.NOT_REQUIRED]: {text: "해당없음", tone: "faint", label: "해당 없음"},
         [STATE.PENDING]: {text: "대기", tone: "ink", label: "대기"},
@@ -112,6 +129,7 @@ export function Status() {
                 </div>
             )}
             {result?.hasRevokedSettlement && <p className="revocation-note">정산 철회 이력 있음</p>}
+            {skewNotice && <p className="notice--quiet">{skewNotice}</p>}
             {error && <p className="form-status" role="alert">{error}</p>}
         </section>
     );

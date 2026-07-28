@@ -35,6 +35,11 @@ const ATTESTED_EVENT = parseAbiItem(
     "event Attested(address indexed recipient,address indexed attester,bytes32 uid,bytes32 indexed schema)",
 );
 
+export async function getChainTime(): Promise<bigint> {
+    const block = await withRetry(() => publicClient.getBlock());
+    return block.timestamp;
+}
+
 export interface AttestationRecord {
     uid: Hex;
     schema: Hex;

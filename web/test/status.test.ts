@@ -1,6 +1,6 @@
 import {STATE} from "@poi/core";
 import {describe, expect, it} from "vitest";
-import {describeState} from "../src/status";
+import {clockSkewNotice, describeState} from "../src/status";
 
 describe("describeState", () => {
     it.each([
@@ -12,4 +12,18 @@ describe("describeState", () => {
         [STATE.SETTLED, "정산됨"],
         [STATE.SETTLED_LATE, "정산됨(기한 후)"],
     ])("%s", (state, label) => expect(describeState(state)).toBe(label));
+});
+
+describe("clockSkewNotice", () => {
+    it.each([0n, 59n])("does not warn for %s seconds", (difference) => {
+        expect(clockSkewNotice(1_000n + difference, 1_000n)).toBeUndefined();
+    });
+
+    it.each([60n, 3_600n])("includes a %s second difference", (difference) => {
+        expect(clockSkewNotice(1_000n + difference, 1_000n)).toContain(`${difference}초`);
+    });
+
+    it("uses the absolute difference when the chain is behind", () => {
+        expect(clockSkewNotice(1_000n, 1_060n)).toContain("60초");
+    });
 });

@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+web/.env.local
 *.key
 *.pem
 keystore/

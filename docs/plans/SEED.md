@@ -100,7 +100,9 @@ I4(`windowStart >= attestTime`)를 지키려면 결정은 전부 단계 1(`T0`)�
 넘긴다(셸이 파싱해 다음 단계에 준다) — `forge script`는 상태를 들고 있지 않다.
 
 ```
-PHASE=1  → 배포 + addMetric + 결정 5건. 주소·UID를 console2.log로 출력
+PHASE=1  → 배포 + addMetric + 결정 **4건**(F1·F2·F4·F5). 주소·UID를 console2.log로 출력
+           F3(이의 있음)는 별도 결정이 아니라 F1의 정산에 이의를 붙인 것이다.
+           f_copy(CT18용)는 B가 단계 3에서 발행한다
 PHASE=2  → 환경변수로 받은 decisionUID·관측값으로 F1·F2 정산
 PHASE=3  → F2 철회 + 정정 재발행, B 이의, B 복사 결정
 ```
@@ -165,16 +167,22 @@ f_copy.attester           == B
 ```
 1  기존 anvil 종료
 2  anvil --fork-url $RPC --fork-block-number 31820323 --port 8545 기동, 대기
-3  T0 계산 후 evm_setNextBlockTimestamp + evm_mine
-4  PHASE=1 forge script --broadcast     → 주소·UID 파싱
-5  observe.ts 로 F1·F2 관측값 계산      → 실패하면 중단
-6  시각을 T0+700 으로 → PHASE=2
-7  시각을 T0+800 으로 → PHASE=3
-8  시각을 실제 now 로  → evm_mine
-9  docs/fixtures/seed.json 생성
-10 web/.env.local 생성
-11 사람이 읽을 요약 출력 (fixture별 UID·기대 상태·verifier 명령)
+3  T0 계산
+4  observe.ts 로 F1·F2 관측값 계산      → 실패하면 중단
+5  evm_setNextBlockTimestamp(T0) + evm_mine
+6  PHASE=1 forge script --broadcast     → 주소·UID 파싱
+7  시각을 T0+700 으로 → PHASE=2
+8  시각을 T0+800 으로 → PHASE=3
+9  시각을 실제 now 로  → evm_mine
+10 docs/fixtures/seed.json 생성
+11 web/.env.local 생성
+12 사람이 읽을 요약 출력 (fixture별 UID·기대 상태·verifier 명령)
 ```
+
+> **관측값 계산이 발행보다 먼저인 이유**: 결정의 `outcomeThreshold`는 발행 시점에 확정되고
+> 이후 바꿀 수 없다. 임계값을 관측값 기준으로 잡으려면 관측값을 먼저 알아야 한다.
+> 구간 `[T0+60, T0+660]`은 실행 시점 기준으로 이미 **과거**라 봉이 존재한다 —
+> 그래서 발행 전에 계산할 수 있다. (codex 리뷰 지적)
 
 - `set -euo pipefail`. 각 단계 실패 시 anvil을 내리고 비영 종료.
 - 파싱은 `forge script`의 `console2.log` 출력을 `grep`/`sed`로. **JSON 출력이 있으면 그쪽을 쓴다.**
