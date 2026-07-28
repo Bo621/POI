@@ -276,3 +276,32 @@ cd contracts && forge test          # 150/150
 ```
 
 그리고 `docs/E2E_BEHAVIOR.md`의 모든 행이 **새 테스트 이름과 짝지어져** 있어야 한다.
+
+---
+
+## 단계 3 리뷰 대응 R1 — 해시 퍼센트 인코딩
+
+```
+Expected: "#/없는경로"
+Received: "#/%EC%97%86%EB%8A%94%EA%B2%BD%EB%A1%9C"
+```
+
+브라우저가 해시의 비ASCII를 퍼센트 인코딩한다. 테스트가 그것을 고려하지 않았다.
+
+**테스트만 고치고 끝내지 말 것 — 제품에도 같은 문제가 있다.**
+`notFound`의 `raw`를 화면에 그대로 보여주면 사용자는
+`"%EC%97%86…는 없는 화면입니다"`를 보게 된다.
+
+### 고칠 것
+
+1. `parseRoute`가 `raw`를 만들 때 **`decodeURIComponent`로 복원**한다.
+   복원에 실패하면(잘못된 인코딩) 원문 그대로 둔다 — 던지지 말 것.
+2. `router.test.ts`에 케이스 추가: `"#/%EC%97%86%EB%8A%94%EA%B2%BD%EB%A1%9C"` → `raw === "없는경로"`.
+3. `routing.spec.ts`는 URL 비교 시 `decodeURIComponent`를 쓰거나
+   ASCII 경로로 확인한다. **둘 다 두는 것이 낫다** — 인코딩 왕복 자체가 검사 대상이다.
+
+### 검증
+
+```
+cd web && npm test && npm run test:e2e     # 23/23, skipped 0
+```
