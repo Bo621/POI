@@ -59,19 +59,19 @@ contract SeedFixtures is Deploy {
         );
         bytes32 f1 = _attestDecision(
             IEAS(DEFAULT_EAS), d.decisionSchemaUID,
-            _outcome(f1Commitment, keccak256("f1-trigger"), PRICE_METRIC, 1, priceThreshold, t0 + 60, t0 + 660)
+            _outcome(f1Commitment, keccak256("f1-trigger"), PRICE_METRIC, 1, priceThreshold, t0 + 1800, t0 + 2400)
         );
         bytes32 f2 = _attestDecision(
             IEAS(DEFAULT_EAS), d.decisionSchemaUID,
-            _outcome(keccak256("f2-decision"), keccak256("f2-trigger"), DRAWDOWN_METRIC, 1, drawdownThreshold, t0 + 60, t0 + 660)
+            _outcome(keccak256("f2-decision"), keccak256("f2-trigger"), DRAWDOWN_METRIC, 1, drawdownThreshold, t0 + 1800, t0 + 2400)
         );
         bytes32 f4 = _attestDecision(
             IEAS(DEFAULT_EAS), d.decisionSchemaUID,
-            _outcome(keccak256("f4-decision"), keccak256("f4-trigger"), PRICE_METRIC, 1, 1, t0 + 60, t0 + 660)
+            _outcome(keccak256("f4-decision"), keccak256("f4-trigger"), PRICE_METRIC, 1, 1, t0 + 1800, t0 + 2400)
         );
         bytes32 f5 = _attestDecision(
             IEAS(DEFAULT_EAS), d.decisionSchemaUID,
-            _outcome(keccak256("f5-decision"), keccak256("f5-trigger"), PRICE_METRIC, 1, 1, t0 + 7200, t0 + 93600)
+            _outcome(keccak256("f5-decision"), keccak256("f5-trigger"), PRICE_METRIC, 1, 1, t0 + 14400, t0 + 100800)
         );
         vm.stopBroadcast();
 

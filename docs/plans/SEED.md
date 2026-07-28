@@ -381,3 +381,85 @@ RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
 ```
 
 **끝까지 완주해 요약을 출력해야 한다.** 실패하면 revert 사유가 화면에 나와야 한다.
+
+---
+
+## 리뷰 대응 R3 — `forge script --broadcast`를 버리고 `cast send`로 간다
+
+### 확정된 사실
+
+anvil **1.7.1**은 명시적 `evm_mine`(`EthApi::mine_one`)이 트랜잭션 채굴과 겹치면
+`Backend::do_mine_block`에서 `unwrap_failed` → **패닉(Abort trap: 6)** 한다.
+
+```
+anvil::eth::backend::mem::Backend<N>::do_mine_block::{{closure}}
+anvil::eth::api::EthApi::mine_one::{{closure}}
+core::result::unwrap_failed
+```
+
+그래서 R1의 `--block-time`도, R2의 블록 티커도 **같은 버그를 친다.** 둘 다 쓸 수 없다.
+
+한편 `forge script --broadcast`는 마지막 트랜잭션의 **확인 블록**을 기다리는데
+온디맨드 anvil은 그 블록을 만들지 않는다. `forge script`에는 `--confirmations` 옵션이 **없다.**
+`--slow`로도 해결되지 않는 것을 확인했다.
+
+`cast send`에는 `--confirmations`와 `--async`가 있다. **전송을 `cast send`로 옮긴다.**
+
+### 설계
+
+`SeedFixtures.s.sol`은 **상태를 바꾸지 않는 계산 전용**으로 바꾼다.
+브로드캐스트를 하지 않으므로 forge의 확인 대기가 아예 없다.
+
+```
+SeedFixtures.s.sol  (view/pure, --broadcast 없이 실행)
+    입력: T0, 관측값, 스키마 UID 등 (환경변수)
+    출력: console2.log 로 각 트랜잭션의 to·calldata·from(A/B) 을 한 줄씩
+          형식:  TX <A|B> <to> <calldata>
+```
+
+`dev_up.sh`가 그 줄들을 읽어 순서대로 보낸다.
+
+```bash
+cast send "$to" "$calldata" --private-key "$key" \
+    --rpc-url "$LOCAL_RPC" --confirmations 1
+```
+
+- `cast send`는 **영수증만 기다린다.** 온디맨드 anvil이 트랜잭션마다 블록을 만드니 즉시 돌아온다.
+- 별도의 채굴 호출이 없으므로 anvil 버그를 건드리지 않는다.
+- 실패하면 `cast send`가 비영으로 끝나고 stderr에 revert 사유가 그대로 나온다.
+  **R2가 원했던 진단이 공짜로 얻어진다.**
+
+배포(리졸버 4종)만은 calldata가 아니라 바이트코드다. `cast send --create <bytecode>`를 쓰고
+반환된 주소를 영수증에서 읽는다. 컨트랙트 바이트코드는
+`forge inspect <컨트랙트> bytecode`로 얻는다.
+
+스키마 UID·attestation UID처럼 **반환값이 필요한 호출**은 `cast call`로 먼저 결과를 얻고
+(같은 블록 상태에서) `cast send`로 실제 전송한 뒤, 영수증 로그에서 UID를 확인한다.
+EAS는 `Attested(address,address,bytes32,bytes32)` 이벤트의 `data`가 UID이고,
+SchemaRegistry는 `Registered`의 첫 토픽 뒤 인덱스가 UID다.
+
+### 시각 이동
+
+`evm_increaseTime` + `evm_mine`은 **트랜잭션 전송과 겹치지 않는 시점**에만 호출한다
+(phase 사이). 그러면 동시 채굴이 아니므로 패닉하지 않는다. 지금까지 phase 사이의
+시각 이동 자체는 문제를 일으키지 않았다.
+
+### 하지 말 것
+
+- `--block-time` 금지 (anvil 패닉).
+- `forge script --broadcast` 금지 (확인 블록 대기로 멈춘다).
+- 백그라운드 블록 티커 금지 (anvil 패닉).
+- anvil을 업그레이드하지 말 것 — 도구 버전을 바꾸는 것은 별개 결정이다.
+
+### 검증
+
+```bash
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
+```
+
+**끝까지 완주해 요약을 출력해야 한다.** 완주 후:
+
+- `docs/fixtures/seed.json`에 F1·F2·F4·F5·f_copy의 실제 UID
+- `web/.env.local` 생성
+- `cast call <settlement resolver> "activeHead(bytes32)(bytes32)" <f1.decisionUID>` ≠ 0
+- `cast call <settlement resolver> "revokeCount(bytes32)(uint32)" <f2.decisionUID>` == 1

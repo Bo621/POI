@@ -12,6 +12,7 @@ FORK_BLOCK=31820323
 PHASE1_LOG=""
 PHASE2_LOG=""
 PHASE3_LOG=""
+TICKER_PID=""
 
 if [[ -z "${RPC_URL}" ]]; then
     echo "RPC 환경변수에 GIWA Sepolia fork URL을 지정해 주세요." >&2
@@ -20,16 +21,58 @@ fi
 
 cleanup_on_error() {
     local status=$?
+    stop_ticker
     if (( status != 0 )); then
-        "${ROOT_DIR}/scripts/dev_down.sh"
         [[ -z "${PHASE1_LOG}" ]] || rm -f "${PHASE1_LOG}"
         [[ -z "${PHASE2_LOG}" ]] || rm -f "${PHASE2_LOG}"
         [[ -z "${PHASE3_LOG}" ]] || rm -f "${PHASE3_LOG}"
-        echo "시드가 실패해 anvil을 종료했습니다. 로그: ${ANVIL_LOG}" >&2
+        if [[ "${KEEP_ANVIL_ON_FAILURE:-0}" == "1" ]]; then
+            echo "시드가 실패했지만 KEEP_ANVIL_ON_FAILURE=1로 anvil을 유지합니다. 로그: ${ANVIL_LOG}" >&2
+        else
+            "${ROOT_DIR}/scripts/dev_down.sh"
+            echo "시드가 실패해 anvil을 종료했습니다. 로그: ${ANVIL_LOG}" >&2
+        fi
     fi
     exit "${status}"
 }
 trap cleanup_on_error EXIT
+
+start_ticker() {
+    ( while :; do
+        cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null 2>&1
+        sleep 1
+    done ) &
+    TICKER_PID=$!
+}
+
+stop_ticker() {
+    if [[ -n "${TICKER_PID:-}" ]]; then
+        kill "${TICKER_PID}" 2>/dev/null || true
+        wait "${TICKER_PID}" 2>/dev/null || true
+        TICKER_PID=""
+    fi
+}
+
+diagnose_forge_failure() {
+    local broadcast="${ROOT_DIR}/contracts/broadcast/SeedFixtures.s.sol/91342/run-latest.json"
+    local tx_hash
+    if [[ ! -f "${broadcast}" ]]; then
+        echo "실패 진단: 브로드캐스트 JSON을 찾지 못했습니다: ${broadcast}" >&2
+        return
+    fi
+    tx_hash="$(jq -r '
+        [.receipts[]?
+            | select(.status == 0 or .status == "0x0" or .status == "0x00")
+            | .transactionHash]
+        | last // empty
+    ' "${broadcast}")"
+    if [[ -z "${tx_hash}" ]]; then
+        echo "실패 진단: 브로드캐스트 JSON에서 실패한 트랜잭션 해시를 찾지 못했습니다." >&2
+        return
+    fi
+    echo "실패 진단: cast run ${tx_hash}" >&2
+    cast run "${tx_hash}" --rpc-url "${LOCAL_RPC}" || true
+}
 
 value_after_label() {
     local label=$1
@@ -69,14 +112,23 @@ set_time() {
 run_phase() {
     local phase=$1
     local output=$2
+    local forge_status
     shift 2
+    start_ticker
+    set +e
     (
         cd "${ROOT_DIR}/contracts"
         env SEED_PHASE="${phase}" SEED_KEY_A="${KEY_A}" SEED_KEY_B="${KEY_B}" "$@" \
             forge script script/SeedFixtures.s.sol:SeedFixtures \
             --sig "runSeed()" --rpc-url "${LOCAL_RPC}" --broadcast --slow -vv
     ) | tee "${output}"
-    cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null
+    forge_status="${PIPESTATUS[0]}"
+    set -e
+    stop_ticker
+    if (( forge_status != 0 )); then
+        diagnose_forge_failure
+        return "${forge_status}"
+    fi
 }
 
 "${ROOT_DIR}/scripts/dev_down.sh"
@@ -94,11 +146,12 @@ done
 cast block-number --rpc-url "${LOCAL_RPC}" >/dev/null
 
 REAL_NOW="$(date +%s)"
-T0="$(( (REAL_NOW - 4800) / 60 * 60 ))"
-WINDOW_END="$(( T0 + 660 ))"
+T0="$(( (REAL_NOW - 10800) / 60 * 60 ))"
+WINDOW_START="$(( T0 + 1800 ))"
+WINDOW_END="$(( T0 + 2400 ))"
 
-PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "$((T0 + 60))" "${WINDOW_END}")"
-DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "$((T0 + 60))" "${WINDOW_END}")"
+PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${WINDOW_START}" "${WINDOW_END}")"
+DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${WINDOW_START}" "${WINDOW_END}")"
 PRICE_THRESHOLD="$(( PRICE_VALUE - 1000000 ))"
 DRAWDOWN_THRESHOLD="$(( DRAWDOWN_VALUE + 50 ))"
 
@@ -135,7 +188,7 @@ for pair in \
     require_value "${pair%%:*}" "${pair#*:}"
 done
 
-set_time "$((T0 + 700))"
+set_time "$((T0 + 2500))"
 run_phase 2 "${PHASE2_LOG}" \
     SEED_SETTLEMENT_SCHEMA_UID="${SETTLEMENT_SCHEMA}" SEED_WINDOW_END="${WINDOW_END}" \
     SEED_PRICE_VALUE="${PRICE_VALUE}" SEED_DRAWDOWN_VALUE="${DRAWDOWN_VALUE}" \
@@ -145,7 +198,7 @@ F2_S1="$(value_after_label SEED_F2_SETTLEMENT_S1_UID= "${PHASE2_LOG}")"
 require_value F1_SETTLEMENT "${F1_SETTLEMENT}"
 require_value F2_S1 "${F2_S1}"
 
-set_time "$((T0 + 800))"
+set_time "$((T0 + 2600))"
 run_phase 3 "${PHASE3_LOG}" \
     SEED_DECISION_SCHEMA_UID="${DECISION_SCHEMA}" \
     SEED_SETTLEMENT_SCHEMA_UID="${SETTLEMENT_SCHEMA}" \
