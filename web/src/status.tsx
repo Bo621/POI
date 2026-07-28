@@ -10,8 +10,7 @@ import {useState, type FormEvent} from "react";
 import type {Hex} from "viem";
 import {clockSkewNotice} from "./chainClock";
 import {SCHEMAS, isDeployed} from "./config";
-import {readDecision, readSettlement, readSettlementHeads} from "./read";
-import {ZERO_UID} from "./wallet";
+import {readDecision, readSettlementState} from "./read";
 
 export {clockSkewNotice} from "./chainClock";
 
@@ -53,19 +52,18 @@ export function Status({now, skewSeconds}: {
         try {
             if (!/^0x[0-9a-fA-F]{64}$/.test(decisionUID)) throw new Error("결정 UID를 확인해 주세요.");
             const uid = decisionUID as Hex;
-            const [decision, heads] = await Promise.all([
+            const [decision, settlement] = await Promise.all([
                 readDecision(uid),
-                readSettlementHeads(SCHEMAS.settlement as Hex, uid),
+                readSettlementState(SCHEMAS.settlement as Hex, uid),
             ]);
-            const active = heads.activeHead === ZERO_UID ? undefined : await readSettlement(heads.activeHead);
             setLoaded({
                 hasExpectedOutcome: decision.hasExpectedOutcome,
                 windowStart: decision.windowStart,
                 windowEnd: decision.windowEnd,
                 graceSeconds: BigInt(decision.graceSeconds),
-                activeHead: heads.activeHead,
-                activeHeadTime: active?.time,
-                revokeCount: heads.revokeCount,
+                activeHead: settlement.activeHead,
+                activeHeadTime: settlement.activeHeadTime,
+                revokeCount: settlement.revokeCount,
                 grade: formatGrade(evidenceTier(decision.evidenceCommitment), REVEAL_STATE.SEALED),
             });
         } catch (cause) {

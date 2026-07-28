@@ -14,8 +14,13 @@ import {useRoute} from "./router";
 import {DecisionDetail} from "./decisionDetail";
 import {Verify} from "./verify";
 import {Wallet, ZERO_UID, type VerificationSnapshot, type WalletState} from "./wallet";
+import {ErrorBoundary} from "./errorBoundary";
 
 export default function App() {
+    return <ErrorBoundary label="본문"><AppRoute /></ErrorBoundary>;
+}
+
+function AppRoute() {
     const route = useRoute();
     if (route.name === "decision") return <RoutedDecision uid={route.uid} />;
     if (route.name === "verify") return <Verify />;

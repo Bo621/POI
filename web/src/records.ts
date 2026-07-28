@@ -8,8 +8,7 @@ import {
 } from "@poi/core";
 import type {Address, Hex} from "viem";
 import {SCHEMAS} from "./config";
-import {getChainTime, readDecisionLogs, readSettlement, readSettlementHeads} from "./read";
-import {ZERO_UID} from "./wallet";
+import {getChainTime, readDecisionLogs, readSettlementState} from "./read";
 
 export interface RecordRow {
     uid: Hex;
@@ -25,8 +24,7 @@ export async function loadRecords(address: Address): Promise<RecordRow[]> {
         getChainTime(),
     ]);
     const rows = await Promise.all(decisions.map(async (decision): Promise<RecordRow> => {
-        const heads = await readSettlementHeads(SCHEMAS.settlement as Hex, decision.uid);
-        const active = heads.activeHead === ZERO_UID ? undefined : await readSettlement(heads.activeHead);
+        const heads = await readSettlementState(SCHEMAS.settlement as Hex, decision.uid);
         return {
             uid: decision.uid,
             committedAt: decision.time,
@@ -36,7 +34,7 @@ export async function loadRecords(address: Address): Promise<RecordRow[]> {
                 windowEnd: decision.windowEnd,
                 graceSeconds: BigInt(decision.graceSeconds),
                 activeHead: heads.activeHead,
-                activeHeadTime: active?.time,
+                activeHeadTime: heads.activeHeadTime,
                 revokeCount: heads.revokeCount,
             }, now).state,
             hasRevoked: heads.revokeCount > 0,

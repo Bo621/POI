@@ -170,6 +170,14 @@ export async function readSettlementHeads(schema: Hex, decisionUID: Hex) {
     return {activeHead, lastHead, revokeCount: Number(revokeCount)};
 }
 
+export async function readSettlementState(schema: Hex, decisionUID: Hex) {
+    const heads = await readSettlementHeads(schema, decisionUID);
+    const active = /^0x0{64}$/.test(heads.activeHead)
+        ? undefined
+        : await readSettlement(heads.activeHead);
+    return {...heads, active, activeHeadTime: active?.time};
+}
+
 export async function readMetricDecimals(decisionSchema: Hex, metricId: Hex): Promise<number> {
     const address = await resolverFor(decisionSchema);
     const metric = await withRetry(() => publicClient.readContract({
