@@ -44,6 +44,8 @@ contract POIDecisionResolver is POIMetricRegistry {
     error NoteNotSameActor();
     error NoteNotEarlier();
     error BadVerifiedUID();
+    error VerifiedAddressExpired();
+    error VerifiedAddressRevoked();
     error MetricNotAllowed();
     error OpOutOfRange();
     error WindowInPast();
@@ -85,7 +87,7 @@ contract POIDecisionResolver is POIMetricRegistry {
 
         _checkParents(d.parents, a);
         _checkPromotedNote(d.promotedFromNote, a);
-        _checkVerifiedAddress(d.verifiedAddressUID, a.attester);
+        _checkVerifiedAddress(d.verifiedAddressUID, a.attester, a.time);
         _checkOutcome(d, a.time);
 
         return true;
@@ -115,12 +117,15 @@ contract POIDecisionResolver is POIMetricRegistry {
     }
 
     /// @dev B4 — 커밋 시점의 검증 상태 스냅샷. **필수가 아니다**(미검증 지갑도 허용).
-    ///      다만 넣었다면 실재하고 발행자 본인의 것이어야 한다.
-    function _checkVerifiedAddress(bytes32 verifiedUID, address attester) private view {
+    ///      다만 넣었다면 실재하고 발행자 본인의 것이어야 한다. Dojang 검증은 30일 뒤
+    ///      만료되므로, 만료된 스냅샷을 받으면 "커밋 시점에 검증됐다"는 B4 주장이 거짓이 된다.
+    function _checkVerifiedAddress(bytes32 verifiedUID, address attester, uint64 attestTime) private view {
         if (verifiedUID == 0) return;
 
         Attestation memory v = _eas.getAttestation(verifiedUID);
         if (v.uid == 0 || v.recipient != attester) revert BadVerifiedUID();
+        if (v.revocationTime != 0) revert VerifiedAddressRevoked();
+        if (v.expirationTime != 0 && v.expirationTime <= attestTime) revert VerifiedAddressExpired();
     }
 
     /// @dev I4~I6. `hasExpectedOutcome=false`면 나머지 필드가 전부 0이어야 한다(I6d) —

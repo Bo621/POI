@@ -30,6 +30,8 @@ export const RESOLVER_ERROR_MESSAGES: Record<string, string> = {
     NoteNotSameActor: "참조한 노트의 작성자가 다릅니다. 같은 작성자의 노트를 선택해 주세요.",
     NoteNotEarlier: "참조한 노트가 현재 결정보다 이르지 않습니다. 더 먼저 발행된 노트를 선택해 주세요.",
     BadVerifiedUID: "검증 기록 UID가 유효하지 않습니다. 조건에 맞는 검증 기록을 확인해 주세요.",
+    VerifiedAddressExpired: "검증 상태의 유효기간이 지났습니다. 지갑을 다시 검증한 뒤 커밋해 주세요.",
+    VerifiedAddressRevoked: "검증이 철회된 지갑입니다. 검증 없이 진행하려면 검증 UID를 비워 주세요.",
     MetricNotAllowed: "허용되지 않은 지표입니다. 레지스트리에서 허용된 지표를 선택해 주세요.",
     OpOutOfRange: "비교 연산자 값이 범위를 벗어났습니다. 지원되는 op 값을 선택해 주세요.",
     WindowInPast: "관측 구간의 시작이 현재보다 과거입니다. 결과를 알기 전에 결정했다는 것을 증명하려면 구간이 미래여야 합니다.",
