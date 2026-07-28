@@ -21,9 +21,9 @@
 | L0 | **P0** | 로컬 포크 개발 환경 (`anvil --fork-url`) | — | `[x]` chainId 91342 · EAS `1.4.1-beta.3` · Dojang `isVerified` · 10,000 ETH · `evm_increaseTime` 확인 |
 | O1 | **P0** | 배포 지갑 생성 + 파우셋 클레임 | — | `[x]` `0x77E8DFC4…C2dfaa` — **0.015 ETH** 확인 (2026-07-27 23:5x, nonce 0). 개인키는 `.env`에만, 커밋 금지 |
 | O2 | **P0** | 법률 검토 게이트 (B14) | — | `[ ]` 정산 상태·이의 공개 범위가 기획 A.6과 충돌하지 않음을 확인. **되돌릴 수 없는 온체인 공개 전** |
-| O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[ ]` 리졸버 4종 배포 → 스키마 4종 등록(settlement·challenge만 `revocable=true`) → `initialize` → 각 리졸버 `ready` |
-| O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[ ]` `windowStart=now, windowEnd=now+10m, graceSeconds=1h` 커밋. tx 해시와 `T_overdue` 기록 |
-| O5 | **P0** | `addMetric × 2` (등록 즉시 frozen) | O3, V3 | `[ ]` V3 완료 — `definitionHash`는 `docs/metrics/manifest.json`에 있다. 배포(O3) 후 실행만 남음 |
+| O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[x]` 리졸버 4종 + 스키마 4종 + initialize 완료. 주소·UID는 `docs/DEPLOYMENT.md` |
+| O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[x]` `0x68df5b76…b654` · **T_overdue = 1785256156 (2026-07-29 01:29:16 KST)** |
+| O5 | **P0** | `addMetric × 2` (등록 즉시 frozen) | O3, V3 | `[x]` 2종 등록·frozen 확인 (tx `0x1aa6aab0…` · `0x794c8136…`) |
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
 | O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
