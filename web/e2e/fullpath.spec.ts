@@ -80,6 +80,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await decision.getByLabel("windowStart (Unix 초)").fill(String(decisionTime + 120));
     await decision.getByLabel("windowEnd (Unix 초)").fill(String(windowEnd));
     await decision.getByLabel("graceSeconds").fill("3600");
+    await openDetails(decision, "계보 (선택)");
     await decision.getByLabel("승격 노트 UID (선택)").fill(noteUID);
     await decision.getByRole("button", {name: "salt 생성 및 백업"}).click();
 

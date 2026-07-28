@@ -98,9 +98,11 @@ test("30분 graceSeconds는 한국어 오류로 발행을 막는다", async ({pa
     await expect(page.getByRole("dialog", {name: "salt 백업"})).toHaveCount(0);
 });
 
-test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다", async ({page}) => {
-    await connect(page, accounts.B, `#/d/${requireSeed().fixtures.f1.decisionUID}`);
-    const settlement = section(page, "정산");
+test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다", async ({page, context}) => {
+    await page.close();
+    const pageB = await context.newPage();
+    await connect(pageB, accounts.B, `#/d/${requireSeed().fixtures.f1.decisionUID}`);
+    const settlement = section(pageB, "정산");
     await settlement.getByLabel("decisionUID", {exact: true}).fill(requireSeed().fixtures.f1.decisionUID);
     await settlement.getByRole("button", {name: "정산 확인"}).click();
     await expect(settlement.getByRole("alert")).toHaveText("결정 작성자만 정산할 수 있습니다.");
@@ -109,6 +111,16 @@ test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다
 
 test("지갑 없이 기록하기에 진입해 작성과 salt 백업을 하고 발행만 비활성이다", async ({page}) => {
     await page.goto("/#/record");
+    const journal = section(page, "저널과 노트");
+    await journal.getByLabel("저널 내용").fill("지갑 없는 노트");
+    await journal.getByRole("button", {name: "저널 저장"}).click();
+    await journal.getByRole("button", {name: "노트로 승격"}).click();
+    const noteDialog = page.getByRole("dialog", {name: "salt 백업"});
+    await noteDialog.getByLabel("저장했습니다").check();
+    await expect(noteDialog.getByRole("button", {name: "발행", exact: true})).toBeDisabled();
+    await expect(noteDialog.getByText("노트를 발행하려면 지갑을 연결해 주세요.")).toBeVisible();
+    await noteDialog.getByRole("button", {name: "취소"}).click();
+
     const decision = section(page, "결정 커밋");
     await decision.getByLabel("결정 내용").fill("지갑 없는 결정");
     await decision.getByLabel("trigger").fill("지갑 없는 trigger");
@@ -118,5 +130,15 @@ test("지갑 없이 기록하기에 진입해 작성과 salt 백업을 하고 �
     await expect(dialog).toBeVisible();
     await dialog.getByLabel("저장했습니다").check();
     await expect(dialog.getByRole("button", {name: "발행", exact: true})).toBeDisabled();
+    await expect(dialog.getByText("결정 기록을 발행하려면 지갑을 연결해 주세요.")).toBeVisible();
     await expect(page.getByText("지갑을 연결하면 발행할 수 있습니다. 작성과 salt 백업은 지금도 가능합니다.")).toBeVisible();
+    await dialog.getByRole("button", {name: "취소"}).click();
+
+    await page.goto("/");
+    const settlement = section(page, "정산");
+    await expect(settlement.getByRole("button", {name: "정산 발행"})).toBeDisabled();
+    await expect(settlement.getByText("지갑을 연결해야 정산을 발행할 수 있습니다.")).toBeVisible();
+    const challenge = section(page, "이의");
+    await expect(challenge.getByRole("button", {name: "이의 발행"})).toBeDisabled();
+    await expect(challenge.getByText("지갑을 연결해야 이의를 발행할 수 있습니다.")).toBeVisible();
 });

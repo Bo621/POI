@@ -265,6 +265,7 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
                     onCancel={() => setPending(undefined)}
                     onProceed={publish}
                     publishDisabled={!address}
+                    publishDisabledReason="결정 기록을 발행하려면 지갑을 연결해 주세요."
                 />
             )}
         </section>

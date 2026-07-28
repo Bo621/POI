@@ -115,6 +115,7 @@ export function Note({address}: {address?: Address}) {
                     onCancel={() => setPending(undefined)}
                     onProceed={publish}
                     publishDisabled={!address}
+                    publishDisabledReason="노트를 발행하려면 지갑을 연결해 주세요."
                 />
             )}
         </section>

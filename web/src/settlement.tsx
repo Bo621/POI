@@ -175,8 +175,9 @@ export function Settlement({address}: {address?: Address}) {
             </form>
             {prepared && <dl className="doc-fields"><dt>판정</dt><dd>{prepared.result === RESULT.OBSERVED ? "OBSERVED" : prepared.result === RESULT.NOT_OBSERVED ? "NOT_OBSERVED" : "INDETERMINATE"}</dd></dl>}
             {prepared && prepared.supersedes !== ZERO_UID && <p>철회된 이전 정산 <span className="hex">{prepared.supersedes}</span>을 자동으로 정정합니다.</p>}
+            {!address && <p className="notice notice--quiet">지갑을 연결해야 정산을 발행할 수 있습니다.</p>}
             <div className="button-row">
-                <button className="btn-commit" type="button" onClick={publish} disabled={!prepared?.canPublish || !isDeployed()}>정산 발행</button>
+                <button className="btn-commit" type="button" onClick={publish} disabled={!address || !prepared?.canPublish || !isDeployed()}>정산 발행</button>
                 <button className="btn-quiet" type="button" onClick={revoke} disabled={!prepared || !isDeployed()}>활성 정산 철회</button>
             </div>
             {decision && <dl className="doc-fields"><dt>구간 종료</dt><dd className="hex">{decision.windowEnd.toString()}</dd></dl>}

@@ -104,8 +104,9 @@ export function Challenge({address}: {address?: Address}) {
                 <div className="field"><label htmlFor="challenge-source">출처</label><input id="challenge-source" value={source} onChange={(e) => setSource(e.target.value)} /></div>
                 <div className="field"><label htmlFor="challenge-observed-at">observedAt (Unix 초)</label><input id="challenge-observed-at" type="number" value={observedAt} onChange={(e) => setObservedAt(Number(e.target.value))} /></div>
                 <div className="field"><label htmlFor="challenge-note">noteCommitment (선택)</label><input className="uid" id="challenge-note" value={noteCommitment} onChange={(e) => setNoteCommitment(e.target.value)} /></div>
+                {!address && <p className="notice notice--quiet">지갑을 연결해야 이의를 발행할 수 있습니다.</p>}
                 <div className="button-row">
-                    <button className="btn-commit" type="submit" disabled={!isDeployed()}>이의 발행</button>
+                    <button className="btn-commit" type="submit" disabled={!address || !isDeployed()}>이의 발행</button>
                     <button className="btn" type="button" onClick={load} disabled={!isDeployed()}>목록 조회</button>
                 </div>
             </form>
