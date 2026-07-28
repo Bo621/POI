@@ -273,3 +273,15 @@ Test timeout of 15000ms exceeded
 bash scripts/dev_up.sh && cd web && npm run test:e2e     # 26/26, skipped 0
 ```
 연속 2회 실행해도 같아야 한다.
+
+### R3 보정 — 테스트 전체 타임아웃이 먼저 걸린다
+
+`expect.poll(..., {timeout: 30_000})`은 이미 들어가 있다.
+그런데 `playwright.config.ts`의 **테스트 전체 타임아웃이 15초**라 그것이 먼저 걸린다.
+
+```
+Test timeout of 15000ms exceeded
+```
+
+**그 테스트에만** `test.setTimeout(60_000)`을 준다.
+전역 타임아웃을 올리지 말 것 — 다른 테스트가 느리게 실패하는 것을 늦추기만 한다.
