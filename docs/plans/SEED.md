@@ -546,3 +546,66 @@ bash --version          # 3.2.x 확인
 bash -n scripts/dev_up.sh
 RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh    # 완주해야 한다
 ```
+
+---
+
+## 리뷰 대응 R6 — `cast send`의 확인 대기도 없앤다
+
+실행 결과: `Error: transaction was not confirmed within the timeout`.
+
+anvil은 살아 있었고 **패닉도 없었다**(0건). 트랜잭션 16건이 전부 전송돼 블록도 17개 생겼다.
+그런데 `cast send`가 `eth_getTransactionReceipt` **515회**, `eth_blockNumber` **476회**를
+호출하며 기다렸다. 영수증은 이미 있는데 **확인 블록을 하나 더** 기다린 것이다.
+`forge script`와 같은 문제가 `cast send`에서 반복됐다.
+
+### 고치는 방법 — `--async` + 직접 영수증 조회
+
+```bash
+send_tx() {            # $1=key  $2=to  $3=calldata   → stdout: tx hash
+    local hash
+    hash="$(cast send --rpc-url "${LOCAL_RPC}" --private-key "$1" --async "$2" "$3")"
+    printf '%s' "${hash}"
+}
+
+wait_receipt() {       # $1=tx hash → stdout: 영수증 JSON. 실패면 비영 종료
+    local i=0 json
+    while [ "$i" -lt 60 ]; do
+        json="$(cast receipt "$1" --rpc-url "${LOCAL_RPC}" --json 2>/dev/null || true)"
+        if [ -n "${json}" ] && [ "${json}" != "null" ]; then
+            printf '%s' "${json}"; return 0
+        fi
+        sleep 0.5; i=$((i+1))
+    done
+    echo "영수증을 받지 못했습니다: $1" >&2; return 1
+}
+```
+
+- `--async`는 **해시만 돌려주고 기다리지 않는다.** 확인 블록 대기가 원천적으로 없다.
+- anvil은 온디맨드 채굴이라 `sendRawTransaction` 시점에 이미 블록을 만든다.
+  그래서 영수증은 곧바로 존재한다. 폴링은 안전장치일 뿐이다.
+- **`evm_mine`을 호출하지 않는다.** 동시 채굴이 없어야 anvil이 패닉하지 않는다(R3).
+
+### 실패 판정
+
+`--async`는 revert를 알려주지 않는다. **영수증의 `status`를 반드시 검사한다.**
+
+```bash
+status="$(printf '%s' "${json}" | jq -r '.status')"
+if [ "${status}" != "0x1" ] && [ "${status}" != "1" ]; then
+    echo "트랜잭션 실패: ${hash}" >&2
+    cast run "${hash}" --rpc-url "${LOCAL_RPC}" >&2 || true    # revert 사유 출력
+    return 1
+fi
+```
+
+`cast run`이 revert 사유를 보여준다 — R2가 요구한 진단이 여기서 충족된다.
+
+배포(`--create`)도 같은 방식으로 하고, 영수증의 `contractAddress`에서 주소를 읽는다.
+
+### 검증
+
+```bash
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
+```
+
+**완주해서 요약을 출력해야 한다.** 실패하면 `cast run`의 revert 사유가 화면에 나와야 한다.

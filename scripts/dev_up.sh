@@ -16,6 +16,11 @@ ATTESTED_TOPIC="$(cast keccak 'Attested(address,address,bytes32,bytes32)')"
 TX_LOGS=()
 ATTEST_UIDS=()
 
+if ! command -v jq >/dev/null 2>&1; then
+    echo "jq가 필요합니다. jq를 설치한 뒤 다시 실행해 주세요." >&2
+    exit 1
+fi
+
 if [[ -z "${RPC_URL}" ]]; then
     echo "RPC 환경변수에 GIWA Sepolia fork URL을 지정해 주세요." >&2
     exit 1
@@ -24,7 +29,7 @@ fi
 cleanup_on_error() {
     local status=$?
     local file
-    for file in "${TX_LOGS[@]:-}"; do
+    for file in ${TX_LOGS[@]+"${TX_LOGS[@]}"}; do
         [[ -z "${file}" ]] || rm -f "${file}"
     done
     if (( status != 0 )); then
@@ -46,6 +51,10 @@ require_value() {
         echo "${name} 값을 찾지 못했습니다." >&2
         exit 1
     fi
+}
+
+lower() {
+    printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
 }
 
 set_time() {
@@ -109,10 +118,10 @@ register_schema() {
     receipt="$(cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" \
         --confirmations 1 --json "${SCHEMA_REGISTRY}" \
         'register(string,address,bool)' "${schema}" "${resolver}" "${revocable}")"
-    emitted="$(jq -r --arg address "${SCHEMA_REGISTRY,,}" '
+    emitted="$(jq -r --arg address "$(lower "${SCHEMA_REGISTRY}")" '
         [.logs[]? | select((.address | ascii_downcase) == $address) | .topics[1]] | first // empty
     ' <<<"${receipt}")"
-    if [[ "${emitted,,}" != "${predicted,,}" ]]; then
+    if [[ "$(lower "${emitted}")" != "$(lower "${predicted}")" ]]; then
         echo "SchemaRegistry 반환 UID와 Registered 로그가 다릅니다: ${predicted} != ${emitted}" >&2
         return 1
     fi
@@ -152,7 +161,7 @@ execute_phase() {
     ATTEST_UIDS=()
     while read -r actor to calldata; do
         receipt="$(send_transaction "${actor}" "${to}" "${calldata}")"
-        uid="$(jq -r --arg topic "${ATTESTED_TOPIC,,}" '
+        uid="$(jq -r --arg topic "$(lower "${ATTESTED_TOPIC}")" '
             [.logs[]?
                 | select((.topics[0] | ascii_downcase) == $topic)
                 | .data]
