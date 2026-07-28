@@ -24,6 +24,8 @@ build/
 .next/
 .turbo/
 coverage/
+web/test-results/
+web/playwright-report/
 *.tsbuildinfo
 .pnpm-store/
 npm-debug.log*

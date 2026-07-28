@@ -115,3 +115,94 @@ cd web && npm run test:e2e
 ```
 
 기존 `npm test`(60개)와 `npm run build`에 회귀가 없어야 한다.
+
+---
+
+## 리뷰 대응 R1 — 실제로 돌려보니 12 통과 / 3 실패
+
+`bash scripts/dev_up.sh` 후 `npm run test:e2e` 실행 결과. **하네스는 동작한다**
+(EIP-1193 주입, 시드 fixture 로딩, 12건 통과 — F4 `기한초과`·F2 철회 이력·이의 건수
+미표시·DAG·Passport 포함). 실패 3건을 각각 원인까지 규명해 고친다.
+
+### 1. `[P1]` **제품 결함** — reveal이 지갑 없이는 검증할 수 없다
+
+```
+read.spec.ts › CT18 사본은 불일치하고 다운로드할 수 없다
+Locator: … getByText(/일치하지 않습니다/)  — element(s) not found
+```
+
+원인: `web/src/reveal.tsx:18`
+
+```ts
+if (!address) throw new Error("먼저 지갑을 연결해 주세요.");
+…
+attester: address,      // 연결된 지갑 주소를 attester로 쓴다
+```
+
+**제3자가 남의 공개를 검증할 수 없다.** B10과 §12.2가 요구하는 것은
+"클라이언트에서 검증 가능, 서버 신뢰 불필요"이고 그 요점은 **제3자 검증**이다.
+검증하려고 지갑을 연결해야 한다면 그 성질이 사라진다. CT18(타인 commitment 복사)도
+바로 이 경로로 확인하는 것이다.
+
+**고친다** (`web/src`를 바꾸는 것이 옳은 유일한 자리다):
+
+- `attester`를 **입력 필드로** 받는다. 라벨 `attester (검증할 발행자 주소)`.
+- 지갑이 연결돼 있으면 그 주소를 **기본값으로 채워 준다**(편의). 하지만 **필수가 아니다.**
+- 지갑 미연결 시 `"먼저 지갑을 연결해 주세요."`로 막지 말 것. 검증은 순수 계산이다.
+- 발행(파일 다운로드)도 지갑을 요구하지 않는다 — 파일을 만드는 것뿐이다.
+- 입력이 주소 형식이 아니면 그때만 오류.
+
+`web/test/reveal.test.ts`에 **지갑 없이 타인 주소로 대조**하는 케이스를 추가한다.
+
+### 2. `[P1]` 결정 커밋 성공 경로에서 tx 해시가 나오지 않는다
+
+```
+write.spec.ts › 결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다
+Locator: … getByText('트랜잭션', {exact:true})  — not found
+```
+
+`Receipt`는 `txHash`가 있을 때만 `<dt>트랜잭션</dt>`을 그린다. 즉 **발행이 끝까지 가지
+못했거나 해시가 전달되지 않는다.**
+
+원인을 먼저 규명할 것. 확인 순서:
+
+1. 실패 시 화면에 남는 `role="alert"` 문구를 테스트가 함께 출력하게 한다
+   (`expect.soft`로 alert 내용을 찍고 나서 단언).
+2. `decision.tsx`의 발행 핸들러가 `attest()`의 반환값에서 `txHash`를 실제로 받아
+   `Receipt`에 넘기는지 확인한다(W-TXLINK에서 `attest`가 `{uid, txHash}`를 돌려주게 바뀌었다).
+3. 주입 provider의 `eth_sendTransaction`이 anvil로 제대로 릴레이되는지 확인한다.
+
+**추측으로 고치지 말 것.** 원인을 찾고 그것을 고친다.
+
+### 3. `graceSeconds` 30분이 사전 검증에 걸리지 않는다
+
+같은 파일의 **`windowStart` 과거 테스트는 통과했다.** 즉 alert 표시 경로 자체는 동작한다
+(`decision.tsx:250`이 `role="alert"`). `buildDecisionPayload`에는
+`graceSeconds < 1시간` 검사가 있다(`decision.tsx:73`).
+
+그런데 화면에서는 걸리지 않았다. 가능성:
+
+- 입력이 `grace` 상태에 연결되지 않았다(라벨과 state 불일치)
+- `fill("1800")`이 다른 컨트롤에 들어갔다
+- 검사가 `hasExpectedOutcome` 분기 안에 있는데 그 분기를 타지 않았다
+
+**원인을 규명하고, 제품 쪽이면 제품을 고친다.** 사용자가 30분을 넣고 발행 버튼까지
+갔다가 온체인에서 `GraceOutOfRange`로 튕기는 것은 W-A가 막기로 한 것이다.
+
+### 4. 기록해 둘 것 — B 계정 정산은 온체인 매핑을 타지 않는다
+
+UI가 소유자 여부를 먼저 검사해 `"결정 작성자만 정산할 수 있습니다."`로 막는다.
+**제품 동작으로는 옳다**(일찍 막는 것이 낫다). 다만 그래서 X7의 `NotDecisionOwner`
+한국어 매핑이 화면에 닿는 경로를 E2E가 덮지 못한다.
+
+테스트는 그대로 두고 **`docs/TEST_SCENARIO.md`에 한 줄 적는다**:
+컨트랙트 revert 문구는 UI 사전 검증을 우회해야 볼 수 있으므로 자동 검사 대상이 아니다.
+
+### 검증
+
+```
+bash scripts/dev_up.sh
+cd web && npm run test:e2e      # 15/15
+cd web && npm test              # 60 + reveal 추가분
+cd web && npx tsc --noEmit && npm run build
+```

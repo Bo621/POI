@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "test": "vitest run"
+    "test": "vitest run test",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@poi/core": "workspace:*",
@@ -15,6 +16,7 @@
     "viem": "^2.21.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
