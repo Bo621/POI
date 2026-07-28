@@ -49,6 +49,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     test.setTimeout(90_000);
 
     const pageA = await connect(context, accounts.A);
+    await pageA.goto("/#/record");
     const journal = section(pageA, "저널과 노트");
     const timestamp = await chainNow();
     const journalText = `FULL-PATH 저널 ${timestamp}`;
@@ -65,7 +66,6 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const noteUID = await receiptUID(journal);
     await advanceChain(rpcUrl, 1);
 
-    await pageA.goto("/#/record");
     const decisionText = `FULL-PATH 결정 ${timestamp}`;
     const decision = section(pageA, "결정 커밋");
     const decisionTime = await chainNow();

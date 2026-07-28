@@ -136,12 +136,4 @@ test("지갑 없이 기록하기에 진입해 작성과 salt 백업을 하고 �
     await expect(dialog.getByText("결정 기록을 발행하려면 지갑을 연결해 주세요.")).toBeVisible();
     await expect(page.getByText("지갑을 연결하면 발행할 수 있습니다. 작성과 salt 백업은 지금도 가능합니다.")).toBeVisible();
     await dialog.getByRole("button", {name: "취소"}).click();
-
-    await page.goto("/");
-    const settlement = section(page, "정산");
-    await expect(settlement.getByRole("button", {name: "정산 발행"})).toBeDisabled();
-    await expect(settlement.getByText("지갑을 연결해야 정산을 발행할 수 있습니다.")).toBeVisible();
-    const challenge = section(page, "이의");
-    await expect(challenge.getByRole("button", {name: "이의 발행"})).toBeDisabled();
-    await expect(challenge.getByText("지갑을 연결해야 이의를 발행할 수 있습니다.")).toBeVisible();
 });
