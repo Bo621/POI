@@ -57,6 +57,13 @@ export interface AttestationRecord {
     data: Hex;
 }
 
+export class AttestationNotFoundError extends Error {
+    constructor() {
+        super("이 체인에 없는 기록입니다.");
+        this.name = "AttestationNotFoundError";
+    }
+}
+
 export interface ChallengeLog {
     uid: Hex;
     attester: Address;
@@ -137,6 +144,9 @@ export async function readDecision(uid: Hex): Promise<DecisionFields & {
     time: bigint;
 }> {
     const attestation = await getAttestation(uid);
+    if (attestation.uid.toLowerCase() !== uid.toLowerCase()) {
+        throw new AttestationNotFoundError();
+    }
     const values = decodeAbiParameters(DECISION_PARAMETERS, attestation.data);
     const fields = Object.fromEntries(
         DECISION_PARAMETERS.map((parameter, index) => [parameter.name, values[index]]),

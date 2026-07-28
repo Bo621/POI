@@ -1,5 +1,5 @@
 import type {Hex} from "viem";
-import {addRecent, type RecentDecision} from "./recent";
+import {addRecent, removeRecent, type RecentDecision} from "./recent";
 
 export const RECENT_KEY = "poi.recent-decisions";
 const UID_PATTERN = /^0x[0-9a-f]{64}$/i;
@@ -21,4 +21,10 @@ export function readRecent(): RecentDecision[] {
 
 export function rememberDecision(uid: Hex): void {
     localStorage.setItem(RECENT_KEY, JSON.stringify(addRecent(readRecent(), uid, Date.now())));
+}
+
+export function forgetDecision(uid: Hex): RecentDecision[] {
+    const remaining = removeRecent(readRecent(), uid);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(remaining));
+    return remaining;
 }

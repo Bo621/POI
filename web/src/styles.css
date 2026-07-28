@@ -464,9 +464,24 @@ button:disabled {
 
 .record-row__detail {
     display: grid;
+    min-inline-size: 0;
     gap: var(--space-1);
     color: var(--ink-soft);
     font-size: var(--text-sm);
+}
+
+.record-row--failed > * {
+    min-inline-size: 0;
+}
+
+.record-row--failed .doc-note,
+.record-row--failed .notice {
+    margin: 0;
+}
+
+.record-row--failed .record-row__uid {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .record-list p {

@@ -4,8 +4,8 @@ import type {Address, Hex} from "viem";
 import {publicClient} from "./chain";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {navigate} from "./router";
-import {getChainTime, readDecision, readSettlementState} from "./read";
-import {readRecent} from "./recentStore";
+import {AttestationNotFoundError, getChainTime, readDecision, readSettlementState} from "./read";
+import {forgetDecision, readRecent} from "./recentStore";
 import {loadRecords, needsAction, type RecordRow} from "./records";
 import {RecordRowView} from "./recordRow";
 
@@ -22,6 +22,7 @@ interface DecisionSummary {
 interface FailedSummary {
     uid: Hex;
     error: string;
+    kind: "missing" | "lookup-error";
 }
 
 type SummaryResult = DecisionSummary | FailedSummary;
@@ -49,10 +50,8 @@ async function loadExampleUIDs(): Promise<Hex[]> {
 async function loadSummaries(uids: Hex[]): Promise<SummaryResult[]> {
     const now = await getChainTime();
     const results = await Promise.allSettled(uids.map(async (uid): Promise<DecisionSummary> => {
-        const [decision, heads] = await Promise.all([
-            readDecision(uid),
-            readSettlementState(SCHEMAS.settlement as Hex, uid),
-        ]);
+        const decision = await readDecision(uid);
+        const heads = await readSettlementState(SCHEMAS.settlement as Hex, uid);
         return {
             uid,
             state: deriveState({
@@ -69,7 +68,11 @@ async function loadSummaries(uids: Hex[]): Promise<SummaryResult[]> {
     }));
     return results.map((result, index) => result.status === "fulfilled"
         ? result.value
-        : {uid: uids[index], error: errorMessage(result.reason)});
+        : {
+            uid: uids[index],
+            error: errorMessage(result.reason),
+            kind: result.reason instanceof AttestationNotFoundError ? "missing" : "lookup-error",
+        });
 }
 
 function isFailedSummary(row: SummaryResult): row is FailedSummary {
@@ -123,7 +126,7 @@ function WalletRows({rows}: {rows: RecordRow[]}) {
 export function Home({address}: {address?: Address}) {
     const [uid, setUid] = useState("");
     const [examples, setExamples] = useState<LoadState<SummaryResult[]>>({status: "loading"});
-    const [recent] = useState(readRecent);
+    const [recent, setRecent] = useState(readRecent);
     const [recentRows, setRecentRows] = useState<LoadState<SummaryResult[]>>({status: "loading"});
     const [records, setRecords] = useState<LoadState<RecordRow[]>>({status: "loading"});
     const [latestBlockAt, setLatestBlockAt] = useState<bigint>();
@@ -209,10 +212,16 @@ export function Home({address}: {address?: Address}) {
         <section className="doc-section"><h2>최근 열어본 증서</h2>
             <LoadStateView state={recentRows} failureText="최근 열어본 증서를 불러오지 못했습니다." retry={() => setRecentRetry(value => value + 1)}>
                 {(rows) => <ul className="record-list">{rows.map((row) => {
-                if (isFailedSummary(row)) return <li className="record-row" key={row.uid}>
-                    <span className="notice" role="alert">! 불러오지 못함</span>
+                if (isFailedSummary(row)) return <li className="record-row record-row--failed" key={row.uid}>
+                    {row.kind === "missing"
+                        ? <span className="doc-note">이 체인에 없는 기록입니다.</span>
+                        : <span className="notice" role="alert">! 불러오지 못함</span>}
                     <span className="hex record-row__uid">{row.uid}</span>
-                    <span className="record-row__detail">{row.error}</span>
+                    {row.kind === "lookup-error" && <span className="record-row__detail">
+                        {row.error}
+                        <button className="btn" type="button" onClick={() => setRecentRetry(value => value + 1)}>다시 시도</button>
+                    </span>}
+                    <button className="btn-quiet record-row__action" type="button" onClick={() => setRecent(forgetDecision(row.uid))}>기록 지우기</button>
                 </li>;
                 const visit = recent.find((item) => item.uid.toLowerCase() === row.uid.toLowerCase());
                 return <RecordRowView

@@ -1,9 +1,15 @@
 import {describe, expect, it} from "vitest";
-import {addRecent, type RecentDecision} from "../src/recent";
+import {addRecent, removeRecent, type RecentDecision} from "../src/recent";
 
 const item = (digit: number): RecentDecision => ({
     uid: `0x${String(digit).repeat(64)}`,
     at: digit,
+});
+
+describe("removeRecent", () => {
+    it("removes only the selected UID, case-insensitively", () => {
+        expect(removeRecent([item(1), item(2)], item(1).uid.toUpperCase())).toEqual([item(2)]);
+    });
 });
 
 describe("addRecent", () => {
