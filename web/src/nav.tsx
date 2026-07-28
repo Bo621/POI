@@ -1,4 +1,5 @@
 import type {Route} from "./router";
+import {ThemeToggle} from "./theme";
 import {Wallet, type WalletState} from "./wallet";
 
 function isCurrent(route: Route, name: "home" | "record" | "me" | "verify"): boolean {
@@ -29,6 +30,7 @@ export function Nav({route, wallet, onWalletChange}: {
                 {link.label}
             </a>)}
         </div>
+        <ThemeToggle />
         <Wallet state={wallet} onChange={onWalletChange} />
         <span className="site-nav__chain" aria-label="chainId 91342">· 91342</span>
     </nav>;

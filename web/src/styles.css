@@ -730,3 +730,10 @@ pre {
     --gold: oklch(0.620 0.130 85);
     --gold-soft: oklch(0.620 0.130 85 / 0.12);
 }
+
+/* 기와 ↔ 한지 전환. 두 정체성이 다 살아 있다는 표시이기도 하다. */
+.theme-toggle {
+    padding-inline: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+}
