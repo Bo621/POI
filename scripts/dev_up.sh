@@ -74,7 +74,8 @@ set_time() {
 send_tx() {
     local key=$1
     shift
-    cast send --private-key "${key}" --rpc-url "${LOCAL_RPC}" --async "$@"
+    cast send --private-key "${key}" --rpc-url "${LOCAL_RPC}" --async \
+        --gas-limit 8000000 "$@"
 }
 
 wait_receipt() {

@@ -669,3 +669,95 @@ RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
 
 이 단계의 성공 기준은 "완주"가 아니라 **"anvil이 죽지 않고, 실패하면 revert 사유가
 화면에 나오는 것"**이다.
+
+---
+
+## 리뷰 대응 R8 — 포크를 버린다. EAS를 로컬에 직접 배포한다
+
+### 왜 지금까지 계속 막혔나
+
+R1~R7에서 나온 실패가 전부 **같은 뿌리**를 가진다: anvil이 레이트 리밋되는 공개 RPC
+(`https://sepolia-rpc.giwa.io/`)에서 상태를 **지연 조회**한다.
+
+- 트랜잭션마다 EAS·SchemaRegistry의 스토리지를 상류에서 새로 받아온다
+- 공개 RPC는 429를 던진다(CT-FORK 테스트에서도 같은 일이 있었다)
+- 그래서 트랜잭션이 기어가고, 타임아웃이 나고, anvil이 죽는다
+- 마지막 실행에서는 `cast block-number`조차 180초 안에 응답하지 않았다
+
+`forge test --fork-url`이 잘 돌았던 이유는 **foundry가 자체 RPC 캐시**(`~/.foundry/cache/rpc`)를
+쓰기 때문이다. anvil은 그 캐시를 쓰지 않는다.
+
+### 해법 — 포크하지 않는다
+
+시드에 필요한 것은 EAS와 SchemaRegistry **동작**이지 GIWA의 상태가 아니다.
+`contracts/lib/eas-contracts/`에 소스가 있으므로 **로컬 anvil에 직접 배포**한다.
+
+```
+anvil --port 8545 --chain-id 91342          # --fork-url 없음
+  1. SchemaRegistry 배포
+  2. EAS 배포 (생성자에 SchemaRegistry 주소)
+  3. 그 다음은 지금과 동일 — 리졸버 4종, 스키마 4종, addMetric, fixture
+```
+
+- 상류 RPC 호출이 **0건**이 된다. 레이트 리밋도, 지연 조회도, 타임아웃도 없다
+- 결정적이고 빠르다
+- `--chain-id 91342`를 유지해 commitment의 chainId 결합이 실제와 같다
+
+### 이 선택이 무엇을 잃는가 — 정직하게
+
+**실제 배포본 `1.4.1-beta.3`이 아니라 lib `v1.4.0`의 EAS가 돈다.**
+그 차이는 이미 **C8과 CT-FORK가 포크에서 실제 바이트코드 상대로 검증**했다
+(`FOUNDRY_PROFILE=fork forge test` 37/37). 시드는 UI를 손으로 확인하기 위한
+**개발 환경**이지 그 검증을 대신하는 것이 아니다.
+
+`docs/TEST_SCENARIO.md`와 `docs/fixtures/seed.json`에 이 사실을 한 줄로 적는다:
+
+> 이 시드는 로컬에 배포한 EAS(lib v1.4.0)를 쓴다. 실제 배포본(1.4.1-beta.3) 상대 검증은
+> `FOUNDRY_PROFILE=fork forge test`가 담당한다.
+
+### 구현
+
+- `scripts/dev_up.sh`: `--fork-url`·`--fork-block-number` 제거.
+  `RPC` 환경변수는 **선택**이 된다(업비트 조회에는 필요 없다).
+- EAS·SchemaRegistry 배포를 `cast send --create`로 추가하고 주소를 이후 단계에 넘긴다.
+  바이트코드는 `forge inspect SchemaRegistry bytecode` / `forge inspect EAS bytecode`.
+  **EAS 생성자는 SchemaRegistry 주소를 받는다** — `cast abi-encode`로 인자를 붙인다.
+- `web/.env.local`에 `VITE_EAS_ADDRESS`를 추가하고 `web/src/config.ts`가 그것을 읽게 한다
+  (지금은 `0x42...21`로 고정돼 있다. 환경변수가 없으면 기존 상수를 기본값으로).
+- `T0` 기준은 그대로 둔다(업비트 봉이 실제 과거에 있어야 하므로).
+  포크가 아니므로 anvil의 시작 시각은 실제 현재다 — `evm_increaseTime`으로 **뒤로 갈 수 없다.**
+  그래서 `T0`를 과거로 두지 말고 **anvil 시작 직후의 체인 시각을 `T0`로 삼고**,
+  관측 구간만 과거로 지정한다. `windowStart`는 발행 시각보다 미래여야 하므로(I4)
+  **관측 구간과 발행 시각을 분리**한다:
+
+  ```
+  T0        = anvil 시작 시각 (≈ 실제 현재)
+  windowStart = T0 + 1800          # 발행 시점보다 미래 (I4 만족)
+  windowEnd   = T0 + 2400
+  → 관측 구간이 미래이므로 업비트 봉이 없다
+  ```
+
+  **그래서 시각을 앞으로 감는다.** `evm_increaseTime`으로 `windowEnd`를 지나면 그 구간은
+  "체인 시각 기준 과거"가 되지만 **실제 시각으로는 여전히 미래**라 업비트 봉이 없다.
+
+  해결: **관측값을 업비트의 최근 과거 구간에서 가져오되, 그 값을 fixture의 관측값으로 쓴다.**
+  `observe.ts`는 `[실제now-3600, 실제now-3000]` 구간을 조회해 값을 얻고,
+  fixture의 `windowStart/windowEnd`는 체인 시각 기준으로 잡는다.
+  **두 구간이 다르다는 것을 `seed.json`에 명시한다** —
+  로컬 시드는 verifier 대조가 아니라 **UI 확인**이 목적이기 때문이다.
+
+  verifier의 실제 `MATCH` 증명은 **O3 실제 배포 뒤**에 한다(`SUBMISSION.md` §1).
+
+### 검증
+
+```bash
+bash scripts/dev_up.sh                       # RPC 환경변수 없이도 돌아야 한다
+```
+
+완주해서 요약을 출력해야 한다. 상류 RPC 호출이 없으므로 **1분 안에 끝나야 한다.**
+완주 후:
+
+- `docs/fixtures/seed.json`에 F1·F2·F4·F5·f_copy의 UID
+- `web/.env.local` 생성 (`VITE_EAS_ADDRESS` 포함)
+- `cast call <settlement resolver> "activeHead(bytes32)(bytes32)" <f1.decisionUID>` ≠ 0
+- `cast call <settlement resolver> "revokeCount(bytes32)(uint32)" <f2.decisionUID>` == 1
