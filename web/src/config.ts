@@ -7,6 +7,8 @@ export const CHAIN = {
 
 export const EAS_ADDRESS =
     import.meta.env.VITE_EAS_ADDRESS ?? "0x4200000000000000000000000000000000000021";
+export const EXPLORER_URL =
+    import.meta.env.VITE_EXPLORER_URL ?? "https://sepolia-explorer.giwa.io";
 export const SCHEMA_REGISTRY_ADDRESS =
     import.meta.env.VITE_SCHEMA_REGISTRY_ADDRESS ?? "0x4200000000000000000000000000000000000020";
 export const DOJANG_ADDRESS =
@@ -30,6 +32,10 @@ export const RESOLVERS = {
 };
 
 export const DOJANG_SCHEMA_UID = import.meta.env.VITE_DOJANG_SCHEMA_UID ?? "";
+
+export function isLocalChain(): boolean {
+    return /(?:127\.0\.0\.1|localhost)/i.test(CHAIN.rpcUrl);
+}
 
 export function isDeployed(): boolean {
     return Object.values(SCHEMAS).every((uid) => /^0x[0-9a-fA-F]{64}$/.test(uid))

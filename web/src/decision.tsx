@@ -2,7 +2,8 @@ import {useState, type FormEvent} from "react";
 import {commitment, messageFromRevert} from "@poi/core";
 import {bytesToHex, isHex, type Address, type Hex} from "viem";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
-import {attest, encodeDecisionData, type DecisionFields} from "./eas";
+import {attest, encodeDecisionData, type AttestResult, type DecisionFields} from "./eas";
+import {Receipt} from "./receipt";
 import {SaltBackup} from "./saltBackup";
 import {ZERO_UID, type VerificationSnapshot} from "./wallet";
 
@@ -147,6 +148,7 @@ export function Decision({address, verification}: {
     const [parentsText, setParentsText] = useState("");
     const [promoted, setPromoted] = useState("");
     const [pending, setPending] = useState<DecisionForm>();
+    const [receipt, setReceipt] = useState<AttestResult>();
     const [status, setStatus] = useState("");
 
     function prepare(event: FormEvent) {
@@ -187,13 +189,14 @@ export function Decision({address, verification}: {
         if (!pending || !isDeployed()) return;
         try {
             const payload = buildDecisionPayload(pending);
-            const hash = await attest({
+            const result = await attest({
                 schema: SCHEMAS.decision as Hex,
                 data: encodeDecisionData(payload.fields),
                 revocable: false,
                 refUID: payload.refUID,
             });
-            setStatus(`발행 트랜잭션: ${hash}`);
+            setReceipt(result);
+            setStatus("");
             setPending(undefined);
         } catch (error) {
             setStatus(revertMessage(error));
@@ -245,6 +248,7 @@ export function Decision({address, verification}: {
                 <button className="btn" type="submit" disabled={!isDeployed()}>salt 생성 및 백업</button>
             </form>
             {status && <p className="form-status" role="alert">{status}</p>}
+            <Receipt label="결정 커밋" uid={receipt?.uid} txHash={receipt?.txHash} />
             {pending && (
                 <SaltBackup
                     salts={pending.salts}
