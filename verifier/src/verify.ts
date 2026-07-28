@@ -1,4 +1,5 @@
 import {
+    METRICS,
     RESULT,
     deriveState,
     evalPredicate,
@@ -8,8 +9,9 @@ import {
     type PoiState,
 } from "@poi/core";
 import type {Hex} from "viem";
-import type {MetricRegistry} from "./metric.ts";
+import type {CandleRow, MetricRegistry} from "./metric.ts";
 import type {ChainReader, OnChainSettlement} from "./reader.ts";
+import {snapshotHash} from "./snapshot.ts";
 import {VERIFIER_VERSION} from "./version.ts";
 
 export const VERDICT = {
@@ -28,7 +30,14 @@ export interface VerifyReport {
     hasRevokedSettlement: boolean;
     settlementUID?: Hex;
     onChain?: {result: number; observedValue: bigint | null; observedAt: bigint; source: string};
-    independent?: {scaledValue: bigint; expectedResult: number; raw: string; source: string};
+    independent?: {
+        scaledValue: bigint;
+        expectedResult: number;
+        raw: string;
+        source: string;
+        snapshot: CandleRow[];
+        snapshotHash: Hex;
+    };
     problems: string[];
 }
 
@@ -88,8 +97,44 @@ export async function verifyDecision(args: {
     if (!decision.hasExpectedOutcome) {
         return {...base, verdict: VERDICT.NOT_REQUIRED};
     }
+    const manifest = METRICS.find((metric) =>
+        metric.metricId.toLowerCase() === decision.outcomeMetricId.toLowerCase());
+    if (!manifest) {
+        problems.push(`manifest에 없는 metricId다: ${decision.outcomeMetricId}`);
+        return {
+            ...base,
+            verdict: VERDICT.NO_OBSERVATION,
+            ...(settlement ? {settlementUID: activeHead, onChain: onChainView(settlement)} : {}),
+        };
+    }
+
+    const onChainMetric = await args.reader.getMetric(decision.outcomeMetricId);
+    let metricMismatch = false;
+    if (!onChainMetric.allowed) {
+        problems.push(`온체인 지표 ${decision.outcomeMetricId}가 허용되지 않았다.`);
+        metricMismatch = true;
+    }
+    if (onChainMetric.kind !== 0) {
+        problems.push(`온체인 지표 kind ${onChainMetric.kind}가 기대값 0과 다르다.`);
+        metricMismatch = true;
+    }
+    if (!onChainMetric.frozen) {
+        problems.push(`온체인 지표 ${decision.outcomeMetricId}가 frozen 상태가 아니다.`);
+    }
+    if (onChainMetric.decimals !== manifest.decimals) {
+        problems.push(
+            `온체인 decimals ${onChainMetric.decimals}가 manifest decimals ${manifest.decimals}와 다르다.`,
+        );
+        metricMismatch = true;
+    }
+    if (onChainMetric.definitionHash.toLowerCase() !== manifest.definitionHash.toLowerCase()) {
+        problems.push(
+            `온체인 definitionHash ${onChainMetric.definitionHash}가 manifest definitionHash ${manifest.definitionHash}와 다르다.`,
+        );
+        metricMismatch = true;
+    }
     if (!settlement) {
-        return {...base, verdict: VERDICT.NO_SETTLEMENT};
+        return {...base, verdict: metricMismatch ? VERDICT.MISMATCH : VERDICT.NO_SETTLEMENT};
     }
 
     const report: VerifyReport = {
@@ -98,7 +143,7 @@ export async function verifyDecision(args: {
         settlementUID: activeHead,
         onChain: onChainView(settlement),
     };
-    let inconsistent = false;
+    let inconsistent = metricMismatch;
     if (settlement.observedAt !== decision.windowEnd) {
         problems.push(`온체인 observedAt ${settlement.observedAt}이 windowEnd ${decision.windowEnd}와 다르다.`);
         inconsistent = true;
@@ -126,13 +171,21 @@ export async function verifyDecision(args: {
         return report;
     }
     const observation = await provider.observe(decision.windowStart, decision.windowEnd);
-    if (!observation) {
-        report.verdict = inconsistent ? VERDICT.MISMATCH : VERDICT.NO_OBSERVATION;
+    if (observation.kind === "error") {
+        throw new VerifyError(`지표 조회 실패: ${observation.reason}`);
+    }
+    if (observation.kind === "insufficient") {
+        if (settlement.result !== RESULT.INDETERMINATE || settlement.hasObservedValue) {
+            problems.push(
+                `독립 관측은 데이터 부족(${observation.reason})인데 온체인 result가 ${settlement.result}이다.`,
+            );
+            inconsistent = true;
+        }
+        report.verdict = inconsistent ? VERDICT.MISMATCH : VERDICT.MATCH;
         return report;
     }
 
-    const decimals = await args.reader.getMetricDecimals(decision.outcomeMetricId);
-    const scaledValue = scale(observation.raw, decimals);
+    const scaledValue = scale(observation.raw, manifest.decimals);
     const expectedResult = settlementResult({
         hasObservedValue: true,
         scaledValue,
@@ -146,6 +199,8 @@ export async function verifyDecision(args: {
         expectedResult,
         raw: observation.raw,
         source: observation.source,
+        snapshot: observation.snapshot,
+        snapshotHash: snapshotHash(observation.snapshot),
     };
     if (!settlement.hasObservedValue) {
         problems.push(`독립 관측값 ${scaledValue}이 있지만 온체인에는 관측값이 없다.`);

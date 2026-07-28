@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import {isAddress, isHex, type Address, type Hex} from "viem";
+import {defaultProviders} from "./providers.ts";
 import {createViemReader} from "./reader.ts";
 import {VERDICT, verifyDecision} from "./verify.ts";
 
-const USAGE = "사용법: poi-verify <decisionUID> [--rpc <url>] [--json]";
+const USAGE = "사용법: poi-verify <decisionUID> [--rpc <url>] [--json] [--no-fetch]";
 
 function requiredAddress(name: string): Address {
     const value = process.env[name];
@@ -14,11 +15,14 @@ function requiredAddress(name: string): Address {
 export async function main(argv = process.argv.slice(2)): Promise<number> {
     let rpcUrl = process.env.POI_RPC_URL;
     let json = false;
+    let noFetch = false;
     let decisionUID: Hex | undefined;
     for (let index = 0; index < argv.length; index += 1) {
         const arg = argv[index]!;
         if (arg === "--json") {
             json = true;
+        } else if (arg === "--no-fetch") {
+            noFetch = true;
         } else if (arg === "--rpc") {
             rpcUrl = argv[++index];
             if (!rpcUrl) throw new Error(USAGE);
@@ -30,15 +34,17 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     }
     if (!decisionUID || !rpcUrl) throw new Error(USAGE);
 
+    const reader = createViemReader({
+        rpcUrl,
+        easAddress: requiredAddress("POI_EAS_ADDRESS"),
+        settlementResolverAddress: requiredAddress("POI_SETTLEMENT_RESOLVER_ADDRESS"),
+        metricRegistryAddress: requiredAddress("POI_METRIC_REGISTRY_ADDRESS"),
+    });
     const report = await verifyDecision({
-        reader: createViemReader({
-            rpcUrl,
-            easAddress: requiredAddress("POI_EAS_ADDRESS"),
-            settlementResolverAddress: requiredAddress("POI_SETTLEMENT_RESOLVER_ADDRESS"),
-            metricRegistryAddress: requiredAddress("POI_METRIC_REGISTRY_ADDRESS"),
-        }),
+        reader,
+        ...(!noFetch && {metrics: defaultProviders()}),
         decisionUID,
-        now: BigInt(Math.floor(Date.now() / 1000)),
+        now: await reader.getChainTime(),
     });
     if (json) {
         console.log(JSON.stringify(report, (_key, value) =>
@@ -48,7 +54,9 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         console.log(`상태: ${report.state}`);
         for (const problem of report.problems) console.log(`문제: ${problem}`);
     }
-    return report.verdict === VERDICT.MISMATCH ? 1 : 0;
+    if (report.verdict === VERDICT.MISMATCH) return 1;
+    if (report.verdict === VERDICT.NO_OBSERVATION || report.verdict === VERDICT.NO_SETTLEMENT) return 3;
+    return 0;
 }
 
 main().then(
