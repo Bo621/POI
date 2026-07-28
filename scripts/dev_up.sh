@@ -71,6 +71,44 @@ set_time() {
     cast rpc --rpc-url "${LOCAL_RPC}" evm_mine >/dev/null
 }
 
+send_tx() {
+    local key=$1
+    shift
+    cast send --private-key "${key}" --rpc-url "${LOCAL_RPC}" --async "$@"
+}
+
+wait_receipt() {
+    local hash=$1
+    local i=0
+    local receipt
+    local status
+    while (( i < 60 )); do
+        receipt="$(cast receipt "${hash}" --rpc-url "${LOCAL_RPC}" --json 2>/dev/null || true)"
+        if [[ -n "${receipt}" && "${receipt}" != "null" ]]; then
+            status="$(jq -r '.status' <<<"${receipt}")"
+            if [[ "${status}" != "0x1" && "${status}" != "1" ]]; then
+                echo "트랜잭션 실패: ${hash}" >&2
+                cast run "${hash}" --rpc-url "${LOCAL_RPC}" >&2 || true
+                return 1
+            fi
+            printf '%s' "${receipt}"
+            return 0
+        fi
+        sleep 0.5
+        i=$((i + 1))
+    done
+    echo "영수증을 받지 못했습니다: ${hash}" >&2
+    return 1
+}
+
+send_and_wait() {
+    local key=$1
+    local hash
+    shift
+    hash="$(send_tx "${key}" "$@")"
+    wait_receipt "${hash}"
+}
+
 send_transaction() {
     local actor=$1
     local to=$2
@@ -85,9 +123,7 @@ send_transaction() {
         return 1
     fi
 
-    # cast send prints decoded revert information and exits non-zero on failure.
-    cast send --private-key "${key}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json \
-        "${to}" "${calldata}"
+    send_and_wait "${key}" "${to}" "${calldata}"
 }
 
 deploy_resolver() {
@@ -98,8 +134,7 @@ deploy_resolver() {
     local address
     bytecode="$(cd "${ROOT_DIR}/contracts" && forge inspect "src/${contract}.sol:${contract}" bytecode)"
     constructor="$(cast abi-encode 'constructor(address)' "${EAS}")"
-    receipt="$(cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" \
-        --confirmations 1 --json --create "${bytecode}${constructor#0x}")"
+    receipt="$(send_and_wait "${KEY_A}" --create "${bytecode}${constructor#0x}")"
     address="$(jq -r '.contractAddress // .contract_address // empty' <<<"${receipt}")"
     require_value "${contract} 배포 주소" "${address}"
     printf '%s\n' "${address}"
@@ -115,8 +150,7 @@ register_schema() {
     predicted="$(cast call --from "${ACTOR_A}" --rpc-url "${LOCAL_RPC}" \
         "${SCHEMA_REGISTRY}" 'register(string,address,bool)(bytes32)' \
         "${schema}" "${resolver}" "${revocable}")"
-    receipt="$(cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" \
-        --confirmations 1 --json "${SCHEMA_REGISTRY}" \
+    receipt="$(send_and_wait "${KEY_A}" "${SCHEMA_REGISTRY}" \
         'register(string,address,bool)' "${schema}" "${resolver}" "${revocable}")"
     emitted="$(jq -r --arg address "$(lower "${SCHEMA_REGISTRY}")" '
         [.logs[]? | select((.address | ascii_downcase) == $address) | .topics[1]] | first // empty
@@ -129,13 +163,13 @@ register_schema() {
 }
 
 initialize_resolvers() {
-    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+    send_and_wait "${KEY_A}" \
         "${NOTE_RESOLVER}" 'initialize(bytes32)' "${NOTE_SCHEMA}" >/dev/null
-    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+    send_and_wait "${KEY_A}" \
         "${DECISION_RESOLVER}" 'initialize(bytes32,bytes32)' "${DECISION_SCHEMA}" "${NOTE_SCHEMA}" >/dev/null
-    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+    send_and_wait "${KEY_A}" \
         "${SETTLEMENT_RESOLVER}" 'initialize(bytes32,bytes32)' "${SETTLEMENT_SCHEMA}" "${DECISION_SCHEMA}" >/dev/null
-    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+    send_and_wait "${KEY_A}" \
         "${CHALLENGE_RESOLVER}" 'initialize(bytes32,bytes32)' "${CHALLENGE_SCHEMA}" "${SETTLEMENT_SCHEMA}" >/dev/null
 }
 

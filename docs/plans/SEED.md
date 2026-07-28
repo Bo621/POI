@@ -609,3 +609,63 @@ RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
 ```
 
 **완주해서 요약을 출력해야 한다.** 실패하면 `cast run`의 revert 사유가 화면에 나와야 한다.
+
+---
+
+## 리뷰 대응 R7 — 가스 추정을 건너뛴다
+
+실행 결과:
+
+```
+Error: Failed to estimate gas: error sending request for url (http://127.0.0.1:8545/)
+scripts/dev_up.sh: line 188: ... Abort trap: 6   anvil ...
+```
+
+이번에는 **`evm_mine`을 한 번도 부르지 않았는데도** anvil이 죽었다.
+RPC 집계: `eth_sendRawTransaction` **16건**이 성공했고, **17번째의 `eth_estimateGas`에서**
+anvil이 죽었다.
+
+16건 = 리졸버 4종 배포 + 스키마 4종 등록 + `initialize` 4회 + `addMetric` 2회 + 발행 2건.
+**17번째는 결정 발행**이고, R2에서 revert했던 그 트랜잭션과 같은 자리다.
+
+즉 **anvil 1.7.1은 리졸버 안에서 revert하는 트랜잭션의 가스를 추정할 때 죽는다.**
+(R3에서 본 `do_mine_block` 패닉과 별개 경로다.)
+
+### 고치는 방법 — `--gas-limit`을 명시해 추정을 생략한다
+
+`cast send`에 `--gas-limit`을 주면 `eth_estimateGas`를 호출하지 않는다.
+
+```bash
+cast send --rpc-url "${LOCAL_RPC}" --private-key "$1" --async \
+    --gas-limit 8000000 "$2" "$3"
+```
+
+배포도 같다: `--gas-limit 8000000 --create "$bytecode"`.
+
+- anvil 기본 블록 가스 한도는 30,000,000이므로 8,000,000은 안전하다.
+  가장 큰 트랜잭션(결정 리졸버 배포)이 포크 드라이런에서 약 2.5M이었다.
+- 추정을 건너뛰면 **revert하는 트랜잭션도 채굴된다.** 영수증 `status`가 `0x0`으로 오고,
+  R6이 넣은 `cast run`이 revert 사유를 출력한다. **이것이 목표다** —
+  지금까지 사유를 못 봐서 추측만 했다.
+
+### 그 다음에 할 일
+
+17번째 트랜잭션의 revert 사유가 나오면 그것을 고친다. 유력한 후보:
+
+| 후보 | 확인 방법 |
+|---|---|
+| `WindowInPast` (I4) | `windowStart`가 발행 시각보다 과거. R2에서 여유를 30분으로 늘렸으나 실제 체인 시각을 확인해야 한다 |
+| `MetricNotAllowed` (I5) | `addMetric`이 먼저 실행됐는지, `metricId`가 manifest와 같은지 |
+| `RefUIDMismatch` (I12) | 부모가 없으면 `refUID`가 0이어야 한다 |
+| `MalformedPayload` | 평면 튜플 인코딩 길이 |
+
+**사유를 보고 고친다. 추측으로 고치지 말 것.**
+
+### 검증
+
+```bash
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
+```
+
+이 단계의 성공 기준은 "완주"가 아니라 **"anvil이 죽지 않고, 실패하면 revert 사유가
+화면에 나오는 것"**이다.
