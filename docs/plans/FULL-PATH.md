@@ -110,3 +110,73 @@ cd web && npx tsc --noEmit && npm run build
 
 **16/16이 이 항목의 완료 조건이다.** 새 테스트 하나가 통과하면
 "프론트에서 커밋 → 정산 → 이의 → reveal 전 경로 동작"이 자동으로 증명된다.
+
+---
+
+## 리뷰 대응 R1 — `[P1]` 발행이 revert해도 UI가 이유를 말하지 않는다
+
+성공 경로가 3단계(결정 커밋)에서 멈춘다. 화면에 남은 문구:
+
+```
+alert: 발행 영수증에서 UID를 찾지 못했습니다.
+```
+
+노트 발행(2단계)은 성공했다(영수증이 렌더링됐다). 결정 발행은 **트랜잭션이 나갔지만
+revert했고, 영수증에 로그가 없어 UID를 못 찾은 것**이다.
+
+문제는 그 다음이다. **사용자에게 "왜 실패했는지"가 전달되지 않는다.**
+X7이 리졸버 에러 57종을 한국어로 매핑해 뒀는데 **그 경로가 닿지 않는다.**
+`messageFromRevert`가 호출되지 않는 것이다.
+
+되돌릴 수 없는 발행에서 이유 없는 실패는 제품으로서 결함이다. 게다가 가스도 이미 썼다.
+
+### 고칠 것 1 — 보내기 전에 시뮬레이션한다
+
+`web/src/eas.ts`의 발행 경로가 `writeContract`를 바로 부른다.
+**`simulateContract`를 먼저 부른다.**
+
+```
+simulateContract → 실패하면 그 오류에서 revert data를 뽑아
+                   @poi/core 의 messageFromRevert 로 한국어 메시지를 만든다
+               → 트랜잭션을 보내지 않는다 (가스를 쓰지 않는다)
+             성공하면 그 request 로 writeContract
+```
+
+viem 오류에서 revert data를 얻는 방법은 `viem`의 `BaseError.walk()`로
+`ContractFunctionRevertedError` / `RawContractError`를 찾아 `data`를 읽는 것이다.
+**정확한 타입은 설치된 viem 버전에서 확인할 것. 추측 금지.**
+
+매핑에 없는 셀렉터면 원문 그대로 보여준다 — 숨기지 말 것.
+
+### 고칠 것 2 — 영수증도 status를 본다
+
+시뮬레이션을 통과했는데도 온체인에서 revert할 수 있다(상태가 그 사이 바뀐 경우).
+`waitForTransactionReceipt`의 `receipt.status`가 `"reverted"`면
+`"트랜잭션이 온체인에서 실패했습니다."` + tx 해시를 보여준다.
+**"UID를 찾지 못했습니다"로 뭉개지 말 것.**
+
+### 고칠 것 3 — 그래서 왜 revert했는가
+
+1·2를 고치면 다음 실행에서 **한국어 사유가 화면에 뜬다.** 그것을 보고 고친다.
+
+유력한 후보(추측이며, 사유를 보고 판단할 것):
+
+| 후보 | 확인 |
+|---|---|
+| `WindowInPast` (I4) | `chainClock`이 최대 15초 뒤처질 수 있다. `windowStart = 체인시각 + 120`이 발행 시점엔 이미 과거일 수 있다 |
+| `NoteNotEarlier` | 승격 노트의 `time`이 결정의 `time`보다 앞서야 한다 |
+| `MalformedPayload` | 평면 튜플 길이 |
+
+`WindowInPast`가 원인이면 **여유를 늘리는 것으로 때우지 말 것.**
+사용자도 같은 문제를 겪는다 — `windowStart` 기본값과 검증이
+**발행 직전의 체인 시각**을 쓰도록 고쳐야 한다(시뮬레이션이 그 시점 상태로 판정하므로
+1번을 고치면 최소한 가스를 버리지는 않는다).
+
+### 검증
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e     # 16/16
+```
+
+그리고 **일부러 실패하는 발행**(예: 과거 window를 강제로 넣은 상태)에서
+화면에 한국어 사유가 뜨는 것을 확인한다.
