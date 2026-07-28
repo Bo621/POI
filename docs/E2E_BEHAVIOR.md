@@ -8,7 +8,7 @@ skip되면 명령은 실패한다.
 | 1 | `read.spec.ts` | 배포 완료 환경에서 F1 결정의 상태가 정산 완료로 표시된다. |
 | 2 | `read.spec.ts` | F4 결정의 상태가 기한 초과로 표시된다. |
 | 3 | `read.spec.ts` | F2 결정은 정산 완료이며 정산 철회 이력이 표시된다. |
-| 4 | `read.spec.ts` | F5 결정의 상태가 대기로 표시된다. |
+| 4 | `read.spec.ts` | F5 결정의 인장이 다음 시간 경계에서 새로고침 없이 바뀐다. |
 | 5 | `read.spec.ts` | F1 정산의 이의 한 항목을 표시하고, 건수나 조회 완전성을 잘못 보장하지 않는다. |
 | 6 | `read.spec.ts` | F1 공개 데이터의 commitment가 일치하면 RevealFile을 다운로드할 수 있다. |
 | 7 | `read.spec.ts` | 사본의 commitment가 불일치하면 실제 attester를 표시하고 RevealFile 다운로드를 막는다. |
@@ -29,7 +29,7 @@ skip되면 명령은 실패한다.
 | 1 | `read.spec.ts` — `배포 안내가 없고 F1은 정산완료다` |
 | 2 | `read.spec.ts` — `F4는 기한초과다` |
 | 3 | `read.spec.ts` — `F2는 정산완료이며 철회 이력이 있다` |
-| 4 | `read.spec.ts` — `F5는 대기다` |
+| 4 | `read.spec.ts` — `F5는 다음 시간 경계에서 새로고침 없이 인장이 바뀐다` |
 | 5 | `read.spec.ts` — `이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다` |
 | 6 | `read.spec.ts` — `Reveal commitment 대조` / `F1은 일치한다` |
 | 7 | `read.spec.ts` — `Reveal commitment 대조` / `CT18 사본은 불일치하고 다운로드할 수 없다` |
@@ -46,6 +46,8 @@ skip되면 명령은 실패한다.
 ---
 
 ## 실행 전에 시드를 새로 만든다
+
+E2E는 단일 체인을 공유하므로 직렬로 실행한다. 시간에 의존하는 단언은 체인 시각에서 계산한다.
 
 `fullpath`가 `evm_increaseTime`으로 체인 시각을 민다. 그래서 **한 시드로 E2E를 여러 번
 돌리면 fixture의 기대 상태가 어긋나** 거짓 실패가 난다(F5가 `대기`에서 `관측중`으로 넘어가는 식).

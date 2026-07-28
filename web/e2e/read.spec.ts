@@ -36,16 +36,31 @@ test("F2는 정산완료이며 철회 이력이 있다", async ({page}) => {
     await expect(history.locator("dt", {hasText: "결과"}).first().locator("+ dd")).toHaveText("OBSERVED");
 });
 
-test("F5는 새로고침 없이 대기에서 관측중으로 바뀐다", async ({page}) => {
+test("F5는 다음 시간 경계에서 새로고침 없이 인장이 바뀐다", async ({page}) => {
     const fixture = requireSeed().fixtures.f5;
-    await loadStatus(page, fixture.decisionUID, "대기");
+    await page.goto(`/#/d/${fixture.decisionUID}`);
     const status = page.locator("section.status-result");
-    await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
-    await expect(status.locator("dl").getByText("대기", {exact: true})).toBeVisible();
-    const windowText = await section(page, "예상 결과").locator("dd").filter({hasText: " ~ "}).textContent();
-    const windowStart = Date.parse(windowText!.split(" ~ ")[0].replace(" UTC", "Z")) / 1000;
-    await advanceChain(rpcUrl, Math.max(1, windowStart - await chainNow() + 1));
-    await expect(status.getByRole("img", {name: "상태: 관측중"})).toBeVisible({timeout: 30_000});
+    const seal = status.getByRole("img");
+    await expect(seal).toBeVisible();
+    const initialSeal = await seal.getAttribute("aria-label");
+    expect(initialSeal).toMatch(/^상태: .+/);
+
+    const expected = section(page, "예상 결과");
+    const windowText = await expected.locator("dt", {hasText: "관측 구간"}).locator("+ dd").textContent();
+    const [windowStartText, windowEndText] = windowText!.split(" ~ ");
+    const windowStart = Date.parse(windowStartText.replace(" UTC", "Z")) / 1000;
+    const windowEnd = Date.parse(windowEndText.replace(" UTC", "Z")) / 1000;
+    const graceText = await expected.locator("dt", {hasText: "유예"}).locator("+ dd").textContent();
+    const graceSeconds = Number.parseInt(graceText!, 10);
+    const now = await chainNow();
+    const nextBoundary = [windowStart, windowEnd, windowEnd + graceSeconds]
+        .map((boundary) => boundary + 1)
+        .find((boundary) => boundary > now);
+    expect(nextBoundary, "F5에 아직 지나지 않은 상태 경계가 있어야 한다").toBeDefined();
+
+    await advanceChain(rpcUrl, nextBoundary! - now);
+    await expect.poll(() => seal.getAttribute("aria-label"), {timeout: 30_000})
+        .not.toBe(initialSeal);
 });
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
