@@ -1,6 +1,6 @@
 import {useEffect, useState, type FormEvent} from "react";
 import {commitment} from "@poi/core";
-import {bytesToHex, type Address, type Hex} from "viem";
+import {bytesToHex, zeroAddress, type Address, type Hex} from "viem";
 import {clockSkewNotice} from "./chainClock";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {attest, encodeDecisionData, type AttestResult, type DecisionFields} from "./eas";
@@ -118,11 +118,13 @@ export function buildDecisionPayload(form: DecisionForm, now = Math.floor(Date.n
     };
 }
 
-export function Decision({address, verification, chainNow, skewSeconds}: {
+export function Decision({address, verification, chainNow, skewSeconds, onPublished, onEditingChange}: {
     address?: Address;
     verification: VerificationSnapshot;
     chainNow: bigint | undefined;
     skewSeconds: number | undefined;
+    onPublished?: (uid: Hex) => void;
+    onEditingChange?: (editing: boolean) => void;
 }) {
     const [decision, setDecision] = useState("");
     const [trigger, setTrigger] = useState("");
@@ -148,14 +150,22 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
         setWindowEnd((value) => value ?? initialNow + 3900);
     }, [chainNow]);
 
+    useEffect(() => {
+        onEditingChange?.(
+            decision.trim().length > 0
+            || trigger.trim().length > 0
+            || evidence.trim().length > 0
+            || reason.trim().length > 0
+            || parentsText.trim().length > 0
+            || promoted.trim().length > 0
+            || hasOutcome,
+        );
+    }, [decision, trigger, evidence, reason, parentsText, promoted, hasOutcome, onEditingChange]);
+
     function prepare(event: FormEvent) {
         event.preventDefault();
         setStatus("");
         if (chainNow === undefined || windowStart === undefined || windowEnd === undefined) return;
-        if (!address) {
-            setStatus("먼저 지갑을 연결해 주세요.");
-            return;
-        }
         const salts = {decision: newSalt(), trigger: newSalt(), evidence: newSalt(), reason: newSalt()};
         const form: DecisionForm = {
             decision,
@@ -171,7 +181,7 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
             graceSeconds: grace,
             parents: parentsText.split(/\s+/).filter(Boolean),
             promotedFromNote: promoted.trim(),
-            attester: address,
+            attester: address ?? zeroAddress,
             verifiedAddressUID: verification.verifiedAddressUID,
             salts,
         };
@@ -184,9 +194,9 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
     }
 
     async function publish() {
-        if (!pending || !isDeployed() || chainNow === undefined) return;
+        if (!pending || !address || !isDeployed() || chainNow === undefined) return;
         try {
-            const payload = buildDecisionPayload(pending, Number(chainNow));
+            const payload = buildDecisionPayload({...pending, attester: address}, Number(chainNow));
             const result = await attest({
                 schema: SCHEMAS.decision as Hex,
                 data: encodeDecisionData(payload.fields),
@@ -196,6 +206,7 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
             setReceipt(result);
             setStatus("");
             setPending(undefined);
+            if (onPublished) window.setTimeout(() => onPublished(result.uid), 250);
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "발행에 실패했습니다.");
         }
@@ -220,11 +231,13 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
                     <div className="field"><label htmlFor="decision-content">결정 내용</label><textarea id="decision-content" rows={6} value={decision} onChange={(e) => setDecision(e.target.value)} /></div>
                     <div className="field"><label htmlFor="decision-trigger">trigger</label><textarea id="decision-trigger" rows={3} value={trigger} onChange={(e) => setTrigger(e.target.value)} /></div>
                 </div>
-                <div className="field-group">
+                <details className="field-group">
+                    <summary>근거 · 이유 (선택)</summary>
                     <div className="field"><label htmlFor="decision-evidence">근거 (선택)</label><textarea id="decision-evidence" rows={3} value={evidence} onChange={(e) => setEvidence(e.target.value)} /></div>
                     <div className="field"><label htmlFor="decision-reason">이유 (선택)</label><textarea id="decision-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
-                </div>
-                <div className="field-group">
+                </details>
+                <details className="field-group">
+                    <summary>예상 결과 선언 (선택)</summary>
                     <label className="check-field" htmlFor="decision-outcome">
                         <input id="decision-outcome" type="checkbox" checked={hasOutcome} onChange={(e) => setHasOutcome(e.target.checked)} />
                         예상 결과 선언
@@ -240,13 +253,15 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
                             <div className="field"><label htmlFor="decision-grace">graceSeconds</label><input id="decision-grace" type="number" value={grace} onChange={(e) => setGrace(Number(e.target.value))} /></div>
                         </fieldset>
                     )}
-                </div>
-                <div className="field-group">
+                </details>
+                <details className="field-group">
+                    <summary>계보 (선택)</summary>
                     <div className="field"><label htmlFor="decision-parents">부모 UID (공백/줄바꿈 구분, 최대 8)</label><textarea className="hex" id="decision-parents" rows={2} value={parentsText} onChange={(e) => setParentsText(e.target.value)} /></div>
                     <div className="field"><label htmlFor="decision-promoted">승격 노트 UID (선택)</label><input className="uid" id="decision-promoted" value={promoted} onChange={(e) => setPromoted(e.target.value)} /></div>
-                </div>
+                </details>
                 <button className="btn" type="submit" disabled={!isDeployed() || chainNow === undefined}>salt 생성 및 백업</button>
             </form>
+            {!address && <p className="notice notice--quiet">지갑을 연결해야 결정 기록을 발행할 수 있습니다.</p>}
             {chainNow === undefined && <p className="doc-note">체인 시각을 확인하는 중입니다.</p>}
             {skewNotice && <p className="notice--quiet">{skewNotice}</p>}
             {status && <p className="form-status" role="alert">{status}</p>}
@@ -262,6 +277,8 @@ export function Decision({address, verification, chainNow, skewSeconds}: {
                     }}
                     onCancel={() => setPending(undefined)}
                     onProceed={publish}
+                    publishDisabled={!address}
+                    publishDisabledReason="결정 기록을 발행하려면 지갑을 연결해 주세요."
                 />
             )}
         </section>

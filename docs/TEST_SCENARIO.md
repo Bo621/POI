@@ -1,111 +1,126 @@
-# 로컬 수동 테스트 시나리오
+# 새 라우트 수동 테스트 시나리오
 
-각 절은 기대 화면과 실패 시 확인할 지점을 함께 적는다. UID와 관측값은
-`docs/fixtures/seed.json`을 기준으로 한다.
+> 시작할 때마다 시드를 새로 만든다. E2E와 수동 시간 경계 검사가 체인 시각을
+> 앞으로 이동하므로, 이전 시드를 재사용하면 아래 상태와 맞지 않는다.
 
-## S0. 시드 시작
+각 절은 기대 화면과 어긋났을 때 확인할 지점을 함께 적는다. fixture 표기는
+`docs/fixtures/seed.json`의 `f1`, `f2`, `f4`, `f5`, `f_copy`를 뜻한다.
 
-`bash scripts/dev_up.sh`를 실행한다. 출력에 F1, F2, F4, F5,
-f_copy UID와 verifier 명령이 있어야 한다. MetaMask에 `http://127.0.0.1:8545`,
-chainId `91342`를 추가한다.
+## S0. 개발 환경과 시드
 
-이 시드는 로컬에 배포한 EAS(lib v1.4.0)를 쓴다. 실제 배포본(1.4.1-beta.3) 상대 검증은
-`FOUNDRY_PROFILE=fork forge test`가 담당한다.
+`bash scripts/dev_up.sh`를 실행한다.
 
-- 기대 화면: 스크립트가 네 fixture의 기대 상태와 UID를 출력한다.
-- 어긋나면: anvil 로그 경로와 실패한 phase의 Foundry 출력을 확인한다. 관측 실패라면
-  과거 1분봉을 얻지 못한 것이므로 임의 관측값으로 계속하지 않는다.
+- 기대 화면: 마지막 요약에 fixture UID가 나오고 `verifier: MATCH`가 두 줄 나온다.
+- 어긋나면: 출력에서 처음 실패한 phase와 anvil 로그를 확인한다. 관측값을 임의로
+  대신 넣지 말고 시드를 다시 만든다.
 
-## S1. 배포 인식
+## S1. 홈 — 공개 진입점 (`#/`)
 
-`web/.env.local`을 잠시 다른 이름으로 옮겨 웹을 열고, 다시 복원한 뒤 재시작한다.
+지갑을 연결하지 않은 채 홈을 연다.
 
-- 기대 화면: 환경 파일이 없을 때 발행 UI가 비활성화되고, 복원하면 배포를 인식한다.
-- 어긋나면: 스키마 UID 4종과 resolver 주소 4종이 모두 들어 있는지 확인한다.
+- 기대 화면: 서비스 소개 3줄, `기록 열기`, 예시 증서 4건이 보인다. 총 개수,
+  비율, 적중률 같은 집계 숫자는 어디에도 없다.
+- 어긋나면: 예시 UID가 `VITE_EXAMPLE_UIDS` 또는 로컬 seed에서 로드되는지,
+  공개 조회가 지갑 연결을 요구하지 않는지 확인한다.
 
-## S2. 지갑 A
+## S2. 홈 — 지갑 연결 (`#/`)
 
-anvil 기본 계정 A를 연결하고 임의의 시드 UID를 조회한다.
+`연결`을 눌러 anvil 기본 계정 A를 연결한다.
 
-- 기대 화면: 미검증 배지와 검증 UID 미해결 안내가 함께 보인다.
-- 어긋나면: 계정이 A인지, 로컬 RPC에 연결됐는지, Dojang 조회 실패가 검증 성공으로
-  잘못 표시되지 않았는지 확인한다.
+- 기대 화면: nav에 축약 주소와 `미검증` 배지가 나타나고, 홈 아래에 `처리할 기록`과
+  `최근 커밋한 기록`이 나타난다.
+- 어긋나면: MetaMask가 `http://127.0.0.1:8545`, chainId `91342`, 계정 A를
+  사용 중인지와 Dojang 조회 실패가 검증 성공으로 표시되지 않았는지 확인한다.
 
-## S3. 상태 인장 4종
+## S3. 결과 등록 완료 상세 (`#/d/<f1>`)
 
-`seed.json`의 F1, F2, F4, F5 decisionUID를 차례로 조회한다.
+F1의 decisionUID로 이동한다.
 
-- 기대 화면: F1 `정산완료`, F2 `정산완료`와 `정산 철회 이력 있음`, F4 `기한초과`,
-  F5 `대기`.
-- 어긋나면: 브라우저 시간이 아니라 체인 시간이 쓰이는지, active head와 revoke count,
-  최종 블록 시간이 fixture 관측 구간을 지난 시각인지 확인한다.
+- 기대 화면: 쪽빛 `등록완료` 인장, 등급의 두 축, `커밋`, `예상 결과`, `결과 등록`,
+  `이의`, `공개`, `계보`, `검증 근거`가 모두 보인다.
+- 어긋나면: decision 스키마 판별, active settlement head, evidence/reveal 등급 계산,
+  각 부분 조회의 오류 경계를 확인한다.
 
-## S4. F5 시간 경계
+## S4. 철회 이력 상세 (`#/d/<f2>`)
 
-F5의 `windowStart` 직전에서 시작해 현재 체인 시각과 목표의 차이를 구하고
-`cast rpc evm_increaseTime <delta>`와 `cast rpc evm_mine`으로
-`t=windowStart`, `t=W`, `t=W+G` 경계를 각각 만든다.
-여기서 W는 `windowEnd`, G는 `graceSeconds`다.
+F2의 decisionUID로 이동한다.
 
-- 기대 화면: `대기` → `관측중` → `정산대기` → `기한초과`로 바뀌고, 15초 이내에
-  체인 시간으로 재동기화된다.
-- 어긋나면: W가 windowEnd인지, grace가 3600초인지 확인한다.
+- 기대 화면: `등록완료` 인장 아래 「결과 등록 철회 이력 있음」이 보이고,
+  `▸ 이전 결과 등록 (철회됨)`을 펼칠 수 있다.
+- 어긋나면: active head와 last head가 구분되는지, revoke count가 이력 표시에
+  연결되는지 확인한다.
 
-## S5. 이의 목록
+## S5. 기한 초과 상세 (`#/d/<f4>`)
 
-이의 목록을 빈 조건과 F1 정산 조건에서 각각 조회한다.
+F4의 decisionUID로 이동한다.
 
-- 기대 화면: 빈 경우 건수 없음, 결과에는 임의 정렬 주장이 없고 검증 지갑 상태가 병기되며
-  `조회된 것이 전부라는 보장은 없습니다` 안내가 보인다.
-- 어긋나면: EAS challenge 스키마 필터와 조회 시작 블록을 확인한다.
+- 기대 화면: 인주색 `기한초과` 인장이 보인다.
+- 어긋나면: 브라우저 시간이 아니라 최신 블록 시각을 쓰는지, windowEnd와
+  graceSeconds 경계가 맞는지 확인한다.
 
-## S6. 사전 검증과 salt 백업
+## S6. 상태 시간 경계 (`#/d/<f5>`)
 
-결정 폼에서 필수 입력, UID 형식, window 순서, grace 범위, metric/op를 각각 잘못 넣고
-제출을 시도한 뒤 정상 입력으로 salt 백업 전후를 비교한다.
+F5의 decisionUID를 연 뒤 `cast rpc evm_increaseTime <초>`와
+`cast rpc evm_mine`으로 체인 시각을 windowStart, windowEnd, windowEnd+grace
+경계까지 차례로 민다.
 
-- 기대 화면: 사전 검증 5종이 제출 전에 막고, salt 백업을 완료하기 전에는 커밋할 수 없다.
-- 어긋나면: 폼 검증과 `SaltBackupGate` 상태가 실제 제출 버튼에 연결됐는지 확인한다.
+- 기대 화면: 처음 `대기`이고, 경계를 지나며 `관측중` → `등록대기` →
+  `기한초과`로 바뀐다.
+- 어긋나면: 각 이동 뒤 블록을 채굴했는지, 화면이 체인 시각으로 재동기화됐는지,
+  W가 windowEnd이고 G가 graceSeconds인지 확인한다.
 
-## S7. 한국어 컨트랙트 오류
+## S7. 이의 목록 (`#/d/<f1>`)
 
-계정 C로 F1을 정산하고, A로 활성 정산을 supersedes로 다시 정산하고, B로 F1 정산에
-두 번째 이의를 발행한다.
+F1 상세의 활성 결과 등록 아래 이의 목록을 확인한다.
 
-- 기대 화면: 각각 `NotDecisionOwner`, `PriorStillActive`, `AlreadyChallenged`에 대응하는
-  한국어 오류가 보인다.
-- `NotDecisionOwner` 컨트랙트 revert 문구는 UI 소유자 사전 검증을 우회해야 볼 수 있으므로 자동 검사 대상이 아니다.
-- 어긋나면: 지갑이 의도한 A/B/C인지, 오류 selector 매핑이 누락되지 않았는지 확인한다.
+- 기대 화면: 이의 1건이 보이되 건수 숫자와 정렬 주장은 없다. 이의자의 검증 지갑
+  상태가 병기되고 「조회된 것이 전부라는 보장은 없습니다」가 보인다.
+- 어긋나면: challenge 스키마와 settlementUID 필터, 조회 시작 블록, 검증 지갑
+  스냅샷 조회를 확인한다.
 
-## S8. CT18 복사 공격
+## S8. 기록 발행 (`#/record`)
 
-`seed.json`의 `f1Reveal` salt/payload로 F1과 f_copy를 각각 공개 대조한다.
+계정 A로 저널을 저장하고 노트로 승격한 뒤 결정 폼을 채워 커밋한다.
 
-- 기대 화면: F1은 성공하고 f_copy는 실패한다. 두 결정의 `decisionCommitment` 바이트는
-  동일하지만 F1 attester는 A, f_copy attester는 B다.
-- 어긋나면: commitment 프리이미지에 조회한 attester와 chainId 91342가 포함되는지 확인한다.
+- 기대 화면: 현재 단계가 ① → ② → ③ 순서로 인주색 강조된다. salt 백업을
+  완료하기 전에는 발행이 비활성이고, 완료 후 저널·노트·결정 영수증이 정상적으로
+  이어진다.
+- 어긋나면: 저널 저장값, 노트 영수증, 결정 폼 입력 여부가 단계 표시에 연결되는지와
+  `SaltBackup` 확인 상태가 실제 발행 버튼을 막는지 확인한다.
 
-## S9. 성공 경로 1회
+## S9. 새 결정 후속 동작 (`#/d/<새 uid>`)
 
-A로 저널 작성 → 노트 승격 → salt 백업 → 결정 커밋을 수행한다. windowEnd로 시간을
-옮겨 정산하고, B로 이의를 발행한 뒤 A의 커밋을 reveal한다.
+S8에서 결정을 발행한 뒤 결과 등록 가능 시각까지 체인 시간을 옮겨 A로 결과를 등록하고,
+다른 지갑 B로 이의를 발행한다.
 
-- 기대 화면: 각 UID가 이전 단계와 연결되고, 정산은 활성 head, B의 이의는 목록에 나타나며,
-  reveal은 커밋과 일치한다.
-- 어긋나면: note promotion의 동일 attester, refUID, windowEnd, settlement owner,
-  challenge settlementUID를 순서대로 확인한다.
+- 기대 화면: 발행 성공 뒤 새 상세 URL로 자동 이동한다. 활성 결과 등록이 나타나고,
+  지갑을 B로 바꾸면 그 결과 등록에 이의를 발행할 수 있다.
+- 어긋나면: 발행 콜백의 decisionUID, settlement owner, challenge의
+  settlementUID와 현재 지갑을 순서대로 확인한다.
 
-## S10. verifier
+## S10. CT18 복사 공격 (`#/d/<f_copy>`)
 
-요약에 출력된 명령 또는 다음 형식으로 실행한다.
+F1의 salt와 payload를 준비한 뒤 f_copy 상세의 `공개`에서 대조한다.
 
-```bash
-set -a; source .env.verifier; set +a; node --experimental-strip-types verifier/src/cli.ts <f1.decisionUID> --rpc http://127.0.0.1:8545 --json
-```
+- 기대 화면: 대조 결과가 불일치이고, 상세의 attester는 A가 아니라 B로 표시된다.
+- 어긋나면: commitment 프리이미지에 현재 결정의 attester와 chainId `91342`가
+  포함되는지, F1 입력을 f_copy의 소유 정보와 섞지 않았는지 확인한다.
 
-- 기대 화면: F1과 F2 모두 종료코드 0과 `verdict: "MATCH"`를 반환하고 요약의
-  `snapshotHash`가 직접 실행한 결과와 같다. F2는 철회된 S1이 아니라 활성 S2를 사용한다.
-- 어긋나면: provider 관측 구간, metric definition hash, active settlement head가
-  `seed.json`과 같은지 확인한다.
+## S11. 오프체인 verifier (터미널)
+
+요약에 출력된 명령 또는 `poi-verify <f1> --json` 형식으로 실행한다.
+
+- 기대 화면: `MATCH`가 출력되고 종료코드는 0이다.
+- 어긋나면: RPC, provider 관측 구간, metric definitionHash, active settlement
+  head가 현재 seed와 같은지 확인한다.
+
+## S12. 없는 경로와 브라우저 탐색 (`#/없는경로`)
+
+없는 경로를 직접 열고, 정상 상세 URL도 주소창에 붙여 넣어 새로고침한 뒤
+브라우저 뒤로가기를 사용한다.
+
+- 기대 화면: 없는 경로에는 `"없는 화면입니다."`가 보인다. 정상 딥링크,
+  새로고침, 뒤로가기는 각각 해당 hash route를 유지한다.
+- 어긋나면: hash 파서의 fallback, `hashchange` 구독, UID 길이 검증을 확인한다.
 
 종료할 때 `bash scripts/dev_down.sh`를 실행한다.

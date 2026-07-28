@@ -1,13 +1,13 @@
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
-import type {Page} from "@playwright/test";
+import type {Locator, Page} from "@playwright/test";
 import type {Address, Hex} from "viem";
 
 interface Seed {
     accounts: {A: Address; B: Address; C: Address};
     fixtures: {
         f1: {decisionUID: Hex; settlementUID: Hex};
-        f2: {decisionUID: Hex};
+        f2: {decisionUID: Hex; revokedSettlementUID: Hex; activeSettlementUID: Hex};
         f4: {decisionUID: Hex};
         f5: {decisionUID: Hex};
         f_copy: {decisionUID: Hex; decisionCommitment: Hex};
@@ -23,14 +23,28 @@ export let seedUnavailable = "";
 
 try {
     seed = JSON.parse(readFileSync(seedPath, "utf8")) as Seed;
-} catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    seedUnavailable = `시드가 없어 E2E를 건너뜁니다. 먼저 bash scripts/dev_up.sh를 실행하세요. (${detail})`;
+} catch {
+    seedUnavailable = "scripts/dev_up.sh 를 먼저 실행하세요.";
 }
 
 export const accounts = seed?.accounts as Seed["accounts"];
 
 export const rpcUrl = "http://127.0.0.1:8545";
+
+export function shortAddressRe(address: string): RegExp {
+    const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const compact = `${escape(address.slice(0, 6))}…${escape(address.slice(-4))}`;
+    const detailed = `${escape(address.slice(0, 10))}…${escape(address.slice(-6))}`;
+    return new RegExp(`(?:${compact}|${detailed})`, "i");
+}
+
+export async function openDetails(area: Locator, summaryText: string): Promise<void> {
+    const summary = area.locator("summary").filter({hasText: summaryText});
+    const details = summary.locator("..");
+    if (await details.getAttribute("open") === null) {
+        await summary.click();
+    }
+}
 
 export async function chainNow(): Promise<number> {
     const response = await fetch(rpcUrl, {
@@ -66,9 +80,15 @@ export async function advanceChain(rpc: string, seconds: number): Promise<void> 
     await call("evm_mine", []);
 }
 
-export async function injectWallet(page: Page, address: Address, rpc: string): Promise<void> {
-    await page.addInitScript(({account, rpcUrl}) => {
+export async function injectWallet(
+    page: Page,
+    address: Address,
+    rpc: string,
+    options: {authorized?: boolean} = {},
+): Promise<void> {
+    await page.addInitScript(({account, rpcUrl, initiallyAuthorized}) => {
         let requestId = 0;
+        let authorized = initiallyAuthorized;
         const forward = async (method: string, params: unknown[] = []) => {
             const response = await fetch(rpcUrl, {
                 method: "POST",
@@ -95,7 +115,11 @@ export async function injectWallet(page: Page, address: Address, rpc: string): P
             configurable: true,
             value: {
                 request: async ({method, params}: {method: string; params?: unknown[]}) => {
-                    if (method === "eth_requestAccounts" || method === "eth_accounts") return [account];
+                    if (method === "eth_accounts") return authorized ? [account] : [];
+                    if (method === "eth_requestAccounts") {
+                        authorized = true;
+                        return [account];
+                    }
                     if (method === "eth_chainId") return "0x164ce";
                     if (method === "eth_sendTransaction") {
                         const [transaction = {}] = params ?? [];
@@ -107,7 +131,7 @@ export async function injectWallet(page: Page, address: Address, rpc: string): P
                 removeListener: () => undefined,
             },
         });
-    }, {account: address, rpcUrl: rpc});
+    }, {account: address, rpcUrl: rpc, initiallyAuthorized: options.authorized ?? true});
 }
 
 export function requireSeed(): Seed {

@@ -28,7 +28,7 @@ export interface VerificationSnapshot {
     verifiedAddressUID: Hex;
 }
 
-interface WalletState extends VerificationSnapshot {
+export interface WalletState extends VerificationSnapshot {
     address?: Address;
 }
 
@@ -48,11 +48,10 @@ export function shortAddress(address: Address): string {
     return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-export function Wallet({onChange}: {onChange: (state: WalletState) => void}) {
-    const [state, setState] = useState<WalletState>({
-        verified: false,
-        verifiedAddressUID: ZERO_UID,
-    });
+export function Wallet({state, onChange}: {
+    state: WalletState;
+    onChange: (state: WalletState) => void;
+}) {
     const [error, setError] = useState("");
     const [connecting, setConnecting] = useState(false);
 
@@ -81,7 +80,6 @@ export function Wallet({onChange}: {onChange: (state: WalletState) => void}) {
                 // UID 조회 실패는 발행을 막지 않는다. 0으로 기록된다는 안내는 아래에 상시 표시한다.
             }
             const next = {address, verified, verifiedAddressUID};
-            setState(next);
             onChange(next);
         } catch (cause) {
             setError(cause instanceof Error ? cause.message : "지갑 연결에 실패했습니다.");
@@ -97,23 +95,21 @@ export function Wallet({onChange}: {onChange: (state: WalletState) => void}) {
             : "확인 불가";
 
     return (
-        <section className="doc-section">
-            <h2>지갑</h2>
-            <button className="btn" type="button" onClick={connect} disabled={connecting}>
-                {connecting ? "연결 중…" : "지갑 연결"}
-            </button>
-            {state.address && (
-                <p className={`wallet-badge wallet-badge--${state.verified === true ? "verified" : state.verified === false ? "unverified" : "unknown"}`}>
+        <div className="site-nav__wallet">
+            {state.address
+                ? <span className={`wallet-badge wallet-badge--${state.verified === true ? "verified" : state.verified === false ? "unverified" : "unknown"}`}>
                     <span className="hex">{shortAddress(state.address)}</span> {badge}
-                </p>
-            )}
+                </span>
+                : <span className="site-nav__wallet-empty">지갑 연결 안 됨</span>}
+            <button className="btn" type="button" onClick={connect} disabled={connecting}>
+                {connecting ? "연결 중…" : "연결"}
+            </button>
             {state.address && state.verifiedAddressUID === ZERO_UID && (
                 <p className="notice notice--quiet">검증 지갑 스냅샷 UID를 찾지 못했습니다 (0으로 기록됩니다)</p>
             )}
             {error && <p className="form-status" role="alert">{error}</p>}
-        </section>
+        </div>
     );
 }
 
 export {ZERO_UID};
-export type {WalletState};

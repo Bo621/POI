@@ -21,7 +21,10 @@ interface PendingNote {
     salt: Hex;
 }
 
-export function Note({address}: {address?: Address}) {
+export function Note({address, onProgressChange}: {
+    address?: Address;
+    onProgressChange?: (progress: {journalCount: number; notePublished: boolean}) => void;
+}) {
     const [entries, setEntries] = useState<JournalEntry[]>([]);
     const [content, setContent] = useState("");
     const [pending, setPending] = useState<PendingNote>();
@@ -35,6 +38,10 @@ export function Note({address}: {address?: Address}) {
             setStatus(error instanceof Error ? error.message : "저널을 불러오지 못했습니다.");
         }
     }, []);
+
+    useEffect(() => {
+        onProgressChange?.({journalCount: entries.length, notePublished: receipt !== undefined});
+    }, [entries.length, receipt, onProgressChange]);
 
     function save(next: JournalEntry[]) {
         const validated = listJournalEntries(next);
@@ -53,10 +60,6 @@ export function Note({address}: {address?: Address}) {
     }
 
     function prepareNote(entry: JournalEntry) {
-        if (!address) {
-            setStatus("먼저 지갑을 연결해 주세요.");
-            return;
-        }
         setPending({content: entry.content, salt: newSalt()});
     }
 
@@ -109,6 +112,7 @@ export function Note({address}: {address?: Address}) {
                     </li>
                 ))}
             </ul>
+            {!address && <p className="notice notice--quiet">지갑을 연결해야 노트를 발행할 수 있습니다.</p>}
             {status && <p className="form-status" role="alert">{status}</p>}
             <Receipt label="노트" uid={receipt?.uid} txHash={receipt?.txHash} />
             {pending && (
@@ -117,6 +121,8 @@ export function Note({address}: {address?: Address}) {
                     payload={pending.content}
                     onCancel={() => setPending(undefined)}
                     onProceed={publish}
+                    publishDisabled={!address}
+                    publishDisabledReason="노트를 발행하려면 지갑을 연결해 주세요."
                 />
             )}
         </section>

@@ -1,62 +1,86 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, requireSeed, seed, seedUnavailable} from "./fixtures";
+import {accounts, advanceChain, chainNow, requireSeed, rpcUrl, shortAddressRe} from "./fixtures";
 
-test.skip(!seed, seedUnavailable);
-
-const fixture = seed;
+test.beforeAll(() => {
+    requireSeed();
+});
 
 async function loadStatus(page: Page, uid: string, label: string): Promise<void> {
-    const section = page.getByRole("heading", {name: "상태", exact: true}).locator("..");
-    await section.getByLabel("decisionUID", {exact: true}).fill(uid);
-    await section.getByRole("button", {name: "상태 조회"}).click();
-    await expect(section.getByRole("img", {name: `상태: ${label}`})).toBeVisible();
+    await page.goto(`/#/d/${uid}`);
+    await expect(page.getByRole("img", {name: `상태: ${label}`})).toBeVisible();
 }
 
 function section(page: Page, heading: string): Locator {
     return page.getByRole("heading", {name: heading, exact: true}).locator("..");
 }
 
-test.beforeEach(async ({page}) => {
-    await page.goto("/");
-});
-
-test("배포 안내가 없고 F1은 정산완료다", async ({page}) => {
+test("배포 안내가 없고 F1은 등록완료다", async ({page}) => {
+    await loadStatus(page, requireSeed().fixtures.f1.decisionUID, "등록완료");
     await expect(page.getByText("컨트랙트가 아직 배포되지 않았습니다.")).toHaveCount(0);
-    await loadStatus(page, requireSeed().fixtures.f1.decisionUID, "정산 완료");
-    await expect(section(page, "상태").getByText("정산완료", {exact: true})).toBeVisible();
+    await expect(page.locator("section.status-result dl").getByText("등록완료", {exact: true})).toBeVisible();
 });
 
 test("F4는 기한초과다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f4.decisionUID, "기한 초과");
-    await expect(section(page, "상태").getByText("기한초과", {exact: true})).toBeVisible();
+    await loadStatus(page, requireSeed().fixtures.f4.decisionUID, "기한초과");
+    await expect(page.locator("section.status-result dl").getByText("기한초과", {exact: true})).toBeVisible();
 });
 
-test("F2는 정산완료이며 철회 이력이 있다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f2.decisionUID, "정산 완료");
-    await expect(section(page, "상태").getByText("정산완료", {exact: true})).toBeVisible();
-    await expect(section(page, "상태").getByText("정산 철회 이력 있음")).toBeVisible();
+test("F2는 등록완료이며 철회 이력이 있다", async ({page}) => {
+    const fixture = requireSeed().fixtures.f2;
+    await loadStatus(page, fixture.decisionUID, "등록완료");
+    await expect(page.locator("section.status-result dl").getByText("등록완료", {exact: true})).toBeVisible();
+    await expect(page.getByText("결과 등록 철회 이력 있음")).toBeVisible();
+    const history = page.getByText("이전 결과 등록 (철회됨)", {exact: true}).locator("..");
+    await history.locator("summary").click();
+    await expect(history.getByText(fixture.revokedSettlementUID, {exact: true})).toBeVisible();
+    await expect(history.locator("dt", {hasText: "결과"}).first().locator("+ dd")).toHaveText("OBSERVED");
 });
 
-test("F5는 대기다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f5.decisionUID, "대기");
-    await expect(section(page, "상태").getByText("대기", {exact: true})).toBeVisible();
+test("F5는 다음 시간 경계에서 새로고침 없이 인장이 바뀐다", async ({page}) => {
+    test.setTimeout(60_000);
+    const fixture = requireSeed().fixtures.f5;
+    await page.goto(`/#/d/${fixture.decisionUID}`);
+    const status = page.locator("section.status-result");
+    const seal = status.getByRole("img");
+    await expect(seal).toBeVisible();
+    const initialSeal = await seal.getAttribute("aria-label");
+    expect(initialSeal).toMatch(/^상태: .+/);
+
+    const expected = section(page, "예상 결과");
+    const windowText = await expected.locator("dt", {hasText: "관측 구간"}).locator("+ dd").textContent();
+    const [windowStartText, windowEndText] = windowText!.split(" ~ ");
+    const windowStart = Date.parse(windowStartText.replace(" UTC", "Z")) / 1000;
+    const windowEnd = Date.parse(windowEndText.replace(" UTC", "Z")) / 1000;
+    const graceText = await expected.locator("dt", {hasText: "유예"}).locator("+ dd").textContent();
+    const graceSeconds = Number.parseInt(graceText!, 10);
+    const now = await chainNow();
+    const nextBoundary = [windowStart, windowEnd, windowEnd + graceSeconds]
+        .map((boundary) => boundary + 1)
+        .find((boundary) => boundary > now);
+    expect(nextBoundary, "F5에 아직 지나지 않은 상태 경계가 있어야 한다").toBeDefined();
+
+    await advanceChain(rpcUrl, nextBoundary! - now);
+    await expect.poll(() => seal.getAttribute("aria-label"), {timeout: 30_000})
+        .not.toBe(initialSeal);
 });
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
-    const challenge = section(page, "이의");
-    await challenge.getByLabel("settlementUID", {exact: true}).fill(requireSeed().fixtures.f1.settlementUID);
-    await challenge.getByRole("button", {name: "목록 조회"}).click();
-    await expect(challenge.getByText(requireSeed().challengeUID, {exact: true})).toBeVisible();
-    await expect(challenge.locator("ul.record-list > li")).toHaveCount(1);
+    await page.goto(`/#/d/${requireSeed().fixtures.f1.decisionUID}`);
+    const challenge = page.getByRole("heading", {name: "이의", exact: true, level: 3}).locator("..");
+    const item = challenge.locator("ul.record-list > li");
+    await expect(item).toHaveCount(1);
+    await expect(item).toContainText(shortAddressRe(accounts.B));
+    await expect(item).toContainText("NOT_OBSERVED");
     await expect(challenge).not.toContainText(/\d+\s*건/);
     await expect(challenge.getByText("조회된 것이 전부라는 보장은 없습니다.")).toBeVisible();
 });
 
 test.describe("Reveal commitment 대조", () => {
     async function fillReveal(page: Page, uid: string): Promise<Locator> {
+        await page.goto(`/#/d/${uid}`);
         const reveal = section(page, "공개");
         const data = requireSeed();
-        await reveal.getByLabel("attestationUID").fill(uid);
+        await expect(reveal.getByLabel("attestationUID")).toHaveValue(uid);
         await reveal.getByLabel("salt", {exact: true}).fill(data.f1Reveal.salt);
         await reveal.getByLabel("payload (JSON)", {exact: true}).fill(JSON.stringify(data.f1Reveal.payload));
         return reveal;
@@ -79,17 +103,19 @@ test.describe("Reveal commitment 대조", () => {
 });
 
 test("DAG에 노드와 조회 완전성 안내가 나온다", async ({page}) => {
-    const dag = section(page, "결정 DAG 조회");
-    await dag.getByLabel("decisionUID", {exact: true}).fill(requireSeed().fixtures.f1.decisionUID);
-    await dag.getByRole("button", {name: "부모 기록 조회"}).click();
+    await page.goto(`/#/d/${requireSeed().fixtures.f1.decisionUID}`);
+    const dag = section(page, "계보");
+    await dag.locator("summary").click();
     await expect(dag.getByText("UID", {exact: true})).toBeVisible();
     await expect(dag.getByText("조회된 것이 전부라는 보장은 없습니다.")).toBeVisible();
 });
 
 test("Passport에 목록과 비순위 안내가 나온다", async ({page}) => {
-    const passport = section(page, "Strategy Passport");
-    await passport.getByLabel("지갑 주소").fill(accounts.A);
-    await passport.getByRole("button", {name: "기록 조회"}).click();
-    await expect(passport.getByText("UID", {exact: true}).first()).toBeVisible();
+    await page.goto(`/#/passport/${accounts.A}`);
+    const passport = page.locator("main");
+    const uid = requireSeed().fixtures.f1.decisionUID;
+    await expect(passport.getByText(
+        new RegExp(`^${uid.slice(0, 10)}…${uid.slice(-6)}$`, "i"),
+    )).toBeVisible();
     await expect(passport.getByText(/순위나 성과 지표가 아닙니다/)).toBeVisible();
 });

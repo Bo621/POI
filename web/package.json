@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run test",
-    "test:e2e": "playwright test"
+    "test:e2e": "PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/e2e-results.json playwright test --reporter=list,json && node scripts/check-e2e-skips.mjs"
   },
   "dependencies": {
     "@poi/core": "workspace:*",

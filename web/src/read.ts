@@ -57,11 +57,22 @@ export interface AttestationRecord {
     data: Hex;
 }
 
+export class AttestationNotFoundError extends Error {
+    constructor() {
+        super("이 체인에 없는 기록입니다.");
+        this.name = "AttestationNotFoundError";
+    }
+}
+
 export interface ChallengeLog {
     uid: Hex;
     attester: Address;
     refUID: Hex;
     revocationTime: bigint;
+    claimedResult: number;
+    hasObservedValue: boolean;
+    observedValue: bigint;
+    source: string;
 }
 
 const SETTLEMENT_PARAMETERS = [
@@ -73,6 +84,10 @@ const SETTLEMENT_PARAMETERS = [
     {type: "uint64", name: "observedAt"},
     {type: "string", name: "verifierVersion"},
     {type: "bytes32", name: "supersedes"},
+] as const;
+const CHALLENGE_PARAMETERS = [
+    {type: "bytes32"}, {type: "uint8"}, {type: "bool"}, {type: "int128"},
+    {type: "string"}, {type: "uint64"}, {type: "bytes32"},
 ] as const;
 
 async function resolverFor(schema: Hex): Promise<Address> {
@@ -129,6 +144,9 @@ export async function readDecision(uid: Hex): Promise<DecisionFields & {
     time: bigint;
 }> {
     const attestation = await getAttestation(uid);
+    if (attestation.uid.toLowerCase() !== uid.toLowerCase()) {
+        throw new AttestationNotFoundError();
+    }
     const values = decodeAbiParameters(DECISION_PARAMETERS, attestation.data);
     const fields = Object.fromEntries(
         DECISION_PARAMETERS.map((parameter, index) => [parameter.name, values[index]]),
@@ -164,6 +182,14 @@ export async function readSettlementHeads(schema: Hex, decisionUID: Hex) {
     return {activeHead, lastHead, revokeCount: Number(revokeCount)};
 }
 
+export async function readSettlementState(schema: Hex, decisionUID: Hex) {
+    const heads = await readSettlementHeads(schema, decisionUID);
+    const active = /^0x0{64}$/.test(heads.activeHead)
+        ? undefined
+        : await readSettlement(heads.activeHead);
+    return {...heads, active, activeHeadTime: active?.time};
+}
+
 export async function readMetricDecimals(decisionSchema: Hex, metricId: Hex): Promise<number> {
     const address = await resolverFor(decisionSchema);
     const metric = await withRetry(() => publicClient.readContract({
@@ -173,6 +199,20 @@ export async function readMetricDecimals(decisionSchema: Hex, metricId: Hex): Pr
         args: [metricId],
     }));
     return Number(metric[1]);
+}
+
+export async function readMetricDefinition(decisionSchema: Hex, metricId: Hex): Promise<{
+    decimals: number;
+    definitionHash: Hex;
+}> {
+    const address = await resolverFor(decisionSchema);
+    const metric = await withRetry(() => publicClient.readContract({
+        address,
+        abi: DECISION_RESOLVER_ABI,
+        functionName: "metrics",
+        args: [metricId],
+    }));
+    return {decimals: Number(metric[1]), definitionHash: metric[3]};
 }
 
 export async function readChallengeLogs(challengeSchema: Hex): Promise<ChallengeLog[]> {
@@ -186,11 +226,16 @@ export async function readChallengeLogs(challengeSchema: Hex): Promise<Challenge
     return Promise.all(logs.map(async (log) => {
         const uid = log.args.uid!;
         const attestation = await getAttestation(uid);
+        const values = decodeAbiParameters(CHALLENGE_PARAMETERS, attestation.data);
         return {
             uid,
             attester: log.args.attester!,
             refUID: attestation.refUID,
             revocationTime: attestation.revocationTime,
+            claimedResult: Number(values[1]),
+            hasObservedValue: values[2],
+            observedValue: values[3],
+            source: values[4],
         };
     }));
 }

@@ -8,6 +8,7 @@ const address = "0x1111111111111111111111111111111111111111" as Address;
 const settlement = uid("9");
 const log = (id: string, refUID = settlement, revocationTime = 0n): ChallengeLog => ({
     uid: uid(id), attester: address, refUID, revocationTime,
+    claimedResult: 1, hasObservedValue: false, observedValue: 0n, source: "test",
 });
 
 describe("filterActiveChallenges", () => {

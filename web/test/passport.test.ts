@@ -9,8 +9,8 @@ const row = (digit: string, committedAt: bigint): PassportRow => ({
     uid: uid(digit),
     committedAt,
     state: STATE.SETTLED,
-    evidenceCommitment: uid("9"),
-    hasExpectedOutcome: true,
+    hasRevoked: false,
+    grade: "EVIDENCE_COMMITTED · SEALED",
 });
 
 describe("passport helpers", () => {
@@ -22,13 +22,13 @@ describe("passport helpers", () => {
 
     it("summarizes the seven state labels and two-axis grade", () => {
         const labels = [
-            [STATE.NOT_REQUIRED, "예상 결과 없음"],
-            [STATE.PENDING, "구간 시작 전"],
-            [STATE.OBSERVING, "관측 중"],
-            [STATE.AWAITING, "정산 대기"],
-            [STATE.OVERDUE, "정산 기한 초과"],
-            [STATE.SETTLED, "정산됨"],
-            [STATE.SETTLED_LATE, "정산됨(기한 후)"],
+            [STATE.NOT_REQUIRED, "예상 결과를 선언하지 않음"],
+            [STATE.PENDING, "관측 구간 시작 전"],
+            [STATE.OBSERVING, "관측 구간 진행 중"],
+            [STATE.AWAITING, "구간이 끝나 결과를 등록할 수 있습니다"],
+            [STATE.OVERDUE, "유예까지 지나 등록 기한이 지났습니다"],
+            [STATE.SETTLED, "결과가 등록됨"],
+            [STATE.SETTLED_LATE, "기한 후에 등록됨"],
         ] as const;
         for (const [state, label] of labels) {
             expect(summarizeRow({...row("1", 1n), state})).toEqual({
