@@ -1,0 +1,11 @@
+{
+  "generatedBy": "scripts/dev_up.sh",
+  "status": "dev_up.sh 실행 시 실제 로컬 포크 UID와 관측값으로 교체됩니다",
+  "fixtures": {
+    "f1": {"expectedState": "SETTLED"},
+    "f2": {"expectedState": "SETTLED", "hasRevokedSettlement": true},
+    "f4": {"expectedState": "OVERDUE"},
+    "f5": {"expectedState": "PENDING"},
+    "f_copy": {"expectation": "A의 salt/payload로 대조하면 attester가 B이므로 실패한다"}
+  }
+}

@@ -246,3 +246,63 @@ cd web && npm test                    # 40 + 시계 테스트
 cd web && npx tsc --noEmit && npm run build
 cd contracts && forge test            # 150/150 회귀 없음
 ```
+
+---
+
+## 리뷰 대응 R1 — 실제로 돌려보니 시드가 완주하지 못한다
+
+Claude가 `RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh`로 실행해 확인한 것.
+
+### 증상 1 — 온디맨드 채굴에서 `forge script --broadcast`가 멈춘다
+
+anvil 기본은 **트랜잭션이 올 때만 블록을 만든다.** `forge script --broadcast`는 브로드캐스트
+후 확인(confirmation) 블록을 기다리는데, 더 이상 트랜잭션이 없으니 새 블록이 나오지 않아
+`eth_blockNumber`를 무한 폴링한다. 15분 넘게 진행되지 않았다(트랜잭션 18건, 블록 6개).
+
+### 증상 2 — `--block-time`을 주면 anvil이 **크래시**한다
+
+`--block-time 1`로 자동 채굴을 켜면 phase 1은 통과하지만 이후 anvil이 죽는다.
+
+```
+anvil::eth::backend::mem::Backend<N>::do_mine_block::{{closure}}
+core::result::unwrap_failed  →  panic  →  Abort trap: 6
+```
+
+자동 채굴기와 `evm_setNextBlockTimestamp`가 같이 쓰이면 anvil이 패닉한다.
+**`--block-time`은 해법이 아니다.**
+
+### 고치는 방법
+
+세 가지를 함께 바꾼다.
+
+1. **`--block-time`을 쓰지 않는다.** 온디맨드 채굴을 유지한다.
+2. **`evm_setNextBlockTimestamp`를 쓰지 않는다.** 대신 현재 체인 시각을 읽어 상대 증가로 옮긴다:
+
+   ```bash
+   now_ts=$(cast block latest --rpc-url "$LOCAL_RPC" --json | ...timestamp...)
+   delta=$(( target - now_ts ))
+   [ "$delta" -gt 0 ] && cast rpc evm_increaseTime "$delta" --rpc-url "$LOCAL_RPC"
+   cast rpc evm_mine --rpc-url "$LOCAL_RPC"
+   ```
+
+   `evm_increaseTime`은 상대 증가라 자동 채굴기와 충돌하지 않는다.
+   `delta <= 0`이면 시각을 되돌리려는 것이므로 **오류로 중단**한다(타임라인 설계가 틀린 것이다).
+
+3. **`forge script`에 `--slow`를 준다.** 트랜잭션을 하나씩 보내고 각 영수증을 기다리므로
+   온디맨드 채굴에서 매 트랜잭션이 블록을 만들어 확인이 진행된다.
+
+각 phase 뒤에 `cast rpc evm_mine`을 한 번 더 호출해 다음 단계의 기준 시각을 확정한다.
+
+### 검증
+
+```bash
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
+```
+
+**끝까지 완주해서 요약을 출력해야 한다.** phase 1만 통과하고 멈추면 고쳐진 것이 아니다.
+완주 후:
+
+- `docs/fixtures/seed.json`에 F1·F2·F4·F5·f_copy의 실제 UID가 들어 있다
+- `web/.env.local`이 생성돼 있다
+- `cast call <settlement resolver> "activeHead(bytes32)(bytes32)" <f1.decisionUID>` 가 0이 아니다
+- `cast call <settlement resolver> "revokeCount(bytes32)(uint32)" <f2.decisionUID>` 가 1이다

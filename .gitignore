@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 web/.env.local
+.anvil-seed.pid
 *.key
 *.pem
 keystore/
