@@ -73,9 +73,15 @@ export async function advanceChain(rpc: string, seconds: number): Promise<void> 
     await call("evm_mine", []);
 }
 
-export async function injectWallet(page: Page, address: Address, rpc: string): Promise<void> {
-    await page.addInitScript(({account, rpcUrl}) => {
+export async function injectWallet(
+    page: Page,
+    address: Address,
+    rpc: string,
+    options: {authorized?: boolean} = {},
+): Promise<void> {
+    await page.addInitScript(({account, rpcUrl, initiallyAuthorized}) => {
         let requestId = 0;
+        let authorized = initiallyAuthorized;
         const forward = async (method: string, params: unknown[] = []) => {
             const response = await fetch(rpcUrl, {
                 method: "POST",
@@ -102,7 +108,11 @@ export async function injectWallet(page: Page, address: Address, rpc: string): P
             configurable: true,
             value: {
                 request: async ({method, params}: {method: string; params?: unknown[]}) => {
-                    if (method === "eth_requestAccounts" || method === "eth_accounts") return [account];
+                    if (method === "eth_accounts") return authorized ? [account] : [];
+                    if (method === "eth_requestAccounts") {
+                        authorized = true;
+                        return [account];
+                    }
                     if (method === "eth_chainId") return "0x164ce";
                     if (method === "eth_sendTransaction") {
                         const [transaction = {}] = params ?? [];
@@ -114,7 +124,7 @@ export async function injectWallet(page: Page, address: Address, rpc: string): P
                 removeListener: () => undefined,
             },
         });
-    }, {account: address, rpcUrl: rpc});
+    }, {account: address, rpcUrl: rpc, initiallyAuthorized: options.authorized ?? true});
 }
 
 export function requireSeed(): Seed {

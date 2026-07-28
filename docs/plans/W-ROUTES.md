@@ -574,3 +574,60 @@ waiting for … heading '상태' … getByLabel('decisionUID')
 ```
 cd web && npm run test:e2e     # 28/28, skipped 0
 ```
+
+---
+
+## 단계 5 리뷰 대응 R5 — `[P1]` 상세의 쓰기 버튼이 죽어 있다
+
+Claude가 `decisionDetail.tsx`를 읽어 확인했다. **버튼은 있는데 동작이 없다.**
+
+```
+decisionDetail.tsx:173   {owner && <button className="btn-commit" type="button">정산하기</button>}
+decisionDetail.tsx:70    <button className="btn-commit" type="button" disabled={!address}>이의 제기</button>
+```
+
+**둘 다 `onClick`이 없다.** 눌러도 아무 일이 없다.
+그래서 `fullpath`와 `B 계정 정산` 테스트가 계속 실패한 것이고,
+선택자를 아무리 고쳐도 통과할 수 없었다.
+
+기존 `Settlement`·`Challenge` 컴포넌트는 여전히 **단일 페이지에만** 있고
+자기 `decisionUID`/`settlementUID` 입력 필드를 들고 있다.
+
+### 고칠 것
+
+1. **`settlement.tsx`·`challenge.tsx`를 라우트에서 재사용 가능하게 만든다.**
+   UID를 **prop으로 받을 수 있게** 하고, prop이 있으면 그 입력 필드를 그리지 않는다.
+
+   ```tsx
+   <Settlement decisionUID={uid} address={address} />      // 입력 필드 없음
+   <Challenge settlementUID={s.uid} address={address} />   // 입력 필드 없음
+   ```
+
+   prop이 없으면 지금처럼 입력 필드를 그린다(단일 페이지가 아직 살아 있다).
+   **로직을 복제하지 말 것.** 같은 컴포넌트가 두 모드를 갖는다.
+
+2. `decisionDetail.tsx`의 죽은 버튼을 **실제 폼으로 교체**한다.
+   - `정산`: 소유자에게만 `<Settlement decisionUID={uid} …/>`.
+     소유자가 아니면 `"결정 작성자만 정산할 수 있습니다."`를 `.doc-note`로 표시하고 폼을 그리지 않는다.
+   - `이의`: 각 정산 아래에 `<Challenge settlementUID={…} …/>`.
+     지갑이 없으면 발행 버튼만 비활성(+이유). 폼 자체는 보인다.
+
+3. 발행에 성공하면 해당 절을 다시 불러온다(상태 인장도 갱신).
+
+### E2E
+
+- `B 계정의 F1 정산 시도` → `#/d/<f1>`에서 B는 **폼이 없고** 소유자 안내가 보인다.
+  단언의 의도("소유자가 아니면 정산할 수 없고 이유를 안다")는 그대로다.
+- `fullpath` 상태 확인 → 인장은 **`<h2>상태</h2>` 아래가 아니라 문서 머리**에 있다
+  (`decisionDetail.tsx:157`). 머리 영역에서 찾는다.
+
+### 하지 말 것
+
+- 단일 페이지를 아직 지우지 말 것(단계 7).
+- 단언을 약화하지 말 것.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 28/28, skipped 0
+```

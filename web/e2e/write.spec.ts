@@ -33,8 +33,13 @@ async function fillValidOutcome(page: Page): Promise<void> {
     await decision.getByLabel("graceSeconds").fill("3600");
 }
 
-test.beforeEach(async ({page}) => {
-    await connect(page);
+test.beforeEach(async ({page}, testInfo) => {
+    if (testInfo.title.startsWith("지갑 없이")) {
+        await injectWallet(page, accounts.A, rpcUrl, {authorized: false});
+        await page.goto("/#/record");
+    } else {
+        await connect(page);
+    }
 });
 
 test("지갑 연결 주소가 축약 표기된다", async ({page}) => {
@@ -103,7 +108,6 @@ test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다
     const pageB = await context.newPage();
     await connect(pageB, accounts.B, `#/d/${requireSeed().fixtures.f1.decisionUID}`);
     const settlement = section(pageB, "정산");
-    await settlement.getByLabel("decisionUID", {exact: true}).fill(requireSeed().fixtures.f1.decisionUID);
     await settlement.getByRole("button", {name: "정산 확인"}).click();
     await expect(settlement.getByRole("alert")).toHaveText("결정 작성자만 정산할 수 있습니다.");
     await expect(settlement.getByRole("button", {name: "정산 발행"})).toBeDisabled();

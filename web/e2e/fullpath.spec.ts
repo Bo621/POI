@@ -98,8 +98,6 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const decisionUID = await receiptUID(decision);
 
     const status = section(pageA, "상태");
-    await status.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
-    await status.getByRole("button", {name: "상태 조회"}).click();
     await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
 
     const currentTime = await chainNow();
@@ -110,12 +108,9 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
         new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
     )).toBeVisible();
     const awaiting = section(pageA, "상태");
-    await awaiting.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
-    await awaiting.getByRole("button", {name: "상태 조회"}).click();
     await expect(awaiting.getByRole("img", {name: "상태: 정산 대기"})).toBeVisible({timeout: 20_000});
 
     const settlement = section(pageA, "정산");
-    await settlement.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
     await settlement.getByLabel("관측값", {exact: true}).fill("92000000");
     await settlement.getByLabel("출처").fill("FULL-PATH E2E");
     await settlement.getByLabel("verifierVersion").fill("full-path-e2e");
@@ -125,7 +120,6 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await expectNoAlert(settlement, "정산 발행 alert");
     const settlementUID = await receiptUID(settlement);
 
-    await awaiting.getByRole("button", {name: "상태 조회"}).click();
     await expect(awaiting.getByRole("img", {name: "상태: 정산 완료"})).toBeVisible();
 
     await pageA.close();
