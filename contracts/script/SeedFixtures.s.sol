@@ -15,7 +15,6 @@ import {POIMetricRegistry} from "../src/POIMetricRegistry.sol";
 /// @notice Calculation-only seed script. It never broadcasts or mutates chain state.
 ///         scripts/dev_up.sh sends the emitted transactions with cast send.
 contract SeedFixtures is Script {
-    address internal constant DEFAULT_EAS = 0x4200000000000000000000000000000000000021;
     bytes32 internal constant PRICE_METRIC =
         0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf;
     bytes32 internal constant DRAWDOWN_METRIC =
@@ -159,6 +158,7 @@ contract SeedFixtures is Script {
     }
 
     function _phase3() private view {
+        address eas = vm.envAddress("SEED_EAS_ADDRESS");
         bytes32 decisionSchema = vm.envBytes32("SEED_DECISION_SCHEMA_UID");
         bytes32 settlementSchema = vm.envBytes32("SEED_SETTLEMENT_SCHEMA_UID");
         bytes32 challengeSchema = vm.envBytes32("SEED_CHALLENGE_SCHEMA_UID");
@@ -168,7 +168,7 @@ contract SeedFixtures is Script {
 
         _tx(
             "A",
-            DEFAULT_EAS,
+            eas,
             abi.encodeCall(
                 IEAS.revoke,
                 (
@@ -239,7 +239,7 @@ contract SeedFixtures is Script {
         string memory actor,
         bytes32 schema,
         POICodec.DecisionData memory d
-    ) private pure {
+    ) private view {
         bytes32 refUID = d.parents.length == 0 ? bytes32(0) : d.parents[0];
         _attest(actor, schema, false, refUID, _decisionData(d));
     }
@@ -248,7 +248,7 @@ contract SeedFixtures is Script {
         string memory actor,
         bytes32 schema,
         POICodec.SettlementData memory s
-    ) private pure {
+    ) private view {
         _attest(
             actor,
             schema,
@@ -271,7 +271,7 @@ contract SeedFixtures is Script {
         string memory actor,
         bytes32 schema,
         POICodec.ChallengeData memory c
-    ) private pure {
+    ) private view {
         _attest(
             actor,
             schema,
@@ -295,10 +295,11 @@ contract SeedFixtures is Script {
         bool revocable,
         bytes32 refUID,
         bytes memory data
-    ) private pure {
+    ) private view {
+        address eas = vm.envAddress("SEED_EAS_ADDRESS");
         _tx(
             actor,
-            DEFAULT_EAS,
+            eas,
             abi.encodeCall(
                 IEAS.attest,
                 (

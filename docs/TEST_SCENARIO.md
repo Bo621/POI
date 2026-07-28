@@ -1,13 +1,16 @@
-# 로컬 포크 수동 테스트 시나리오
+# 로컬 수동 테스트 시나리오
 
 각 절은 기대 화면과 실패 시 확인할 지점을 함께 적는다. UID와 관측값은
 `docs/fixtures/seed.json`을 기준으로 한다.
 
 ## S0. 시드 시작
 
-`RPC=<GIWA Sepolia RPC> bash scripts/dev_up.sh`를 실행한다. 출력에 F1, F2, F4, F5,
+`bash scripts/dev_up.sh`를 실행한다. 출력에 F1, F2, F4, F5,
 f_copy UID와 verifier 명령이 있어야 한다. MetaMask에 `http://127.0.0.1:8545`,
 chainId `91342`를 추가한다.
+
+이 시드는 로컬에 배포한 EAS(lib v1.4.0)를 쓴다. 실제 배포본(1.4.1-beta.3) 상대 검증은
+`FOUNDRY_PROFILE=fork forge test`가 담당한다.
 
 - 기대 화면: 스크립트가 네 fixture의 기대 상태와 UID를 출력한다.
 - 어긋나면: anvil 로그 경로와 실패한 phase의 Foundry 출력을 확인한다. 관측 실패라면
@@ -35,7 +38,7 @@ anvil 기본 계정 A를 연결하고 임의의 시드 UID를 조회한다.
 - 기대 화면: F1 `정산완료`, F2 `정산완료`와 `정산 철회 이력 있음`, F4 `기한초과`,
   F5 `대기`.
 - 어긋나면: 브라우저 시간이 아니라 체인 시간이 쓰이는지, active head와 revoke count,
-  최종 블록 시간이 실제 now로 돌아왔는지 확인한다.
+  최종 블록 시간이 fixture 관측 구간을 지난 시각인지 확인한다.
 
 ## S4. F5 시간 경계
 
@@ -99,7 +102,8 @@ A로 저널 작성 → 노트 승격 → salt 백업 → 결정 커밋을 수행
 poi-verify <f1.decisionUID> --rpc http://127.0.0.1:8545 --json
 ```
 
-- 기대 화면: `MATCH`, 종료코드 0. F2를 검증하면 철회된 S1이 아니라 활성 S2를 사용한다.
+- 기대 화면: 로컬 시드는 UI 확인용이므로 verifier의 실제 `MATCH` 증명은 실제 배포 뒤에
+  수행한다. F2 상태를 조회하면 철회된 S1이 아니라 활성 S2를 사용한다.
 - 어긋나면: provider 관측 구간, metric definition hash, active settlement head가
   `seed.json`과 같은지 확인한다.
 

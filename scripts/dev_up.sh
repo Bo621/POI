@@ -2,27 +2,18 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RPC_URL="${RPC:-}"
 LOCAL_RPC="http://127.0.0.1:8545"
 PID_FILE="${ROOT_DIR}/.anvil-seed.pid"
 ANVIL_LOG="${TMPDIR:-/tmp}/poi-seed-anvil.log"
 KEY_A="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 KEY_B="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
 ACTOR_A="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-EAS="0x4200000000000000000000000000000000000021"
-SCHEMA_REGISTRY="0x4200000000000000000000000000000000000020"
-FORK_BLOCK=31820323
 ATTESTED_TOPIC="$(cast keccak 'Attested(address,address,bytes32,bytes32)')"
 TX_LOGS=()
 ATTEST_UIDS=()
 
 if ! command -v jq >/dev/null 2>&1; then
     echo "jq가 필요합니다. jq를 설치한 뒤 다시 실행해 주세요." >&2
-    exit 1
-fi
-
-if [[ -z "${RPC_URL}" ]]; then
-    echo "RPC 환경변수에 GIWA Sepolia fork URL을 지정해 주세요." >&2
     exit 1
 fi
 
@@ -141,6 +132,24 @@ deploy_resolver() {
     printf '%s\n' "${address}"
 }
 
+deploy_contract() {
+    local contract=$1
+    local constructor=${2:-}
+    local bytecode
+    local receipt
+    local address
+    bytecode="$(
+        cd "${ROOT_DIR}/contracts"
+        forge inspect "lib/eas-contracts/contracts/${contract}.sol:${contract}" bytecode \
+            --use 0.8.28 --contracts lib/eas-contracts/contracts \
+            --remappings '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/'
+    )"
+    receipt="$(send_and_wait "${KEY_A}" --create "${bytecode}${constructor#0x}")"
+    address="$(jq -r '.contractAddress // .contract_address // empty' <<<"${receipt}")"
+    require_value "${contract} 배포 주소" "${address}"
+    printf '%s\n' "${address}"
+}
+
 register_schema() {
     local schema=$1
     local resolver=$2
@@ -180,7 +189,7 @@ calculate_phase() {
     shift 2
     (
         cd "${ROOT_DIR}/contracts"
-        env SEED_PHASE="${phase}" "$@" \
+        env SEED_PHASE="${phase}" SEED_EAS_ADDRESS="${EAS}" "$@" \
             forge script script/SeedFixtures.s.sol:SeedFixtures \
             --sig 'runSeed()' --rpc-url "${LOCAL_RPC}" -vv
     ) >"${output}"
@@ -209,8 +218,7 @@ execute_phase() {
 }
 
 "${ROOT_DIR}/scripts/dev_down.sh"
-anvil --fork-url "${RPC_URL}" --fork-block-number "${FORK_BLOCK}" \
-    --port 8545 --chain-id 91342 >"${ANVIL_LOG}" 2>&1 &
+anvil --port 8545 --chain-id 91342 >"${ANVIL_LOG}" 2>&1 &
 ANVIL_PID=$!
 printf '%s\n' "${ANVIL_PID}" >"${PID_FILE}"
 
@@ -223,16 +231,20 @@ done
 cast block-number --rpc-url "${LOCAL_RPC}" >/dev/null
 
 REAL_NOW="$(date +%s)"
-T0="$(( (REAL_NOW - 10800) / 60 * 60 ))"
+OBSERVATION_START="$(( (REAL_NOW - 3600) / 60 * 60 ))"
+OBSERVATION_END="$(( OBSERVATION_START + 600 ))"
+T0="$(cast block latest --rpc-url "${LOCAL_RPC}" --json | jq -r '.timestamp')"
 WINDOW_START="$(( T0 + 1800 ))"
 WINDOW_END="$(( T0 + 2400 ))"
 
-PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${WINDOW_START}" "${WINDOW_END}")"
-DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${WINDOW_START}" "${WINDOW_END}")"
+PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${OBSERVATION_START}" "${OBSERVATION_END}")"
+DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${OBSERVATION_START}" "${OBSERVATION_END}")"
 PRICE_THRESHOLD="$(( PRICE_VALUE - 1000000 ))"
 DRAWDOWN_THRESHOLD="$(( DRAWDOWN_VALUE + 50 ))"
 
-set_time "${T0}"
+SCHEMA_REGISTRY="$(deploy_contract SchemaRegistry)"
+EAS_CONSTRUCTOR="$(cast abi-encode 'constructor(address)' "${SCHEMA_REGISTRY}")"
+EAS="$(deploy_contract EAS "${EAS_CONSTRUCTOR}")"
 
 NOTE_RESOLVER="$(deploy_resolver POINoteResolver)"
 DECISION_RESOLVER="$(deploy_resolver POIDecisionResolver)"
@@ -304,13 +316,14 @@ F2_S2="${ATTEST_UIDS[0]}"
 F1_CHALLENGE="${ATTEST_UIDS[1]}"
 F_COPY_UID="${ATTEST_UIDS[2]}"
 
-set_time "${REAL_NOW}"
-
 mkdir -p "${ROOT_DIR}/docs/fixtures"
 {
     printf '{\n'
     printf '  "generatedBy": "scripts/dev_up.sh",\n'
+    printf '  "eas": {"version": "lib v1.4.0", "address": "%s", "schemaRegistryAddress": "%s"},\n' "${EAS}" "${SCHEMA_REGISTRY}"
     printf '  "t0": "%s",\n' "${T0}"
+    printf '  "observationWindow": {"start": "%s", "end": "%s", "purpose": "최근 실제 Upbit 관측값 조회"},\n' "${OBSERVATION_START}" "${OBSERVATION_END}"
+    printf '  "fixtureWindow": {"start": "%s", "end": "%s", "purpose": "로컬 UI 시드이며 verifier 대조용이 아님"},\n' "${WINDOW_START}" "${WINDOW_END}"
     printf '  "observations": {"BTC_PRICE_KRW_AT_END": "%s", "BTC_MAX_DRAWDOWN_IN_WINDOW": "%s"},\n' "${PRICE_VALUE}" "${DRAWDOWN_VALUE}"
     printf '  "schemas": {"note": "%s", "decision": "%s", "settlement": "%s", "challenge": "%s"},\n' "${NOTE_SCHEMA}" "${DECISION_SCHEMA}" "${SETTLEMENT_SCHEMA}" "${CHALLENGE_SCHEMA}"
     printf '  "fixtures": {\n'
@@ -327,6 +340,7 @@ mkdir -p "${ROOT_DIR}/docs/fixtures"
 
 {
     printf 'VITE_RPC_URL=%s\n' "${LOCAL_RPC}"
+    printf 'VITE_EAS_ADDRESS=%s\n' "${EAS}"
     printf 'VITE_NOTE_SCHEMA_UID=%s\n' "${NOTE_SCHEMA}"
     printf 'VITE_DECISION_SCHEMA_UID=%s\n' "${DECISION_SCHEMA}"
     printf 'VITE_SETTLEMENT_SCHEMA_UID=%s\n' "${SETTLEMENT_SCHEMA}"
