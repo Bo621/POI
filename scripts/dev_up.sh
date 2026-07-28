@@ -8,11 +8,13 @@ PID_FILE="${ROOT_DIR}/.anvil-seed.pid"
 ANVIL_LOG="${TMPDIR:-/tmp}/poi-seed-anvil.log"
 KEY_A="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 KEY_B="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+ACTOR_A="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+EAS="0x4200000000000000000000000000000000000021"
+SCHEMA_REGISTRY="0x4200000000000000000000000000000000000020"
 FORK_BLOCK=31820323
-PHASE1_LOG=""
-PHASE2_LOG=""
-PHASE3_LOG=""
-TICKER_PID=""
+ATTESTED_TOPIC="$(cast keccak 'Attested(address,address,bytes32,bytes32)')"
+TX_LOGS=()
+ATTEST_UIDS=()
 
 if [[ -z "${RPC_URL}" ]]; then
     echo "RPC 환경변수에 GIWA Sepolia fork URL을 지정해 주세요." >&2
@@ -21,11 +23,11 @@ fi
 
 cleanup_on_error() {
     local status=$?
-    stop_ticker
+    local file
+    for file in "${TX_LOGS[@]:-}"; do
+        [[ -z "${file}" ]] || rm -f "${file}"
+    done
     if (( status != 0 )); then
-        [[ -z "${PHASE1_LOG}" ]] || rm -f "${PHASE1_LOG}"
-        [[ -z "${PHASE2_LOG}" ]] || rm -f "${PHASE2_LOG}"
-        [[ -z "${PHASE3_LOG}" ]] || rm -f "${PHASE3_LOG}"
         if [[ "${KEEP_ANVIL_ON_FAILURE:-0}" == "1" ]]; then
             echo "시드가 실패했지만 KEEP_ANVIL_ON_FAILURE=1로 anvil을 유지합니다. 로그: ${ANVIL_LOG}" >&2
         else
@@ -37,60 +39,11 @@ cleanup_on_error() {
 }
 trap cleanup_on_error EXIT
 
-start_ticker() {
-    ( while :; do
-        cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null 2>&1
-        sleep 1
-    done ) &
-    TICKER_PID=$!
-}
-
-stop_ticker() {
-    if [[ -n "${TICKER_PID:-}" ]]; then
-        kill "${TICKER_PID}" 2>/dev/null || true
-        wait "${TICKER_PID}" 2>/dev/null || true
-        TICKER_PID=""
-    fi
-}
-
-diagnose_forge_failure() {
-    local broadcast="${ROOT_DIR}/contracts/broadcast/SeedFixtures.s.sol/91342/run-latest.json"
-    local tx_hash
-    if [[ ! -f "${broadcast}" ]]; then
-        echo "실패 진단: 브로드캐스트 JSON을 찾지 못했습니다: ${broadcast}" >&2
-        return
-    fi
-    tx_hash="$(jq -r '
-        [.receipts[]?
-            | select(.status == 0 or .status == "0x0" or .status == "0x00")
-            | .transactionHash]
-        | last // empty
-    ' "${broadcast}")"
-    if [[ -z "${tx_hash}" ]]; then
-        echo "실패 진단: 브로드캐스트 JSON에서 실패한 트랜잭션 해시를 찾지 못했습니다." >&2
-        return
-    fi
-    echo "실패 진단: cast run ${tx_hash}" >&2
-    cast run "${tx_hash}" --rpc-url "${LOCAL_RPC}" || true
-}
-
-value_after_label() {
-    local label=$1
-    local file=$2
-    sed -n "/${label}/{n;s/^[[:space:]]*//;p;q;}" "${file}"
-}
-
-address_on_label() {
-    local label=$1
-    local file=$2
-    sed -n "s/.*${label}[[:space:]]*\\(0x[0-9a-fA-F]\\{40\\}\\).*/\\1/p" "${file}" | head -n 1
-}
-
 require_value() {
     local name=$1
     local value=$2
-    if [[ -z "${value}" ]]; then
-        echo "forge 출력에서 ${name} 값을 찾지 못했습니다." >&2
+    if [[ -z "${value}" || "${value}" == "null" ]]; then
+        echo "${name} 값을 찾지 못했습니다." >&2
         exit 1
     fi
 }
@@ -109,26 +62,106 @@ set_time() {
     cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null
 }
 
-run_phase() {
+send_transaction() {
+    local actor=$1
+    local to=$2
+    local calldata=$3
+    local key
+    if [[ "${actor}" == "A" ]]; then
+        key="${KEY_A}"
+    elif [[ "${actor}" == "B" ]]; then
+        key="${KEY_B}"
+    else
+        echo "알 수 없는 seed actor: ${actor}" >&2
+        return 1
+    fi
+
+    # cast send prints decoded revert information and exits non-zero on failure.
+    cast send "${to}" "${calldata}" \
+        --private-key "${key}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json
+}
+
+deploy_resolver() {
+    local contract=$1
+    local bytecode
+    local constructor
+    local receipt
+    local address
+    bytecode="$(cd "${ROOT_DIR}/contracts" && forge inspect "src/${contract}.sol:${contract}" bytecode)"
+    constructor="$(cast abi-encode 'constructor(address)' "${EAS}")"
+    receipt="$(cast send --create "${bytecode}${constructor#0x}" \
+        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json)"
+    address="$(jq -r '.contractAddress // .contract_address // empty' <<<"${receipt}")"
+    require_value "${contract} 배포 주소" "${address}"
+    printf '%s\n' "${address}"
+}
+
+register_schema() {
+    local schema=$1
+    local resolver=$2
+    local revocable=$3
+    local predicted
+    local receipt
+    local emitted
+    predicted="$(cast call "${SCHEMA_REGISTRY}" \
+        'register(string,address,bool)(bytes32)' "${schema}" "${resolver}" "${revocable}" \
+        --from "${ACTOR_A}" --rpc-url "${LOCAL_RPC}")"
+    receipt="$(cast send "${SCHEMA_REGISTRY}" \
+        'register(string,address,bool)' "${schema}" "${resolver}" "${revocable}" \
+        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json)"
+    emitted="$(jq -r --arg address "${SCHEMA_REGISTRY,,}" '
+        [.logs[]? | select((.address | ascii_downcase) == $address) | .topics[1]] | first // empty
+    ' <<<"${receipt}")"
+    if [[ "${emitted,,}" != "${predicted,,}" ]]; then
+        echo "SchemaRegistry 반환 UID와 Registered 로그가 다릅니다: ${predicted} != ${emitted}" >&2
+        return 1
+    fi
+    printf '%s\n' "${predicted}"
+}
+
+initialize_resolvers() {
+    cast send "${NOTE_RESOLVER}" 'initialize(bytes32)' "${NOTE_SCHEMA}" \
+        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
+    cast send "${DECISION_RESOLVER}" 'initialize(bytes32,bytes32)' "${DECISION_SCHEMA}" "${NOTE_SCHEMA}" \
+        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
+    cast send "${SETTLEMENT_RESOLVER}" 'initialize(bytes32,bytes32)' "${SETTLEMENT_SCHEMA}" "${DECISION_SCHEMA}" \
+        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
+    cast send "${CHALLENGE_RESOLVER}" 'initialize(bytes32,bytes32)' "${CHALLENGE_SCHEMA}" "${SETTLEMENT_SCHEMA}" \
+        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
+}
+
+calculate_phase() {
     local phase=$1
     local output=$2
-    local forge_status
     shift 2
-    start_ticker
-    set +e
     (
         cd "${ROOT_DIR}/contracts"
-        env SEED_PHASE="${phase}" SEED_KEY_A="${KEY_A}" SEED_KEY_B="${KEY_B}" "$@" \
+        env SEED_PHASE="${phase}" "$@" \
             forge script script/SeedFixtures.s.sol:SeedFixtures \
-            --sig "runSeed()" --rpc-url "${LOCAL_RPC}" --broadcast --slow -vv
-    ) | tee "${output}"
-    forge_status="${PIPESTATUS[0]}"
-    set -e
-    stop_ticker
-    if (( forge_status != 0 )); then
-        diagnose_forge_failure
-        return "${forge_status}"
-    fi
+            --sig 'runSeed()' --rpc-url "${LOCAL_RPC}" -vv
+    ) >"${output}"
+}
+
+execute_phase() {
+    local input=$1
+    local actor
+    local to
+    local calldata
+    local receipt
+    local uid
+    ATTEST_UIDS=()
+    while read -r actor to calldata; do
+        receipt="$(send_transaction "${actor}" "${to}" "${calldata}")"
+        uid="$(jq -r --arg topic "${ATTESTED_TOPIC,,}" '
+            [.logs[]?
+                | select((.topics[0] | ascii_downcase) == $topic)
+                | .data]
+            | first // empty
+        ' <<<"${receipt}")"
+        if [[ -n "${uid}" ]]; then
+            ATTEST_UIDS+=("${uid}")
+        fi
+    done < <(sed -n 's/^[[:space:]]*TX //p' "${input}")
 }
 
 "${ROOT_DIR}/scripts/dev_down.sh"
@@ -155,64 +188,77 @@ DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/ob
 PRICE_THRESHOLD="$(( PRICE_VALUE - 1000000 ))"
 DRAWDOWN_THRESHOLD="$(( DRAWDOWN_VALUE + 50 ))"
 
+set_time "${T0}"
+
+NOTE_RESOLVER="$(deploy_resolver POINoteResolver)"
+DECISION_RESOLVER="$(deploy_resolver POIDecisionResolver)"
+SETTLEMENT_RESOLVER="$(deploy_resolver POISettlementResolver)"
+CHALLENGE_RESOLVER="$(deploy_resolver POIChallengeResolver)"
+
+NOTE_SCHEMA="$(register_schema \
+    'bytes32 contentCommitment' "${NOTE_RESOLVER}" false)"
+DECISION_SCHEMA="$(register_schema \
+    'bytes32[] parents,bytes32 promotedFromNote,bytes32 verifiedAddressUID,bytes32 decisionCommitment,bytes32 triggerCommitment,bytes32 evidenceCommitment,bytes32 reasonCommitment,bool hasExpectedOutcome,bytes32 outcomeMetricId,uint8 outcomeOp,int128 outcomeThreshold,uint64 windowStart,uint64 windowEnd,uint32 graceSeconds' \
+    "${DECISION_RESOLVER}" false)"
+SETTLEMENT_SCHEMA="$(register_schema \
+    'bytes32 decisionUID,uint8 result,bool hasObservedValue,int128 observedValue,string source,uint64 observedAt,string verifierVersion,bytes32 supersedes' \
+    "${SETTLEMENT_RESOLVER}" true)"
+CHALLENGE_SCHEMA="$(register_schema \
+    'bytes32 settlementUID,uint8 claimedResult,bool hasObservedValue,int128 observedValue,string source,uint64 observedAt,bytes32 noteCommitment' \
+    "${CHALLENGE_RESOLVER}" true)"
+initialize_resolvers
+
 PHASE1_LOG="$(mktemp "${TMPDIR:-/tmp}/poi-seed-phase1.XXXXXX")"
 PHASE2_LOG="$(mktemp "${TMPDIR:-/tmp}/poi-seed-phase2.XXXXXX")"
 PHASE3_LOG="$(mktemp "${TMPDIR:-/tmp}/poi-seed-phase3.XXXXXX")"
+TX_LOGS=("${PHASE1_LOG}" "${PHASE2_LOG}" "${PHASE3_LOG}")
 
-set_time "${T0}"
-run_phase 1 "${PHASE1_LOG}" \
-    SEED_T0="${T0}" SEED_PRICE_THRESHOLD="${PRICE_THRESHOLD}" \
-    SEED_DRAWDOWN_THRESHOLD="${DRAWDOWN_THRESHOLD}"
-
-NOTE_RESOLVER="$(address_on_label SEED_NOTE_RESOLVER= "${PHASE1_LOG}")"
-DECISION_RESOLVER="$(address_on_label SEED_DECISION_RESOLVER= "${PHASE1_LOG}")"
-SETTLEMENT_RESOLVER="$(address_on_label SEED_SETTLEMENT_RESOLVER= "${PHASE1_LOG}")"
-CHALLENGE_RESOLVER="$(address_on_label SEED_CHALLENGE_RESOLVER= "${PHASE1_LOG}")"
-NOTE_SCHEMA="$(value_after_label SEED_NOTE_SCHEMA_UID= "${PHASE1_LOG}")"
-DECISION_SCHEMA="$(value_after_label SEED_DECISION_SCHEMA_UID= "${PHASE1_LOG}")"
-SETTLEMENT_SCHEMA="$(value_after_label SEED_SETTLEMENT_SCHEMA_UID= "${PHASE1_LOG}")"
-CHALLENGE_SCHEMA="$(value_after_label SEED_CHALLENGE_SCHEMA_UID= "${PHASE1_LOG}")"
-F1_UID="$(value_after_label SEED_F1_UID= "${PHASE1_LOG}")"
-F2_UID="$(value_after_label SEED_F2_UID= "${PHASE1_LOG}")"
-F4_UID="$(value_after_label SEED_F4_UID= "${PHASE1_LOG}")"
-F5_UID="$(value_after_label SEED_F5_UID= "${PHASE1_LOG}")"
-F1_COMMITMENT="$(value_after_label SEED_F1_COMMITMENT= "${PHASE1_LOG}")"
-
-for pair in \
-    "NOTE_RESOLVER:${NOTE_RESOLVER}" "DECISION_RESOLVER:${DECISION_RESOLVER}" \
-    "SETTLEMENT_RESOLVER:${SETTLEMENT_RESOLVER}" "CHALLENGE_RESOLVER:${CHALLENGE_RESOLVER}" \
-    "NOTE_SCHEMA:${NOTE_SCHEMA}" "DECISION_SCHEMA:${DECISION_SCHEMA}" \
-    "SETTLEMENT_SCHEMA:${SETTLEMENT_SCHEMA}" "CHALLENGE_SCHEMA:${CHALLENGE_SCHEMA}" \
-    "F1_UID:${F1_UID}" "F2_UID:${F2_UID}" "F4_UID:${F4_UID}" "F5_UID:${F5_UID}" \
-    "F1_COMMITMENT:${F1_COMMITMENT}"; do
-    require_value "${pair%%:*}" "${pair#*:}"
-done
+calculate_phase 1 "${PHASE1_LOG}" \
+    SEED_ACTOR_A="${ACTOR_A}" SEED_DECISION_RESOLVER="${DECISION_RESOLVER}" \
+    SEED_DECISION_SCHEMA_UID="${DECISION_SCHEMA}" SEED_T0="${T0}" \
+    SEED_PRICE_THRESHOLD="${PRICE_THRESHOLD}" SEED_DRAWDOWN_THRESHOLD="${DRAWDOWN_THRESHOLD}"
+F1_COMMITMENT="$(sed -n '/SEED_F1_COMMITMENT/{n;s/^[[:space:]]*//;p;q;}' "${PHASE1_LOG}")"
+require_value F1_COMMITMENT "${F1_COMMITMENT}"
+execute_phase "${PHASE1_LOG}"
+if (( ${#ATTEST_UIDS[@]} != 4 )); then
+    echo "phase 1 Attested 로그가 4개여야 합니다: ${#ATTEST_UIDS[@]}" >&2
+    exit 1
+fi
+F1_UID="${ATTEST_UIDS[0]}"
+F2_UID="${ATTEST_UIDS[1]}"
+F4_UID="${ATTEST_UIDS[2]}"
+F5_UID="${ATTEST_UIDS[3]}"
 
 set_time "$((T0 + 2500))"
-run_phase 2 "${PHASE2_LOG}" \
+calculate_phase 2 "${PHASE2_LOG}" \
     SEED_SETTLEMENT_SCHEMA_UID="${SETTLEMENT_SCHEMA}" SEED_WINDOW_END="${WINDOW_END}" \
     SEED_PRICE_VALUE="${PRICE_VALUE}" SEED_DRAWDOWN_VALUE="${DRAWDOWN_VALUE}" \
     SEED_F1_UID="${F1_UID}" SEED_F2_UID="${F2_UID}"
-F1_SETTLEMENT="$(value_after_label SEED_F1_SETTLEMENT_UID= "${PHASE2_LOG}")"
-F2_S1="$(value_after_label SEED_F2_SETTLEMENT_S1_UID= "${PHASE2_LOG}")"
-require_value F1_SETTLEMENT "${F1_SETTLEMENT}"
-require_value F2_S1 "${F2_S1}"
+execute_phase "${PHASE2_LOG}"
+if (( ${#ATTEST_UIDS[@]} != 2 )); then
+    echo "phase 2 Attested 로그가 2개여야 합니다: ${#ATTEST_UIDS[@]}" >&2
+    exit 1
+fi
+F1_SETTLEMENT="${ATTEST_UIDS[0]}"
+F2_S1="${ATTEST_UIDS[1]}"
 
 set_time "$((T0 + 2600))"
-run_phase 3 "${PHASE3_LOG}" \
+calculate_phase 3 "${PHASE3_LOG}" \
     SEED_DECISION_SCHEMA_UID="${DECISION_SCHEMA}" \
     SEED_SETTLEMENT_SCHEMA_UID="${SETTLEMENT_SCHEMA}" \
     SEED_CHALLENGE_SCHEMA_UID="${CHALLENGE_SCHEMA}" \
     SEED_WINDOW_END="${WINDOW_END}" SEED_PRICE_VALUE="${PRICE_VALUE}" \
-    SEED_DRAWDOWN_VALUE="${DRAWDOWN_VALUE}" SEED_F1_UID="${F1_UID}" \
-    SEED_F2_UID="${F2_UID}" SEED_F1_COMMITMENT="${F1_COMMITMENT}" \
-    SEED_F1_SETTLEMENT_UID="${F1_SETTLEMENT}" SEED_F2_SETTLEMENT_S1_UID="${F2_S1}"
-F2_S2="$(value_after_label SEED_F2_SETTLEMENT_S2_UID= "${PHASE3_LOG}")"
-F1_CHALLENGE="$(value_after_label SEED_F1_CHALLENGE_UID= "${PHASE3_LOG}")"
-F_COPY_UID="$(value_after_label SEED_F_COPY_UID= "${PHASE3_LOG}")"
-require_value F2_S2 "${F2_S2}"
-require_value F1_CHALLENGE "${F1_CHALLENGE}"
-require_value F_COPY_UID "${F_COPY_UID}"
+    SEED_DRAWDOWN_VALUE="${DRAWDOWN_VALUE}" SEED_F2_UID="${F2_UID}" \
+    SEED_F1_COMMITMENT="${F1_COMMITMENT}" SEED_F1_SETTLEMENT_UID="${F1_SETTLEMENT}" \
+    SEED_F2_SETTLEMENT_S1_UID="${F2_S1}"
+execute_phase "${PHASE3_LOG}"
+if (( ${#ATTEST_UIDS[@]} != 3 )); then
+    echo "phase 3 Attested 로그가 3개여야 합니다: ${#ATTEST_UIDS[@]}" >&2
+    exit 1
+fi
+F2_S2="${ATTEST_UIDS[0]}"
+F1_CHALLENGE="${ATTEST_UIDS[1]}"
+F_COPY_UID="${ATTEST_UIDS[2]}"
 
 set_time "${REAL_NOW}"
 
@@ -248,6 +294,7 @@ mkdir -p "${ROOT_DIR}/docs/fixtures"
 } >"${ROOT_DIR}/web/.env.local"
 
 rm -f "${PHASE1_LOG}" "${PHASE2_LOG}" "${PHASE3_LOG}"
+TX_LOGS=()
 trap - EXIT
 printf '\n시드 완료 (T0=%s)\n' "${T0}"
 printf 'F1 SETTLED  %s\nF2 SETTLED+철회  %s\nF4 OVERDUE  %s\nF5 PENDING  %s\n' \

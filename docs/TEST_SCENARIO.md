@@ -39,8 +39,9 @@ anvil 기본 계정 A를 연결하고 임의의 시드 UID를 조회한다.
 
 ## S4. F5 시간 경계
 
-F5의 `windowStart` 직전에서 시작해 `cast rpc evm_setNextBlockTimestamp <t>`와
-`cast rpc evm_mine`으로 `t=windowStart`, `t=W`, `t=W+G` 경계를 각각 만든다.
+F5의 `windowStart` 직전에서 시작해 현재 체인 시각과 목표의 차이를 구하고
+`cast rpc evm_increaseTime <delta>`와 `cast rpc evm_mine`으로
+`t=windowStart`, `t=W`, `t=W+G` 경계를 각각 만든다.
 여기서 W는 `windowEnd`, G는 `graceSeconds`다.
 
 - 기대 화면: `대기` → `관측중` → `정산대기` → `기한초과`로 바뀌고, 15초 이내에

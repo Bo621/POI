@@ -463,3 +463,38 @@ RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
 - `web/.env.local` 생성
 - `cast call <settlement resolver> "activeHead(bytes32)(bytes32)" <f1.decisionUID>` ≠ 0
 - `cast call <settlement resolver> "revokeCount(bytes32)(uint32)" <f2.decisionUID>` == 1
+
+---
+
+## 리뷰 대응 R4 — `cast send --create` 인자 순서
+
+실행 결과:
+
+```
+error: unexpected argument '--private-key' found
+Usage: cast send --create <CODE> [SIG] [ARGS]...
+POINoteResolver 배포 주소 값을 찾지 못했습니다.
+```
+
+`--create <CODE>` 뒤는 생성자 시그니처와 인자를 받는 위치 인자라, 그 뒤에 오는
+`--private-key`가 위치 인자로 해석된다. **옵션을 `--create` 앞에 두어야 한다.**
+
+```bash
+cast send --rpc-url "$LOCAL_RPC" --private-key "$key" --confirmations 1 \
+    --create "$bytecode"
+```
+
+`scripts/dev_up.sh`의 **모든 `cast send`/`cast call` 호출을 같은 기준으로 훑을 것** —
+옵션을 먼저, 위치 인자를 나중에. 하나가 통과했다고 나머지가 맞는 것은 아니다.
+
+부수 확인: `observe.ts`는 정상 동작했다(관측값 계산 통과). 다만
+`MODULE_TYPELESS_PACKAGE_JSON` 경고가 나온다 — 루트 `package.json`에 `"type": "module"`을
+넣지 말 것(다른 패키지에 영향이 간다). 경고는 무시하거나 `scripts/`에 별도
+`package.json`(`{"type":"module"}`)을 두어 없앤다.
+
+### 검증
+
+```bash
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
+```
+끝까지 완주해 요약을 출력해야 한다.
