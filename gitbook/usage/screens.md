@@ -12,3 +12,31 @@
 
 Salt 백업을 완료하기 전에는 결정 발행이 비활성입니다. 없는 해시 경로에는
 `"없는 화면입니다."`가 표시되고, 딥링크·새로고침·뒤로가기는 hash route를 유지합니다.
+
+## 인장 7상태 전이
+
+```mermaid
+stateDiagram-v2
+    [*] --> NOT_REQUIRED: 예상 결과 미선언
+    [*] --> PENDING: 커밋 (예상 결과 선언)
+    PENDING --> OBSERVING: windowStart 도달
+    OBSERVING --> AWAITING: windowEnd 도달
+    AWAITING --> SETTLED: 유예 안에 결과 등록
+    AWAITING --> OVERDUE: 유예 경과
+    OVERDUE --> SETTLED_LATE: 기한 후 등록
+
+    note right of OVERDUE
+        미발행이 드러나는 자리.
+        숨기지 않는 것이 설계 의도다.
+    end note
+```
+
+| 상태 | 화면 문구 |
+|---|---|
+| `NOT_REQUIRED` | 해당없음 |
+| `PENDING` | 대기 |
+| `OBSERVING` | 관측중 |
+| `AWAITING` | 등록대기 |
+| `OVERDUE` | **기한초과** |
+| `SETTLED` | 등록완료 |
+| `SETTLED_LATE` | 지연등록 |
