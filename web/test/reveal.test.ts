@@ -28,6 +28,12 @@ describe("reveal", () => {
     it("CT18: attester만 다른 복사본은 불일치한다", () => {
         expect(checkReveal({...base, attester: other}, expected)).toBe(false);
     });
+    it("지갑 연결 없이 입력한 타인의 attester로 대조한다", () => {
+        const connectedWallet = undefined;
+        const file = buildRevealFile({...base, attester: other});
+        expect(connectedWallet).toBeUndefined();
+        expect(checkReveal(file, commitment(file))).toBe(true);
+    });
     it("version과 chainId를 채운다", () => {
         expect(base.version).toBe("poi.reveal.v1");
         expect(base.chainId).toBe(91342);

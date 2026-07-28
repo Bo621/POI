@@ -18,15 +18,23 @@ async function connect(page: Page, account = accounts.A): Promise<void> {
 
 async function fillValidOutcome(page: Page): Promise<void> {
     const decision = section(page, "결정 커밋");
-    const now = Math.floor(Date.now() / 1000);
+    const chainTimestamp = await page.evaluate(async (url) => {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {"content-type": "application/json"},
+            body: JSON.stringify({jsonrpc: "2.0", id: 1, method: "eth_getBlockByNumber", params: ["latest", false]}),
+        });
+        const payload = await response.json() as {result: {timestamp: string}};
+        return Number.parseInt(payload.result.timestamp, 16);
+    }, rpcUrl);
     await decision.getByLabel("결정 내용").fill(`E2E 결정 ${Date.now()}`);
     await decision.getByLabel("trigger").fill("E2E trigger");
     await decision.getByLabel("예상 결과 선언").check();
     await decision.getByLabel("metricId").fill(
         "0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf",
     );
-    await decision.getByLabel("windowStart (Unix 초)").fill(String(now + 300));
-    await decision.getByLabel("windowEnd (Unix 초)").fill(String(now + 3900));
+    await decision.getByLabel("windowStart (Unix 초)").fill(String(chainTimestamp + 300));
+    await decision.getByLabel("windowEnd (Unix 초)").fill(String(chainTimestamp + 3900));
     await decision.getByLabel("graceSeconds").fill("3600");
 }
 
@@ -58,6 +66,10 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
     await expect(publish).toBeEnabled();
     await publish.click();
 
+    const alert = decision.getByRole("alert");
+    if (await alert.count()) {
+        expect.soft(await alert.textContent(), "결정 발행 alert").toBe("");
+    }
     await expect(decision.getByText("트랜잭션", {exact: true})).toBeVisible();
     const uid = await decision.locator("dt", {hasText: "UID"}).locator("+ dd").textContent();
     expect(uid).toMatch(/^0x[0-9a-f]{64}$/i);

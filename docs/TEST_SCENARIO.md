@@ -74,6 +74,7 @@ F5의 `windowStart` 직전에서 시작해 현재 체인 시각과 목표의 차
 
 - 기대 화면: 각각 `NotDecisionOwner`, `PriorStillActive`, `AlreadyChallenged`에 대응하는
   한국어 오류가 보인다.
+- `NotDecisionOwner` 컨트랙트 revert 문구는 UI 소유자 사전 검증을 우회해야 볼 수 있으므로 자동 검사 대상이 아니다.
 - 어긋나면: 지갑이 의도한 A/B/C인지, 오류 selector 매핑이 누락되지 않았는지 확인한다.
 
 ## S8. CT18 복사 공격

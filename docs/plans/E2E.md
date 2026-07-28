@@ -206,3 +206,73 @@ cd web && npm run test:e2e      # 15/15
 cd web && npm test              # 60 + reveal 추가분
 cd web && npx tsc --noEmit && npm run build
 ```
+
+---
+
+## 리뷰 대응 R2 — `[P1]` R1의 지시가 틀렸다. attester는 입력받으면 안 된다
+
+R1 이후 14/15. 남은 실패는 CT18인데, **테스트가 아니라 설계가 틀렸다.**
+
+R1은 "지갑을 요구하지 말고 `attester`를 입력 필드로 받으라"고 했다. 앞부분(지갑을
+요구하지 않는다)은 맞지만 뒷부분이 **CT18을 무력화한다.**
+
+```
+CT18:  B가 A의 commitment를 복사해 자기 attestation에 넣는다.
+       A의 (salt, payload)로 재계산하면 attester가 B이므로 값이 달라져 불일치해야 한다.
+
+그런데 attester를 사람이 입력하면?
+       검증자가 attester 칸에 A를 적으면 B의 attestation에 대해서도 "일치"가 나온다.
+       복사 공격이 통과한다.
+```
+
+즉 **attester는 검증 대상 attestation에 붙어 있는 사실이지 입력값이 아니다.**
+
+### 고치는 방법 — 체인에서 읽는다
+
+`web/src/reveal.tsx`:
+
+- `attestationUID`를 넣으면 **온체인에서 그 attestation을 조회**해
+  `attester`와 `data`(= commitment)를 가져온다. `web/src/read.ts`에 헬퍼를 둔다.
+- **`attester` 입력 필드를 없앤다.** 조회한 값을 읽기 전용으로 표시한다.
+- **`온체인 commitment` 입력 필드도 없앤다.** 같은 이유다 — 사람이 적으면 아무 값이나
+  넣어 "일치"를 만들 수 있다. 조회한 값을 읽기 전용으로 표시한다.
+- 사용자가 넣는 것은 **`salt`·`payload`·`tag`** 셋뿐이다. 그것이 공개하는 사람이 가진 전부다.
+- 지갑은 여전히 **필요 없다.** 조회는 public client로 한다.
+- UID 조회 실패 → `"해당 attestation을 찾을 수 없습니다."`
+- 결정 스키마가 아닌 UID → 그 사실을 알린다.
+
+> 이 설계가 B10의 "서버를 신뢰하지 않는다"를 지킨다. 사용자는 체인에서 온 사실
+> (attester·commitment)과 자기가 가진 비밀(salt·payload)만으로 판정하고,
+> **어느 쪽도 손으로 지어낼 수 없다.**
+
+`decisionCommitment`는 결정 payload의 네 커밋 중 하나다. `tag` 선택에 따라
+평면 튜플에서 해당 필드를 꺼낸다(DECISION·TRIGGER·EVIDENCE·REASON).
+노트(`NOTE`)는 `contentCommitment` 하나다.
+
+### 테스트
+
+`web/test/reveal.test.ts`: 순수 함수는 `attester`·`commitment`를 **인자로** 받는 형태를
+유지한다(이미 그렇다). 화면이 그것을 체인에서 채운다는 것이 바뀌는 부분이다.
+
+`web/e2e/read.spec.ts`의 `fillReveal`을 고친다:
+
+```
+attestationUID · salt · payload 만 넣는다.
+attester와 commitment 칸은 더 이상 없다.
+```
+
+| 테스트 | 기대 |
+|---|---|
+| `uid = f1` | `commitment가 일치합니다.` · 다운로드 활성 |
+| **`uid = f_copy`** | **불일치** · 다운로드 비활성. 화면의 attester가 **B**로 표시된다 |
+
+두 번째가 CT18이다. **화면에 표시된 attester가 B인지도 함께 단언**한다 —
+그래야 "왜 불일치인지"가 테스트에 남는다.
+
+### 검증
+
+```
+bash scripts/dev_up.sh
+cd web && npm run test:e2e     # 15/15
+cd web && npm test && npx tsc --noEmit && npm run build
+```
