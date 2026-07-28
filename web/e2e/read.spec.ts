@@ -71,7 +71,9 @@ test.describe("Reveal commitment 대조", () => {
     test("CT18 사본은 불일치하고 다운로드할 수 없다", async ({page}) => {
         const reveal = await fillReveal(page, requireSeed().fixtures.f_copy.decisionUID);
         await expect(reveal.getByText(/일치하지 않습니다/)).toBeVisible();
-        await expect(reveal.locator("#reveal-attester")).toHaveText(accounts.B);
+        await expect(reveal.locator("#reveal-attester")).toHaveText(
+            new RegExp(`^${accounts.B}$`, "i"),
+        );
         await expect(reveal.getByRole("button", {name: "RevealFile 다운로드"})).toBeDisabled();
     });
 });

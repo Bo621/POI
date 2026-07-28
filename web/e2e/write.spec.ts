@@ -43,7 +43,9 @@ test.beforeEach(async ({page}) => {
 });
 
 test("지갑 연결 주소가 축약 표기된다", async ({page}) => {
-    await expect(section(page, "지갑").getByText(/0xf39f…2266/i)).toBeVisible();
+    await expect(section(page, "지갑").getByText(
+        new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
+    )).toBeVisible();
 });
 
 test("저널 저장은 로컬 목록에 나타난다", async ({page}) => {

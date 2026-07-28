@@ -3,11 +3,8 @@ import {resolve} from "node:path";
 import type {Page} from "@playwright/test";
 import type {Address, Hex} from "viem";
 
-const ANVIL_A = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266" as Address;
-const ANVIL_B = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8" as Address;
-
 interface Seed {
-    accounts?: {A?: Address; B?: Address};
+    accounts: {A: Address; B: Address; C: Address};
     fixtures: {
         f1: {decisionUID: Hex; settlementUID: Hex};
         f2: {decisionUID: Hex};
@@ -31,10 +28,7 @@ try {
     seedUnavailable = `시드가 없어 E2E를 건너뜁니다. 먼저 bash scripts/dev_up.sh를 실행하세요. (${detail})`;
 }
 
-export const accounts = {
-    A: seed?.accounts?.A ?? ANVIL_A,
-    B: seed?.accounts?.B ?? ANVIL_B,
-};
+export const accounts = seed?.accounts as Seed["accounts"];
 
 export const rpcUrl = "http://127.0.0.1:8545";
 
