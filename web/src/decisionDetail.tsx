@@ -10,6 +10,7 @@ import {
     readSettlement,
     readSettlementState,
 } from "./read";
+import {AttesterLink} from "./passport";
 import {Reveal} from "./reveal.tsx";
 import {ZERO_UID} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
@@ -44,7 +45,7 @@ function SettlementBlock({record, address, previous = false, onSuccess}: {record
             <dt>관측값</dt><dd>{record.hasObservedValue ? record.observedValue.toString() : "없음"}</dd>
             <dt>출처</dt><dd>{record.source}</dd>
             <dt>관측 시각</dt><dd className="timestamp">{time(record.observedAt)}</dd>
-            <dt>발행자</dt><dd className="hex">{record.attester}</dd>
+            <dt>발행자</dt><dd><AttesterLink address={record.attester} /></dd>
         </dl>
         <ErrorBoundary label="이의"><Challenge settlementUID={record.uid} address={address} onSuccess={onSuccess} /></ErrorBoundary>
     </div>;
@@ -143,7 +144,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         </section></ErrorBoundary>
         {state.hasRevokedSettlement && <p className="revocation-note">결과 등록 철회 이력 있음</p>}
         <section className="doc-section"><h2>커밋</h2><dl className="doc-fields">
-            <dt>발행자</dt><dd className="hex">{decision.attester} · 미검증 지갑</dd>
+            <dt>발행자</dt><dd><AttesterLink address={decision.attester} /> · 미검증 지갑</dd>
             <dt>커밋 시각</dt><dd className="timestamp">{time(decision.time)}</dd>
             <dt>검증 스냅샷</dt><dd className="hex">{decision.verifiedAddressUID}</dd>
         </dl></section>
@@ -170,7 +171,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         <ErrorBoundary label="계보"><section className="doc-section"><h2>계보</h2><details><summary>계보</summary>
             <p className="notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
             {dagError && <p className="form-status">확인 불가</p>}
-            {dag?.nodes.map(node => <dl className="doc-fields" key={node.uid}><dt>UID</dt><dd className="hex">{node.uid}</dd><dt>발행자</dt><dd className="hex">{node.attester}</dd></dl>)}
+            {dag?.nodes.map(node => <dl className="doc-fields" key={node.uid}><dt>UID</dt><dd className="hex">{node.uid}</dd><dt>발행자</dt><dd><AttesterLink address={node.attester} /></dd></dl>)}
         </details></section></ErrorBoundary>
         <ErrorBoundary label="검증 근거"><section className="doc-section"><details><summary>검증 근거</summary><dl className="doc-fields">
             <dt>체인</dt><dd>{CHAIN.name} · chainId {CHAIN.id}</dd>

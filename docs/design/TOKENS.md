@@ -118,7 +118,7 @@ Pretendard는 Google Fonts에 없다. **CDN을 추가한다.**
 
 ```css
 .doc-section > h2::before {
-    content: "// ";
+    content: "// " / "";   /* ← 뒤의 / "" 를 빠뜨리지 말 것 */
     color: var(--seal);
     font-family: var(--font-mono);
     font-weight: 500;
@@ -126,8 +126,13 @@ Pretendard는 Google Fonts에 없다. **CDN을 추가한다.**
 ```
 
 실제 선택자는 현재 `styles.css`의 절 구조에 맞춘다. **DOM은 건드리지 않는다.**
-`::before`는 접근성 트리에 들어가지 않으므로 `aria-label`과 E2E의 `heading '...'` 조회에
-영향이 없다 — 이것이 이 방식을 고른 이유다.
+
+> **`/ ""` 가 이 규칙의 전부다.** 생성 콘텐츠의 **대체 텍스트를 비우는** 문법이다.
+> 이게 없으면 Chrome이 `"// "`를 **접근성 이름에 포함시켜** 제목이 `// 커밋`이 되고,
+> 스크린리더가 슬래시를 읽으며 E2E의 `exact` heading 조회가 깨진다.
+>
+> 처음에 "`::before`는 접근성 트리에 안 들어간다"고 적었는데 **틀렸다.**
+> 그대로 넣었다가 E2E 26개 중 **11개가 깨졌다.** 시각 효과와 접근성 이름은 별개다.
 
 ## 6. 기와 구분선
 

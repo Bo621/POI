@@ -193,10 +193,12 @@ p {
     opacity: 0.55;
 }
 
-/* N3 조항 표시. ::before는 접근성 트리에 들어가지 않으므로
-   스크린리더 문구와 E2E의 heading 조회가 그대로 유지된다 — 그래서 이 방식을 골랐다. */
+/* N3 조항 표시.
+   `/ ""`는 생성 콘텐츠의 **대체 텍스트를 비운다.** 이게 없으면 Chrome이 "// "를
+   접근성 이름에 넣어 제목이 `// 커밋`이 되고, 스크린리더가 슬래시를 읽으며
+   E2E의 exact heading 조회가 전부 깨진다(실제로 11개가 깨졌다). */
 .doc-section > h2::before {
-    content: "// ";
+    content: "// " / "";
     color: var(--seal);
     font-family: var(--font-mono);
     font-weight: 500;
@@ -455,7 +457,8 @@ button:disabled {
 }
 
 .wallet-badge--verified {
-    border-inline-start-color: var(--indigo);
+    border-inline-start-color: var(--gold);
+    background: var(--gold-soft);
 }
 
 .wallet-badge--unknown {
@@ -529,7 +532,7 @@ button:disabled {
 }
 
 .verification-result {
-    color: var(--indigo);
+    color: var(--gold);
     font-family: var(--font-display);
     font-weight: 700;
 }

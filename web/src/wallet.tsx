@@ -98,7 +98,7 @@ export function Wallet({state, onChange}: {
         <div className="site-nav__wallet">
             {state.address
                 ? <span className={`wallet-badge wallet-badge--${state.verified === true ? "verified" : state.verified === false ? "unverified" : "unknown"}`}>
-                    <span className="hex">{shortAddress(state.address)}</span> {badge}
+                    <a className="hex" href={`#/passport/${state.address.toLowerCase()}`}>{shortAddress(state.address)}</a> {badge}
                 </span>
                 : <span className="site-nav__wallet-empty">지갑 연결 안 됨</span>}
             <button className="btn" type="button" onClick={connect} disabled={connecting}>

@@ -127,7 +127,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
                 {items.map((item) => (
                     <li className="challenge-row" key={item.uid}>
                         <span className="hex" title={item.uid}>{short(item.uid)}</span>
-                        <span><span className="hex" title={item.attester}>{short(item.attester)}</span> · {item.verified === true ? "검증 지갑" : item.verified === false ? "미검증 지갑" : "확인 불가"}</span>
+                        <span><a className="hex" title={item.attester} href={`#/passport/${item.attester.toLowerCase()}`}>{short(item.attester)}</a> · {item.verified === true ? "검증 지갑" : item.verified === false ? "미검증 지갑" : "확인 불가"}</span>
                         <span>{resultLabel(item.claimedResult)}</span>
                         <span>{item.hasObservedValue ? item.observedValue.toString() : "관측값 없음"}</span>
                         <span>{item.source}</span>
