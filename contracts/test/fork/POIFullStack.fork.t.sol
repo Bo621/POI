@@ -383,6 +383,31 @@ contract POIFullStackForkTest is EASForkBase {
         assertEq(challenge.activeChallenge(sUID, BOB), c2);
     }
 
+    function test_Fork_CT20_ExpiredVerifiedAddress() public {
+        bytes32 verifiedSchemaUID = _registerSchema("bytes32 proof", address(0), true);
+
+        vm.prank(ALICE);
+        bytes32 verifiedUID = eas.attest(
+            AttestationRequest({
+                schema: verifiedSchemaUID,
+                data: AttestationRequestData({
+                    recipient: ALICE,
+                    expirationTime: uint64(block.timestamp + 1 hours),
+                    revocable: true,
+                    refUID: bytes32(0),
+                    data: abi.encode(keccak256("verified")),
+                    value: 0
+                })
+            })
+        );
+
+        vm.warp(block.timestamp + 2 hours);
+        POICodec.DecisionData memory d = _okDecision();
+        d.verifiedAddressUID = verifiedUID;
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressExpired.selector);
+        _issueDecision(ALICE, d);
+    }
+
     function test_Fork_CT19_MetricFrozen() public {
         vm.expectRevert(POIMetricRegistry.MetricFrozen.selector);
         decision.addMetric(

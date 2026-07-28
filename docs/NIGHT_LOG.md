@@ -7,6 +7,8 @@
 |---|---|---|---|---|
 | 07-27 23:50 | C4 POIDecisionResolver | ✅ 병합 | 1R · P1 0 / P2 1 | P2: 잉여 워드 payload 무시 → 정규 길이 강제. CT11~CT16 동시 충족 |
 | 07-27 23:52 | — | ⏸ 중단 | — | 사용자 요청으로 무인 루프 정지. 다음 세션에서 `/goal`로 재개 |
+| 07-28 05:0x | W1~W8 프론트 | 🌿 브랜치만 | — | `feat/w-frontend` — 규칙대로 main 병합 안 함. tsc 0 · vitest 40/40 · build 통과. **디자인 없음**(기능 마크업까지만) |
+| 07-28 04:2x | core 브라우저 안전성 | ✅ 병합 | — | W 작업 중 발견 — generateSalt가 Node Buffer를 썼다. web의 shim으로 덮지 않고 core에서 수정 |
 | 07-28 03:5x | V1·V2 verifier | ✅ 병합 | — | tsc가 [P1] 1건 — viem이 uint32를 number로 준다(가짜 리더만 쓰는 테스트가 못 잡는 자리). 14/14 |
 | 07-28 03:1x | X6·X7 등급·에러 | ✅ 병합 | — | 매핑 1건 제거 시 커버리지 테스트가 깨지는 것 확인. core 53/53 |
 | 07-28 02:4x | X4·X5 core 파생 | ✅ 병합 | — | 변이 4종 전부 잡힘. 컨트랙트 경계표와 TS 표 일치 확인. core 37/37 |
@@ -19,7 +21,52 @@
 
 ---
 
-## 재개 지점 (2026-07-27 23:52)
+## 재개 지점 (2026-07-28 05:0x) — 큐 소진, 정지
+
+**루프 분업이 바뀌었다**: 계획 = Claude · 구현 = **Codex** · 리뷰 = Claude.
+`docs/GOAL.md`의 "분업" 절과 10단계 루프를 먼저 읽을 것. 계획 파일은 `docs/plans/<ID>.md`.
+
+### 오늘 밤 완료 (main 병합)
+
+C5 · C6 · C8 · CT-FORK · C9 · X4 · X5 · X6 · X7 · V1 · V2 · C5-R2 · core 브라우저 수정
+
+### 현재 검증 상태
+
+```
+contracts   forge test 144/144
+            FOUNDRY_PROFILE=fork forge test 36/36  (실제 EAS 1.4.1-beta.3 상대)
+core        54/54
+verifier    14/14
+web         40/40 (브랜치 feat/w-frontend)
+```
+
+포크 테스트는 로컬 anvil이 필요하다. 공개 RPC에 직접 붙으면 429가 난다:
+
+```
+anvil --fork-url https://sepolia-rpc.giwa.io/ --fork-block-number 31820323
+GIWA_SEPOLIA_RPC_URL=http://127.0.0.1:8545 FOUNDRY_PROFILE=fork forge test
+```
+
+### 사람이 판단해야 할 것 (무인으로 하지 않았다)
+
+1. **O2 법률 검토 게이트** — 되돌릴 수 없는 온체인 공개 전에 필요하다. O3 배포를 막고 있다
+2. **V3 지표 정의 문서 6종** — 데이터 출처·간격·결측치 정책은 판단이다. 문서 해시가
+   `definitionHash`가 되고, 컨트랙트가 `definitionHash=0`을 거부하므로 O5를 막고 있다
+3. **`feat/w-frontend` 브랜치 검토** — 프론트 8개 항목. 디자인은 하지 않았다
+4. **W1의 `verifiedAddressUID`** — Dojang이 검증 attestation UID getter를 노출하지 않는다
+   (`getVerification`·`verificationOf`·`attestationOf`·`getAttestationUID`·`verifiedAttestation`
+   모두 revert). EAS `Attested` 로그로 찾으려면 **Dojang의 검증 스키마 UID**를 알아야 한다.
+   현재는 0으로 기록하고 그 사실을 화면에 표시한다(명세가 0을 허용한다)
+5. **EAS는 업그레이드 가능한 프록시다** (impl `0xbEc660b456B84A081E90aF29BE43385BDa5bF7b6`).
+   우리 불변식은 현재 구현체 동작을 전제한다. C8의 포크 테스트가 먼저 깨져서 알려준다
+
+### 다음에 무인으로 할 수 있는 것
+
+W9~W12 (P1 프론트) · O9 익스플로러 verify(배포 후) · D1~D9 기획서 반영(P1, 문서 편집)
+
+---
+
+## 이전 재개 지점 (2026-07-27 23:52)
 
 **다음 항목: C5 `POISettlementResolver`** (§5.3 + §6.4 — 명세 283-299, 457-562줄)
 

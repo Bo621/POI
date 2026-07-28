@@ -111,6 +111,26 @@ contract POIDecisionResolverTest is Test {
         return uid;
     }
 
+    function _storeVerified(bytes32 uid, address recipient, uint64 expirationTime, uint64 revocationTime)
+        internal
+        returns (bytes32)
+    {
+        Attestation memory a = Attestation({
+            uid: uid,
+            schema: keccak256("dojang.verified"),
+            time: NOW - 10 days,
+            expirationTime: expirationTime,
+            revocationTime: revocationTime,
+            refUID: bytes32(0),
+            recipient: recipient,
+            attester: address(0xD0),
+            revocable: true,
+            data: ""
+        });
+        eas.set(a);
+        return uid;
+    }
+
     function _parent(address attester, uint64 time) internal returns (bytes32) {
         return _store(keccak256(abi.encodePacked("parent", attester, time)), DECISION_SCHEMA, attester, time);
     }
@@ -332,6 +352,45 @@ contract POIDecisionResolverTest is Test {
         d.verifiedAddressUID = keccak256("never stored");
         vm.expectRevert(POIDecisionResolver.BadVerifiedUID.selector);
         _attest(_attestation(d));
+    }
+
+    function test_Attest_AcceptsNonExpiringVerifiedUID() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerified(keccak256("non-expiring"), ALICE, 0, 0);
+        assertTrue(_attest(_attestation(d)));
+    }
+
+    function test_Attest_AcceptsVerifiedUIDExpiringLater() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerified(keccak256("expiring-later"), ALICE, NOW + 1 days, 0);
+        assertTrue(_attest(_attestation(d)));
+    }
+
+    function test_Attest_RevertsOnExpiredVerifiedUID() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerified(keccak256("expired"), ALICE, NOW - 1, 0);
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressExpired.selector);
+        _attest(_attestation(d));
+    }
+
+    function test_Attest_RevertsOnVerifiedUIDExpiringExactlyNow() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerified(keccak256("expires-now"), ALICE, NOW, 0);
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressExpired.selector);
+        _attest(_attestation(d));
+    }
+
+    function test_Attest_RevertsOnRevokedVerifiedUID() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerified(keccak256("revoked"), ALICE, 0, NOW - 1);
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressRevoked.selector);
+        _attest(_attestation(d));
+    }
+
+    function test_Attest_StillAllowsZeroVerifiedUID() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = bytes32(0);
+        assertTrue(_attest(_attestation(d)));
     }
 
     // --- I4~I6 outcome ------------------------------------------------------
