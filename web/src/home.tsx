@@ -1,7 +1,6 @@
 import {METRICS, deriveState, type PoiState} from "@poi/core";
-import {useEffect, useState, type FormEvent} from "react";
+import {useEffect, useState, type FormEvent, type ReactNode} from "react";
 import type {Address, Hex} from "viem";
-import seed from "../../docs/fixtures/seed.json";
 import {publicClient} from "./chain";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {navigate} from "./router";
@@ -13,10 +12,6 @@ import {RecordRowView} from "./recordRow";
 const UID_PATTERN = /^0x[0-9a-f]{64}$/i;
 const envExamples = (import.meta.env.VITE_EXAMPLE_UIDS ?? "")
     .split(",").map((uid: string) => uid.trim()).filter((uid: string) => UID_PATTERN.test(uid));
-const seedExamples = [seed.fixtures.f1, seed.fixtures.f2, seed.fixtures.f4, seed.fixtures.f5]
-    .map((fixture) => fixture.decisionUID)
-    .filter((uid): uid is Hex => UID_PATTERN.test(uid));
-const exampleUIDs = (envExamples.length > 0 ? envExamples : seedExamples) as Hex[];
 
 interface DecisionSummary {
     uid: Hex;
@@ -24,9 +19,36 @@ interface DecisionSummary {
     hasRevoked: boolean;
 }
 
-async function loadSummaries(uids: Hex[]): Promise<DecisionSummary[]> {
+interface FailedSummary {
+    uid: Hex;
+    error: string;
+}
+
+type SummaryResult = DecisionSummary | FailedSummary;
+type LoadState<T> =
+    | {status: "loading"}
+    | {status: "success"; data: T}
+    | {status: "failed"; error: string};
+
+function errorMessage(cause: unknown): string {
+    return cause instanceof Error ? cause.message : String(cause);
+}
+
+async function loadExampleUIDs(): Promise<Hex[]> {
+    if (envExamples.length > 0) return envExamples as Hex[];
+    const response = await fetch(`${import.meta.env.BASE_URL}seed.json?t=${Date.now()}`, {cache: "no-store"});
+    if (!response.ok) throw new Error(`seed.json 요청 실패 (${response.status})`);
+    const seed: unknown = await response.json();
+    const fixtures = (seed as {fixtures?: Record<string, {decisionUID?: unknown}>}).fixtures;
+    if (!fixtures) throw new Error("seed.json에 fixtures가 없습니다.");
+    return ["f1", "f2", "f4", "f5"]
+        .map((key) => fixtures[key]?.decisionUID)
+        .filter((uid): uid is Hex => typeof uid === "string" && UID_PATTERN.test(uid));
+}
+
+async function loadSummaries(uids: Hex[]): Promise<SummaryResult[]> {
     const now = await getChainTime();
-    return Promise.all(uids.map(async (uid) => {
+    const results = await Promise.allSettled(uids.map(async (uid): Promise<DecisionSummary> => {
         const [decision, heads] = await Promise.all([
             readDecision(uid),
             readSettlementState(SCHEMAS.settlement as Hex, uid),
@@ -45,17 +67,44 @@ async function loadSummaries(uids: Hex[]): Promise<DecisionSummary[]> {
             hasRevoked: heads.revokeCount > 0n,
         };
     }));
+    return results.map((result, index) => result.status === "fulfilled"
+        ? result.value
+        : {uid: uids[index], error: errorMessage(result.reason)});
 }
 
-function SummaryList({rows}: {rows: DecisionSummary[]}) {
+function isFailedSummary(row: SummaryResult): row is FailedSummary {
+    return "error" in row;
+}
+
+function SummaryList({rows}: {rows: SummaryResult[]}) {
     return <ul className="record-list">{rows.map((row) =>
-        <RecordRowView
-            key={row.uid}
-            uid={row.uid}
-            state={row.state}
-            warning={row.hasRevoked ? "정산 철회 이력 있음" : undefined}
-        />
+        isFailedSummary(row)
+            ? <li className="record-row" key={row.uid}>
+                <span className="notice" role="alert">! 불러오지 못함</span>
+                <span className="hex record-row__uid">{row.uid}</span>
+                <span className="record-row__detail">{row.error}</span>
+            </li>
+            : <RecordRowView
+                key={row.uid}
+                uid={row.uid}
+                state={row.state}
+                warning={row.hasRevoked ? "정산 철회 이력 있음" : undefined}
+            />
     )}</ul>;
+}
+
+function LoadStateView<T>({state, emptyText = "표시할 기록이 없습니다.", failureText, retry, children}: {
+    state: LoadState<T[]>;
+    emptyText?: string;
+    failureText: string;
+    retry: () => void;
+    children: (rows: T[]) => ReactNode;
+}) {
+    if (state.status === "loading") return <p className="doc-note">불러오는 중…</p>;
+    if (state.status === "failed") return <p className="form-status" role="alert">
+        ! {failureText} {state.error} <button className="btn" type="button" onClick={retry}>다시 시도</button>
+    </p>;
+    return state.data.length > 0 ? children(state.data) : <p className="doc-note">{emptyText}</p>;
 }
 
 function WalletRows({rows}: {rows: RecordRow[]}) {
@@ -73,26 +122,60 @@ function WalletRows({rows}: {rows: RecordRow[]}) {
 
 export function Home({address}: {address?: Address}) {
     const [uid, setUid] = useState("");
-    const [examples, setExamples] = useState<DecisionSummary[]>([]);
+    const [examples, setExamples] = useState<LoadState<SummaryResult[]>>({status: "loading"});
     const [recent] = useState(readRecent);
-    const [recentRows, setRecentRows] = useState<DecisionSummary[]>([]);
-    const [records, setRecords] = useState<RecordRow[]>();
+    const [recentRows, setRecentRows] = useState<LoadState<SummaryResult[]>>({status: "loading"});
+    const [records, setRecords] = useState<LoadState<RecordRow[]>>({status: "loading"});
     const [latestBlockAt, setLatestBlockAt] = useState<bigint>();
+    const [latestBlockError, setLatestBlockError] = useState("");
+    const [examplesRetry, setExamplesRetry] = useState(0);
+    const [recentRetry, setRecentRetry] = useState(0);
+    const [recordsRetry, setRecordsRetry] = useState(0);
+    const [blockRetry, setBlockRetry] = useState(0);
 
     useEffect(() => {
-        if (exampleUIDs.length > 0) void loadSummaries(exampleUIDs).then(setExamples).catch(() => setExamples([]));
+        let active = true;
+        setExamples({status: "loading"});
+        void loadExampleUIDs()
+            .then(loadSummaries)
+            .then((data) => { if (active) setExamples({status: "success", data}); })
+            .catch((cause: unknown) => { if (active) setExamples({status: "failed", error: errorMessage(cause)}); });
+        return () => { active = false; };
+    }, [examplesRetry]);
+
+    useEffect(() => {
+        let active = true;
+        setRecentRows({status: "loading"});
         const recentUIDs = recent.map((item) => item.uid as Hex);
-        if (recentUIDs.length > 0) void loadSummaries(recentUIDs).then(setRecentRows).catch(() => setRecentRows([]));
-        void publicClient.getBlock().then((block) => setLatestBlockAt(block.timestamp)).catch(() => undefined);
-    }, [recent]);
+        if (recentUIDs.length === 0) setRecentRows({status: "success", data: []});
+        else void loadSummaries(recentUIDs)
+            .then((data) => { if (active) setRecentRows({status: "success", data}); })
+            .catch((cause: unknown) => { if (active) setRecentRows({status: "failed", error: errorMessage(cause)}); });
+        return () => { active = false; };
+    }, [recent, recentRetry]);
+
+    useEffect(() => {
+        let active = true;
+        setLatestBlockAt(undefined);
+        setLatestBlockError("");
+        void publicClient.getBlock()
+            .then((block) => { if (active) setLatestBlockAt(block.timestamp); })
+            .catch((cause: unknown) => { if (active) setLatestBlockError(errorMessage(cause)); });
+        return () => { active = false; };
+    }, [blockRetry]);
 
     useEffect(() => {
         if (!address) {
-            setRecords(undefined);
+            setRecords({status: "success", data: []});
             return;
         }
-        void loadRecords(address).then(setRecords).catch(() => setRecords([]));
-    }, [address]);
+        let active = true;
+        setRecords({status: "loading"});
+        void loadRecords(address)
+            .then((data) => { if (active) setRecords({status: "success", data}); })
+            .catch((cause: unknown) => { if (active) setRecords({status: "failed", error: errorMessage(cause)}); });
+        return () => { active = false; };
+    }, [address, recordsRetry]);
 
     function open(event: FormEvent) {
         event.preventDefault();
@@ -118,9 +201,19 @@ export function Home({address}: {address?: Address}) {
             </form>
         </section>
 
-        {examples.length > 0 && <section className="doc-section"><h2>예시 증서</h2><SummaryList rows={examples} /></section>}
-        {recentRows.length > 0 && <section className="doc-section"><h2>최근 열어본 증서</h2>
-            <ul className="record-list">{recentRows.map((row) => {
+        <section className="doc-section"><h2>예시 증서</h2>
+            <LoadStateView state={examples} failureText="예시 증서를 불러오지 못했습니다." retry={() => setExamplesRetry(value => value + 1)}>
+                {(rows) => <SummaryList rows={rows} />}
+            </LoadStateView>
+        </section>
+        <section className="doc-section"><h2>최근 열어본 증서</h2>
+            <LoadStateView state={recentRows} failureText="최근 열어본 증서를 불러오지 못했습니다." retry={() => setRecentRetry(value => value + 1)}>
+                {(rows) => <ul className="record-list">{rows.map((row) => {
+                if (isFailedSummary(row)) return <li className="record-row" key={row.uid}>
+                    <span className="notice" role="alert">! 불러오지 못함</span>
+                    <span className="hex record-row__uid">{row.uid}</span>
+                    <span className="record-row__detail">{row.error}</span>
+                </li>;
                 const visit = recent.find((item) => item.uid.toLowerCase() === row.uid.toLowerCase());
                 return <RecordRowView
                     key={row.uid}
@@ -128,22 +221,29 @@ export function Home({address}: {address?: Address}) {
                     state={row.state}
                     detail={visit ? `마지막 조회 ${new Date(visit.at).toLocaleString("ko-KR")}` : undefined}
                 />;
-            })}</ul>
-        </section>}
+            })}</ul>}
+            </LoadStateView>
+        </section>
 
         <section className="doc-section"><details><summary>검증 환경</summary><dl className="doc-fields">
             <dt>체인</dt><dd>{CHAIN.name} · chainId {CHAIN.id}</dd>
-            <dt>최신 블록 시각</dt><dd className="hex">{latestBlockAt === undefined ? "확인 불가" : new Date(Number(latestBlockAt) * 1000).toLocaleString("ko-KR")}</dd>
+            <dt>최신 블록 시각</dt><dd className="hex">{latestBlockError
+                ? <>! 확인하지 못했습니다. {latestBlockError} <button className="btn" type="button" onClick={() => setBlockRetry(value => value + 1)}>다시 시도</button></>
+                : latestBlockAt === undefined ? "불러오는 중…" : new Date(Number(latestBlockAt) * 1000).toLocaleString("ko-KR")}</dd>
             <dt>컨트랙트</dt><dd>{isDeployed() ? "배포됨" : "설정 필요"}</dd>
             <dt>스키마</dt><dd>{Object.keys(SCHEMAS).join(" · ")}</dd>
             <dt>지표 정의</dt><dd>{METRICS.map((metric) => `${metric.name} · definitionHash ${metric.definitionHash}`).join(" / ")}</dd>
         </dl></details></section>
 
         {address && <><section className="doc-section"><h2>처리할 기록</h2><p className="hex">{address}</p>
-            {records && (needsAction(records).length > 0 ? <WalletRows rows={needsAction(records)} /> : <p className="doc-note">지금 처리할 기록이 없습니다.</p>)}
+            <LoadStateView state={records} emptyText="표시할 기록이 없습니다." failureText="처리할 기록을 불러오지 못했습니다." retry={() => setRecordsRetry(value => value + 1)}>
+                {(rows) => needsAction(rows).length > 0 ? <WalletRows rows={needsAction(rows)} /> : <p className="doc-note">표시할 기록이 없습니다.</p>}
+            </LoadStateView>
         </section>
         <section className="doc-section"><h2>최근 커밋한 기록</h2>
-            {records && (records.length > 0 ? <WalletRows rows={records.slice(0, 5)} /> : <p className="doc-note">표시할 기록이 없습니다.</p>)}
+            <LoadStateView state={records} failureText="최근 커밋한 기록을 불러오지 못했습니다." retry={() => setRecordsRetry(value => value + 1)}>
+                {(rows) => <WalletRows rows={rows.slice(0, 5)} />}
+            </LoadStateView>
             <p><a className="btn" href="#/me">내 기록 전체 →</a></p>
         </section></>}
     </main>;

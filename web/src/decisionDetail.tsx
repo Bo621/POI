@@ -61,6 +61,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [dag, setDag] = useState<DagResult>();
     const [dagError, setDagError] = useState(false);
     const [metric, setMetric] = useState<{decimals: number; definitionHash: Hex}>();
+    const [metricError, setMetricError] = useState("");
     const [refreshKey, setRefreshKey] = useState(0);
     const loadedUID = useRef<Hex>();
 
@@ -88,7 +89,10 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
                 ]);
                 if (!current) return;
                 setDecision(loadedDecision); setHeads(loadedSettlement); setActive(loadedSettlement.active); setNow(chainNow);
-                void readMetricDefinition(SCHEMAS.decision as Hex, loadedDecision.outcomeMetricId).then(setMetric).catch(() => {});
+                setMetricError("");
+                void readMetricDefinition(SCHEMAS.decision as Hex, loadedDecision.outcomeMetricId)
+                    .then(setMetric)
+                    .catch((cause: unknown) => setMetricError(cause instanceof Error ? cause.message : "지표 정의를 불러오지 못했습니다."));
                 if (attestation.revocationTime > 0n) setError("철회된 결정입니다");
                 setSettlementError(false);
                 try {
@@ -164,6 +168,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             <dt>결정 스키마</dt><dd className="hex">{SCHEMAS.decision}</dd><dt>resolver</dt><dd className="hex">{RESOLVERS.decision}</dd>
             <dt>정산 스키마</dt><dd className="hex">{SCHEMAS.settlement}</dd><dt>resolver</dt><dd className="hex">{RESOLVERS.settlement}</dd>
             <dt>지표</dt><dd className="hex">{decision.outcomeMetricId}</dd><dt>definitionHash</dt><dd className="hex">{metric?.definitionHash ?? "확인 불가"}</dd>
+            {metricError && <><dt>지표 오류</dt><dd className="form-status" role="alert">! {metricError}</dd></>}
             <dt>문서</dt><dd>docs/metrics/{decision.outcomeMetricId}.md</dd>
         </dl><p className="doc-note">온체인 definitionHash가 이 문서의 해시와 다르면 verifier가 불일치로 판정합니다.</p></details></section></ErrorBoundary>
         <section className="doc-section"><h2>오프체인 검증</h2><pre>$ poi-verify {uid} --rpc &lt;url&gt; --json</pre><CopyButton text={`poi-verify ${uid} --rpc <url> --json`}>복사</CopyButton></section>

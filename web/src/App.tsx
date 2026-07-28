@@ -45,7 +45,7 @@ function PageHeader({title}: {title: string}) {
 }
 
 function RecordPage({wallet}: {wallet: WalletState}) {
-    const {now, skewSeconds} = useChainTime();
+    const {now, skewSeconds, error: chainTimeError} = useChainTime();
     const [journalCount, setJournalCount] = useState(0);
     const [notePublished, setNotePublished] = useState(false);
     const [decisionEditing, setDecisionEditing] = useState(false);
@@ -63,6 +63,7 @@ function RecordPage({wallet}: {wallet: WalletState}) {
             <li aria-current={activeStep === 3 ? "step" : undefined}><strong>③ 결정</strong><span>시점 + 예상 결과 고정</span></li>
         </ol>
         {!isDeployed() && <p className="notice" role="status">컨트랙트가 아직 배포되지 않았습니다. 스키마 UID가 설정될 때까지 발행할 수 없습니다.</p>}
+        {chainTimeError && <p className="form-status" role="alert">! 체인 시각을 불러오지 못했습니다. {chainTimeError}</p>}
         <Note address={wallet.address} onProgressChange={onNoteProgress} />
         <Decision
             address={wallet.address}
