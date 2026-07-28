@@ -1,4 +1,4 @@
-import {RESULT, deriveState, evidenceTier, formatGrade, REVEAL_STATE} from "@poi/core";
+import {OP, RESULT, deriveState, evidenceTier, formatGrade, REVEAL_STATE} from "@poi/core";
 import {useEffect, useRef, useState} from "react";
 import type {Address, Hex} from "viem";
 import {CHAIN, EAS_ADDRESS, RESOLVERS, SCHEMAS, SCHEMA_REGISTRY_ADDRESS} from "./config";
@@ -28,7 +28,15 @@ const resultLabel = (result: number) => result === RESULT.OBSERVED ? "OBSERVED"
     : result === RESULT.NOT_OBSERVED ? "NOT_OBSERVED" : "INDETERMINATE";
 const short = (value: string) => `${value.slice(0, 10)}…${value.slice(-6)}`;
 const time = (value: bigint) => new Date(Number(value) * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC");
-const op = (value: number) => ["=", "≠", ">", "≥", "<", "≤"][value] ?? String(value);
+/**
+ * 기호는 core의 OP에서 **파생**시킨다. 배열에 손으로 늘어놓았더니 여섯 개가 전부
+ * 어긋나 있었고(op=1이 `>=`인데 화면엔 `≠`), 모든 결정의 조건이 잘못 표시됐다.
+ * 검증하는 사람이 읽는 값이므로 여기서 틀리면 제품 전체가 거짓말을 한다.
+ */
+const OP_SYMBOL: Record<number, string> = {
+    [OP.GT]: ">", [OP.GTE]: "≥", [OP.LT]: "<", [OP.LTE]: "≤", [OP.EQ]: "=", [OP.NEQ]: "≠",
+};
+export const op = (value: number) => OP_SYMBOL[value] ?? String(value);
 
 function CopyButton({text, children}: {text: string; children: string}) {
     const [copied, setCopied] = useState(false);
