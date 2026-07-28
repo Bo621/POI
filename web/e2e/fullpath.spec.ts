@@ -93,9 +93,11 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const decisionSalt = backup.salts.decision;
     await decisionDialog.getByLabel("저장했습니다").check();
     await expect(publishDecision).toBeEnabled();
-    await publishDecision.click();
     await expectNoAlert(decision, "결정 발행 alert");
-    const decisionUID = await receiptUID(decision);
+    await publishDecision.click();
+    await expect(pageA).toHaveURL(/#\/d\/0x[0-9a-f]{64}$/i);
+    const decisionUID = (new URL(pageA.url()).hash.match(/0x[0-9a-f]{64}/i) ?? [])[0];
+    expect(decisionUID).toBeTruthy();
 
     const status = pageA.locator("header.doc-header").locator("+ .status-result");
     await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();

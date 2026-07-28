@@ -42,3 +42,16 @@ skip되면 명령은 실패한다.
 | 14 | `write.spec.ts` — `30분 graceSeconds는 한국어 오류로 발행을 막는다` |
 | 15 | `write.spec.ts` — `B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다` |
 | 16 | `fullpath.spec.ts` — `저널부터 reveal 다운로드까지 전체 성공 경로를 완주한다` |
+
+---
+
+## 실행 전에 시드를 새로 만든다
+
+`fullpath`가 `evm_increaseTime`으로 체인 시각을 민다. 그래서 **한 시드로 E2E를 여러 번
+돌리면 fixture의 기대 상태가 어긋나** 거짓 실패가 난다(F5가 `대기`에서 `관측중`으로 넘어가는 식).
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e
+```
+
+연속 4회 실행에서 26/26이 유지되는 것은 확인했지만, **깨끗한 판정이 필요하면 시드를 새로 만든다.**
