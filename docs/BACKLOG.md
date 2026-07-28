@@ -123,7 +123,7 @@ C8의 9종과 합쳐 `FOUNDRY_PROFILE=fork` 29/29). CT18은 온체인 항목이 
 | V1 | **P0** | verifier v1.0 골격 — decisionUID 입력 → 판정 출력 | `[x]` `verifier/`. E2·E4·E5·E9 전부 `@poi/core` 재사용(두 벌을 만들지 않는다). `VERIFIER_VERSION = "poi-verifier/1.0.0"` 고정. `ChainReader` 인터페이스 분리로 테스트는 네트워크 없이 14/14 |
 | V2 | **P0** | 온체인 정산과 대조 | `[x]` **업비트 1분봉 provider 2종 구현 완료.** 종료코드 0=일치 · 1=불일치 · 2=조회 실패 · **3=검증 못 함**(0으로 두면 '검증됨'과 구별 안 되고 1로 묶으면 '틀림'과 뭉개진다). 온체인 `definitionHash`·`decimals`·`kind`·`allowed`를 manifest와 대조 · 스냅샷 해시를 리포트에 포함 · `now`는 체인 시간. 45/45 |
 | V3 | **P0** | **metric 정의 문서** (§11.3) | `[x]` **2종** (사용자 결정 — 나머지 4종은 Phase 1). `BTC_PRICE_KRW_AT_END`(decimals 0) · `BTC_MAX_DRAWDOWN_IN_WINDOW`(decimals 1). 업비트 공개 1분봉·UTC·보간 없음·half-up·스냅샷 해시. 해시는 `cast keccak`로 생성해 `docs/metrics/manifest.json`에 고정, core 테스트가 문서 바이트로 재계산해 대조 |
-| V4 | P1 | reveal 검증 CLI | `[ ]` `(salt, payload)` → C 재계산. 타인 commitment 복사본은 실패(CT18) |
+| V4 | P1 | reveal 검증 CLI | `[x]` `(salt, payload)` → C 재계산. 타인 commitment 복사본은 실패(CT18) |
 
 ### V3 대상 지표 6종
 

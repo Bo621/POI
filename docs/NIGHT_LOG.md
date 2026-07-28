@@ -87,3 +87,27 @@ W9~W12 (P1 프론트) · O9 익스플로러 verify(배포 후) · D1~D9 기획�
 현재 상태: `main` 기준 `forge test 88/88` · 완료 C1·C2·C3·C4·C7 / X1·X2·X3 · 공격 테스트 8/19
 미착수 P0: C5·C6 · X4·X5 · W1~W8 · V1~V3 · O1~O5·O8
 사람이 해야 할 것: ~~O1 파우셋~~ **완료** (`0x77E8DFC4…C2dfaa`, 0.015 ETH) / **O2 법률 검토 게이트**만 남음
+
+## 2026-07-29 새벽 — GIWA 정렬 디자인 (`feat/giwa-design`, main 미병합)
+
+| 항목 | 결과 | 파일 | 비고 |
+|---|---|---|---|
+| N1 색 토큰 | ✅ | `web/src/styles.css` `:root`·dark 블록 | 다크 `--seal` = `#FF2200` (GIWA와 동일 값). `--gold`·`--giwa-red` 신설 |
+| N2 Pretendard | ✅ | `web/index.html`, `styles.css:4` | Google Fonts에서 IBM Plex Sans KR만 제거. Gowun Batang·Plex Mono 유지 |
+| N3 `//` 조항 표시 | ✅ (수정 후) | `styles.css` `.doc-section > h2::before` | **처음 넣었을 때 E2E 11/26 실패.** Chrome이 생성 콘텐츠를 접근성 이름에 포함한다 — `content: "// " / ""`로 대체 텍스트를 비워 해결 |
+| N4 기와 구분선 | ✅ | `styles.css` `.doc-section::after` | 4.5rem·0.55. `::before`는 이미 증서 이중선에 쓰이고 있었다 |
+| N5 금색 | ✅ | `styles.css` `.wallet-badge--verified`, `.verification-result` | 계보 연결선은 **건너뜀** — 스타일링할 요소가 없고 DOM을 만들지 않기로 했다 |
+| N6 Passport 진입점 | ✅ | `passport.tsx`(`AttesterLink`), `decisionDetail.tsx`×3, `challenge.tsx`, `wallet.tsx` | 화면은 이미 있었고 **링크만 없었다.** E2E 1개 추가 → 27 |
+
+**최종**: `web 80/80` · `e2e 27/27 (skipped 0)` · tsc 클린 · 빌드 통과
+
+### 이 밤에 드러난 것
+
+1. **`::before` 접근성 가정이 틀렸다.** `TOKENS.md`에 잘못 적어둔 것을 그대로 구현했고
+   E2E가 잡았다. 문서에 정정을 남겼다. 시각 효과와 접근성 이름은 별개다.
+2. **주소 대소문자 재발 (네 번째).** 체인이 돌려주는 attester는 체크섬 표기다.
+   `shortAddressRe` 같은 헬퍼가 있는데도 새 코드에서 또 났다 — 구조적 방지책이 필요하다.
+3. **시드는 매번 새로 만들어야 한다.** E2E를 반복 실행하면 체인 시간이 밀려
+   F5 시간 경계 테스트가 실패한다. 코드 결함이 아니다.
+4. **codex 샌드박스가 git 커밋을 막는다.** N1만 파일 수정 후 커밋에서 멈췄다.
+   이후는 직접 했다. 다음 위임부터는 커밋을 사람/Claude가 맡는 전제로 지시할 것.
