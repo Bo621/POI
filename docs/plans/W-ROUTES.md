@@ -363,3 +363,51 @@ cd web && npm run test:e2e     # 전부 통과, skipped 0
 
 `routing.spec.ts`에 단언을 추가한다: 딥링크 진입 시 `#root`가 **비어 있지 않다.**
 지금 그 단언이 없어서 이 결함이 "타임아웃"으로만 보였다.
+
+---
+
+## 단계 5 리뷰 대응 R1 — 접힘과 이동을 테스트가 따라가지 못한다
+
+25/28. 실패 3건 전부 **테스트 쪽**이다(제품 결함이 아니다).
+
+### 1. `<details>`로 접힌 필드를 열지 않는다
+
+```
+waiting for … getByLabel('예상 결과 선언')
+  locator resolved to <input type="checkbox" id="decision-outcome"/>
+  element is not visible
+```
+
+단계 5에서 선택 항목을 `<details>`로 접었다(의도한 변경). 테스트가 열지 않고 조작한다.
+
+**고칠 것**: 접힌 절을 먼저 연다. `<summary>`를 클릭하거나
+`details[open]`을 확인하는 헬퍼를 `e2e/fixtures.ts`에 둔다.
+
+```ts
+export async function openDetails(area: Locator, summaryText: string): Promise<void>;
+```
+
+**`web/src`에서 `<details>`를 걷어내지 말 것.** 접힘은 SITEMAP §4.2가 요구한 것이고
+필드 15개가 한꺼번에 펼쳐지는 것이 원래 문제였다.
+
+### 2. 정산·이의가 상세로 옮겨간 것을 따라가지 않는다
+
+`write.spec.ts`의 두 테스트가 아직 단일 페이지의 `정산` 절을 찾는다.
+단계 4에서 정산은 `#/d/<uid>` 안으로 들어갔다.
+
+- `B 계정의 F1 정산 시도` → `#/d/<f1>`로 이동한 뒤 그 안의 정산 절에서 확인한다
+- `지갑 없이 기록하기` → `#/record`로 이동해 확인한다
+
+**단언 자체는 바꾸지 말 것.** 어디서 찾는지만 바꾼다.
+
+### 3. `fullpath.spec.ts`도 같은 두 가지
+
+`<details>` 열기 + 정산·이의를 상세 경로에서 수행하도록 고친다.
+**성공 경로가 실제 사용자 동선(홈 → 기록하기 → 상세 → 정산 → 이의 → 공개)과
+같아지는 것이 원래 목표**였으므로, 이 수정이 오히려 의도에 맞다.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 28/28, skipped 0
+```

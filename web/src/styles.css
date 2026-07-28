@@ -125,6 +125,40 @@ p {
     margin-top: var(--space-6);
 }
 
+.record-progress {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    margin: 0 0 var(--space-9);
+    padding: var(--space-6) 0;
+    list-style: none;
+    border-block: 1px solid var(--rule-strong);
+}
+
+.record-progress li {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.record-progress strong {
+    font-family: var(--font-display);
+}
+
+.record-progress span,
+summary {
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
+}
+
+details.field-group > summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+details.field-group[open] > summary {
+    margin-bottom: var(--space-4);
+}
+
 .field-group {
     display: grid;
     gap: var(--space-4);
@@ -479,6 +513,10 @@ pre {
 }
 
 @media (max-width: 34rem) {
+    .record-progress {
+        grid-template-columns: 1fr;
+    }
+
     .doc-fields {
         grid-template-columns: 1fr;
         gap: var(--space-1);

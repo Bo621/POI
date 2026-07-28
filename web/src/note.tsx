@@ -100,7 +100,7 @@ export function Note({address}: {address?: Address}) {
                     <li key={entry.id}>
                         <p>{entry.content}</p>
                         <small className="timestamp">{new Date(entry.createdAt).toLocaleString("ko-KR")}</small>
-                        <button className="btn" type="button" onClick={() => prepareNote(entry)} disabled={!isDeployed()}>
+                        <button className="btn" type="button" onClick={() => prepareNote(entry)} disabled={!address || !isDeployed()}>
                             노트로 승격
                         </button>
                         <button className="btn-quiet" type="button" onClick={() => save(deleteJournalEntry(entries, entry.id))}>
@@ -109,6 +109,7 @@ export function Note({address}: {address?: Address}) {
                     </li>
                 ))}
             </ul>
+            {!address && <p className="notice notice--quiet">지갑을 연결해야 노트를 발행할 수 있습니다.</p>}
             {status && <p className="form-status" role="alert">{status}</p>}
             <Receipt label="노트" uid={receipt?.uid} txHash={receipt?.txHash} />
             {pending && (
