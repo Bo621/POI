@@ -1,6 +1,6 @@
 import {useState} from "react";
 import type {Address, Hex} from "viem";
-import {isDeployed} from "./config";
+import {CHAIN, isDeployed} from "./config";
 import {Decision} from "./decision";
 import {Challenge} from "./challenge";
 import {Note} from "./note";
@@ -26,9 +26,12 @@ export default function App() {
 
     return (
         <main>
-            <h1>POI</h1>
+            <header className="doc-header">
+                <h1>POI 판단 증서</h1>
+                <p className="doc-meta">{CHAIN.name} · chainId {CHAIN.id}</p>
+            </header>
             {!isDeployed() && (
-                <p role="status">컨트랙트 미배포: 스키마 UID가 설정될 때까지 발행할 수 없습니다.</p>
+                <p className="notice" role="status">컨트랙트가 아직 배포되지 않았습니다. 스키마 UID가 설정될 때까지 발행할 수 없습니다.</p>
             )}
             <Wallet onChange={updateWallet} />
             <Note address={address} />

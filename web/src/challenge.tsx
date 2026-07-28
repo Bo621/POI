@@ -100,28 +100,31 @@ export function Challenge({address}: {address?: Address}) {
     }
 
     return (
-        <section>
+        <section className="doc-section">
             <h2>이의</h2>
-            <p>조회된 것이 전부라는 보장은 없습니다.</p>
-            <form onSubmit={publish}>
-                <label>settlementUID<input value={settlementUID} onChange={(e) => setSettlementUID(e.target.value)} /></label>
-                <label>claimedResult<select value={claimedResult} onChange={(e) => setClaimedResult(Number(e.target.value))}>
+            <p className="notice notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
+            <form className="doc-form" onSubmit={publish}>
+                <div className="field"><label htmlFor="challenge-settlement">settlementUID</label><input className="uid" id="challenge-settlement" value={settlementUID} onChange={(e) => setSettlementUID(e.target.value)} /></div>
+                <div className="field"><label htmlFor="challenge-result">claimedResult</label><select id="challenge-result" value={claimedResult} onChange={(e) => setClaimedResult(Number(e.target.value))}>
                     <option value={0}>OBSERVED</option><option value={1}>NOT_OBSERVED</option><option value={2}>INDETERMINATE</option>
-                </select></label>
-                <label><input type="checkbox" checked={hasValue} onChange={(e) => setHasValue(e.target.checked)} />관측값 있음</label>
-                {hasValue && <label>관측값(정수)<input value={observedValue} onChange={(e) => setObservedValue(e.target.value)} /></label>}
-                <label>출처<input value={source} onChange={(e) => setSource(e.target.value)} /></label>
-                <label>observedAt (Unix 초)<input type="number" value={observedAt} onChange={(e) => setObservedAt(Number(e.target.value))} /></label>
-                <label>noteCommitment (선택)<input value={noteCommitment} onChange={(e) => setNoteCommitment(e.target.value)} /></label>
-                <button type="submit" disabled={!isDeployed()}>이의 발행</button>
-                <button type="button" onClick={load} disabled={!isDeployed()}>목록 조회</button>
+                </select></div>
+                <label className="check-field" htmlFor="challenge-has-value"><input id="challenge-has-value" type="checkbox" checked={hasValue} onChange={(e) => setHasValue(e.target.checked)} />관측값 있음</label>
+                {hasValue && <div className="field"><label htmlFor="challenge-value">관측값(정수)</label><input id="challenge-value" value={observedValue} onChange={(e) => setObservedValue(e.target.value)} /></div>}
+                <div className="field"><label htmlFor="challenge-source">출처</label><input id="challenge-source" value={source} onChange={(e) => setSource(e.target.value)} /></div>
+                <div className="field"><label htmlFor="challenge-observed-at">observedAt (Unix 초)</label><input id="challenge-observed-at" type="number" value={observedAt} onChange={(e) => setObservedAt(Number(e.target.value))} /></div>
+                <div className="field"><label htmlFor="challenge-note">noteCommitment (선택)</label><input className="uid" id="challenge-note" value={noteCommitment} onChange={(e) => setNoteCommitment(e.target.value)} /></div>
+                <div className="button-row">
+                    <button className="btn-commit" type="submit" disabled={!isDeployed()}>이의 발행</button>
+                    <button className="btn" type="button" onClick={load} disabled={!isDeployed()}>목록 조회</button>
+                </div>
             </form>
-            {status && <p role="status">{status}</p>}
-            <ul>
+            {status && <p className="form-status" role="status">{status}</p>}
+            <ul className="record-list">
                 {items.map((item) => (
                     <li key={item.uid}>
-                        <span>{item.uid} · {item.verified === true ? "검증 지갑" : item.verified === false ? "미검증 지갑" : "확인 불가"}</span>
-                        {address?.toLowerCase() === item.attester.toLowerCase() && <button type="button" onClick={() => revoke(item.uid)}>내 이의 철회</button>}
+                        <span className="hex">{item.uid}</span>
+                        <span> · {item.verified === true ? "검증 지갑" : item.verified === false ? "미검증 지갑" : "확인 불가"}</span>
+                        {address?.toLowerCase() === item.attester.toLowerCase() && <button className="btn-quiet" type="button" onClick={() => revoke(item.uid)}>내 이의 철회</button>}
                     </li>
                 ))}
             </ul>

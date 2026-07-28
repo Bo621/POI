@@ -48,18 +48,20 @@ export function Reveal({address}: {address?: Address}) {
     }
 
     return (
-        <section>
+        <section className="doc-section">
             <h2>공개</h2>
-            <p>다운로드한 파일을 저장소의 reveals/에 넣어 push하세요. 자동 업로드는 하지 않습니다.</p>
-            <label>attestationUID<input value={attestationUID} onChange={(e) => setAttestationUID(e.target.value)} /></label>
-            <label>항목<select value={tag} onChange={(e) => setTag(e.target.value as CommitTagName)}>
+            <p className="notice notice--quiet">다운로드한 파일을 저장소의 reveals/에 넣어 push하세요. 자동 업로드는 하지 않습니다.</p>
+            <div className="doc-form">
+            <div className="field"><label htmlFor="reveal-attestation">attestationUID</label><input className="uid" id="reveal-attestation" value={attestationUID} onChange={(e) => setAttestationUID(e.target.value)} /></div>
+            <div className="field"><label htmlFor="reveal-tag">항목</label><select id="reveal-tag" value={tag} onChange={(e) => setTag(e.target.value as CommitTagName)}>
                 {TAGS.map((value) => <option key={value}>{value}</option>)}
-            </select></label>
-            <label>salt<input value={salt} onChange={(e) => setSalt(e.target.value)} /></label>
-            <label>payload (JSON)<textarea value={payloadText} onChange={(e) => setPayloadText(e.target.value)} /></label>
-            <label>온체인 commitment<input value={commitment} onChange={(e) => setCommitment(e.target.value)} /></label>
-            <p role="status">{result.matches ? "commitment가 일치합니다." : result.error}</p>
-            <button type="button" onClick={download} disabled={!result.matches}>RevealFile 다운로드</button>
+            </select></div>
+            <div className="field"><label htmlFor="reveal-salt">salt</label><input className="hex" id="reveal-salt" value={salt} onChange={(e) => setSalt(e.target.value)} /></div>
+            <div className="field"><label htmlFor="reveal-payload">payload (JSON)</label><textarea id="reveal-payload" value={payloadText} onChange={(e) => setPayloadText(e.target.value)} /></div>
+            <div className="field"><label htmlFor="reveal-commitment">온체인 commitment</label><input className="uid" id="reveal-commitment" value={commitment} onChange={(e) => setCommitment(e.target.value)} /></div>
+            <p className={result.matches ? "verification-result" : "form-status"} role="status">{result.matches ? "commitment가 일치합니다." : result.error}</p>
+            <button className="btn" type="button" onClick={download} disabled={!result.matches}>RevealFile 다운로드</button>
+            </div>
         </section>
     );
 }

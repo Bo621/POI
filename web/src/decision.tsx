@@ -201,37 +201,50 @@ export function Decision({address, verification}: {
     }
 
     return (
-        <section>
+        <section className="doc-section">
             <h2>결정 커밋</h2>
-            <p>trigger는 온체인에서 강제할 수 없습니다.</p>
-            <p>
-                온체인에 평문으로 공개: predicate(metricId·op·threshold), window, graceSeconds,
-                parents, promotedFromNote, verifiedAddressUID
-            </p>
-            <form onSubmit={prepare}>
-                <label>결정 내용<textarea value={decision} onChange={(e) => setDecision(e.target.value)} /></label>
-                <label>trigger<textarea value={trigger} onChange={(e) => setTrigger(e.target.value)} /></label>
-                <label>근거 (선택)<textarea value={evidence} onChange={(e) => setEvidence(e.target.value)} /></label>
-                <label>이유 (선택)<textarea value={reason} onChange={(e) => setReason(e.target.value)} /></label>
-                <label>
-                    <input type="checkbox" checked={hasOutcome} onChange={(e) => setHasOutcome(e.target.checked)} />
-                    예상 결과 선언
-                </label>
-                {hasOutcome && (
-                    <fieldset>
-                        <label>metricId<input value={metricId} onChange={(e) => setMetricId(e.target.value)} /></label>
-                        <label>op<input type="number" min="0" max="255" value={op} onChange={(e) => setOp(Number(e.target.value))} /></label>
-                        <label>threshold<input value={threshold} onChange={(e) => setThreshold(e.target.value)} /></label>
-                        <label>windowStart (Unix 초)<input type="number" value={windowStart} onChange={(e) => setWindowStart(Number(e.target.value))} /></label>
-                        <label>windowEnd (Unix 초)<input type="number" value={windowEnd} onChange={(e) => setWindowEnd(Number(e.target.value))} /></label>
-                        <label>graceSeconds<input type="number" min={HOUR} max={MAX_GRACE} value={grace} onChange={(e) => setGrace(Number(e.target.value))} /></label>
-                    </fieldset>
-                )}
-                <label>부모 UID (공백/줄바꿈 구분, 최대 8)<textarea value={parentsText} onChange={(e) => setParentsText(e.target.value)} /></label>
-                <label>승격 노트 UID (선택)<input value={promoted} onChange={(e) => setPromoted(e.target.value)} /></label>
-                <button type="submit" disabled={!isDeployed()}>salt 생성 및 백업</button>
+            <p className="notice notice--quiet">trigger는 온체인에서 강제되지 않습니다.</p>
+            <div className="notice">
+                <p>아래 항목은 평문으로 온체인에 기록됩니다.</p>
+                <dl className="doc-fields">
+                    <dt>predicate</dt><dd className="hex">metricId · op · threshold</dd>
+                    <dt>관측 조건</dt><dd className="hex">window · graceSeconds</dd>
+                    <dt>참조</dt><dd className="hex">parents · promotedFromNote · verifiedAddressUID</dd>
+                </dl>
+            </div>
+            <form className="doc-form" onSubmit={prepare}>
+                <div className="field-group">
+                    <div className="field"><label htmlFor="decision-content">결정 내용</label><textarea id="decision-content" rows={6} value={decision} onChange={(e) => setDecision(e.target.value)} /></div>
+                    <div className="field"><label htmlFor="decision-trigger">trigger</label><textarea id="decision-trigger" rows={3} value={trigger} onChange={(e) => setTrigger(e.target.value)} /></div>
+                </div>
+                <div className="field-group">
+                    <div className="field"><label htmlFor="decision-evidence">근거 (선택)</label><textarea id="decision-evidence" rows={3} value={evidence} onChange={(e) => setEvidence(e.target.value)} /></div>
+                    <div className="field"><label htmlFor="decision-reason">이유 (선택)</label><textarea id="decision-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+                </div>
+                <div className="field-group">
+                    <label className="check-field" htmlFor="decision-outcome">
+                        <input id="decision-outcome" type="checkbox" checked={hasOutcome} onChange={(e) => setHasOutcome(e.target.checked)} />
+                        예상 결과 선언
+                    </label>
+                    {hasOutcome && (
+                        <fieldset>
+                            <legend>예상 결과 조건</legend>
+                            <div className="field"><label htmlFor="decision-metric">metricId</label><input className="uid" id="decision-metric" value={metricId} onChange={(e) => setMetricId(e.target.value)} /></div>
+                            <div className="field"><label htmlFor="decision-op">op</label><input id="decision-op" type="number" min="0" max="255" value={op} onChange={(e) => setOp(Number(e.target.value))} /></div>
+                            <div className="field"><label htmlFor="decision-threshold">threshold</label><input id="decision-threshold" value={threshold} onChange={(e) => setThreshold(e.target.value)} /></div>
+                            <div className="field"><label htmlFor="decision-window-start">windowStart (Unix 초)</label><input id="decision-window-start" type="number" value={windowStart} onChange={(e) => setWindowStart(Number(e.target.value))} /></div>
+                            <div className="field"><label htmlFor="decision-window-end">windowEnd (Unix 초)</label><input id="decision-window-end" type="number" value={windowEnd} onChange={(e) => setWindowEnd(Number(e.target.value))} /></div>
+                            <div className="field"><label htmlFor="decision-grace">graceSeconds</label><input id="decision-grace" type="number" min={HOUR} max={MAX_GRACE} value={grace} onChange={(e) => setGrace(Number(e.target.value))} /></div>
+                        </fieldset>
+                    )}
+                </div>
+                <div className="field-group">
+                    <div className="field"><label htmlFor="decision-parents">부모 UID (공백/줄바꿈 구분, 최대 8)</label><textarea className="hex" id="decision-parents" rows={2} value={parentsText} onChange={(e) => setParentsText(e.target.value)} /></div>
+                    <div className="field"><label htmlFor="decision-promoted">승격 노트 UID (선택)</label><input className="uid" id="decision-promoted" value={promoted} onChange={(e) => setPromoted(e.target.value)} /></div>
+                </div>
+                <button className="btn" type="submit" disabled={!isDeployed()}>salt 생성 및 백업</button>
             </form>
-            {status && <p role="alert">{status}</p>}
+            {status && <p className="form-status" role="alert">{status}</p>}
             {pending && (
                 <SaltBackup
                     salts={pending.salts}

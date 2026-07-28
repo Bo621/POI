@@ -82,28 +82,31 @@ export function Note({address}: {address?: Address}) {
     }
 
     return (
-        <section>
+        <section className="doc-section">
             <h2>저널과 노트</h2>
-            <p>이 기록은 검증되지 않습니다</p>
-            <form onSubmit={add}>
-                <label>저널 내용<textarea value={content} onChange={(e) => setContent(e.target.value)} /></label>
-                <button type="submit">저널 저장</button>
+            <p className="notice">이 기록은 검증되지 않습니다</p>
+            <form className="doc-form" onSubmit={add}>
+                <div className="field">
+                    <label htmlFor="journal-content">저널 내용</label>
+                    <textarea id="journal-content" value={content} onChange={(e) => setContent(e.target.value)} />
+                </div>
+                <button className="btn" type="submit">저널 저장</button>
             </form>
-            <ul>
+            <ul className="record-list">
                 {entries.map((entry) => (
                     <li key={entry.id}>
                         <p>{entry.content}</p>
-                        <small>{new Date(entry.createdAt).toLocaleString("ko-KR")}</small>
-                        <button type="button" onClick={() => prepareNote(entry)} disabled={!isDeployed()}>
+                        <small className="timestamp">{new Date(entry.createdAt).toLocaleString("ko-KR")}</small>
+                        <button className="btn" type="button" onClick={() => prepareNote(entry)} disabled={!isDeployed()}>
                             노트로 승격
                         </button>
-                        <button type="button" onClick={() => save(deleteJournalEntry(entries, entry.id))}>
+                        <button className="btn-quiet" type="button" onClick={() => save(deleteJournalEntry(entries, entry.id))}>
                             삭제
                         </button>
                     </li>
                 ))}
             </ul>
-            {status && <p role="alert">{status}</p>}
+            {status && <p className="form-status" role="alert">{status}</p>}
             {pending && (
                 <SaltBackup
                     salts={{note: pending.salt}}

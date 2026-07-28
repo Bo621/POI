@@ -74,17 +74,45 @@ export function Status() {
     }
 
     const result = loaded ? deriveState(loaded, now) : undefined;
+    const seal = result ? {
+        [STATE.NOT_REQUIRED]: {text: "해당없음", tone: "faint", label: "해당 없음"},
+        [STATE.PENDING]: {text: "대기", tone: "ink", label: "대기"},
+        [STATE.OBSERVING]: {text: "관측중", tone: "ink", label: "관측 중"},
+        [STATE.AWAITING]: {text: "정산대기", tone: "ink", label: "정산 대기"},
+        [STATE.OVERDUE]: {text: "기한초과", tone: "seal", label: "기한 초과"},
+        [STATE.SETTLED]: {text: "정산완료", tone: "indigo", label: "정산 완료"},
+        [STATE.SETTLED_LATE]: {text: "지연정산", tone: "indigo", label: "지연 정산"},
+    }[result.state] : undefined;
     return (
-        <section>
+        <section className="doc-section">
             <h2>상태</h2>
-            <form onSubmit={load}>
-                <label>decisionUID<input value={decisionUID} onChange={(e) => setDecisionUID(e.target.value)} /></label>
-                <button type="submit" disabled={!isDeployed()}>상태 조회</button>
+            <form className="doc-form" onSubmit={load}>
+                <div className="field"><label htmlFor="status-decision">decisionUID</label><input className="uid" id="status-decision" value={decisionUID} onChange={(e) => setDecisionUID(e.target.value)} /></div>
+                <button className="btn" type="submit" disabled={!isDeployed()}>상태 조회</button>
             </form>
-            {result && <p>상태: {describeState(result.state)}</p>}
-            {result?.hasRevokedSettlement && <p>정산 철회 이력 있음</p>}
-            {loaded && <p>등급: {loaded.grade}</p>}
-            {error && <p role="alert">{error}</p>}
+            {!result && (
+                <div className="status-empty">
+                    <div className="seal seal--empty" aria-hidden="true">미조회</div>
+                    <p className="doc-note">decisionUID를 넣으면 7상태 중 하나가 인장으로 표시됩니다.</p>
+                </div>
+            )}
+            {result && seal && (
+                <div className="status-result">
+                    <div
+                        className={`seal seal--${seal.tone} seal--stamping`}
+                        role="img"
+                        aria-label={`상태: ${seal.label}`}
+                    >
+                        {seal.text}
+                    </div>
+                    <dl className="doc-fields">
+                        <dt>상태</dt><dd>{describeState(result.state)}</dd>
+                        {loaded && <><dt>등급</dt><dd>{loaded.grade}</dd></>}
+                    </dl>
+                </div>
+            )}
+            {result?.hasRevokedSettlement && <p className="revocation-note">정산 철회 이력 있음</p>}
+            {error && <p className="form-status" role="alert">{error}</p>}
         </section>
     );
 }

@@ -97,16 +97,20 @@ export function Wallet({onChange}: {onChange: (state: WalletState) => void}) {
             : "확인 불가";
 
     return (
-        <section>
+        <section className="doc-section">
             <h2>지갑</h2>
-            <button type="button" onClick={connect} disabled={connecting}>
+            <button className="btn" type="button" onClick={connect} disabled={connecting}>
                 {connecting ? "연결 중…" : "지갑 연결"}
             </button>
-            {state.address && <p>{shortAddress(state.address)} · {badge}</p>}
-            {state.address && state.verifiedAddressUID === ZERO_UID && (
-                <p>검증 지갑 스냅샷 UID를 찾지 못했습니다 (0으로 기록됩니다)</p>
+            {state.address && (
+                <p className={`wallet-badge wallet-badge--${state.verified === true ? "verified" : state.verified === false ? "unverified" : "unknown"}`}>
+                    <span className="hex">{shortAddress(state.address)}</span> {badge}
+                </p>
             )}
-            {error && <p role="alert">{error}</p>}
+            {state.address && state.verifiedAddressUID === ZERO_UID && (
+                <p className="notice notice--quiet">검증 지갑 스냅샷 UID를 찾지 못했습니다 (0으로 기록됩니다)</p>
+            )}
+            {error && <p className="form-status" role="alert">{error}</p>}
         </section>
     );
 }

@@ -340,3 +340,83 @@ cd web && npm run build       # 통과
 ```
 
 테스트 수가 줄면 로직을 건드린 것이다 — 되돌릴 것.
+
+---
+
+## 리뷰 대응 R1 — 실제 화면을 보고 나온 것
+
+`npm run dev`로 띄워 확인했다. 전체 톤은 의도대로다(미색·먹·인주·괘선·밑줄 입력).
+아래만 고친다. **로직은 여전히 건드리지 않는다.** 테스트 40개가 그대로 통과해야 한다.
+
+### [P1] 한글 문장에 모노스페이스가 적용됐다
+
+`.doc-meta`는 `--font-mono`인데 `settlement.tsx:174`의
+`<p className="doc-meta">관측 시점: 구간 종료 시각(고정)</p>` 처럼 **한글 문장**에 쓰였다.
+화면에서 자간이 벌어져 읽기 나쁘고, 계획서 §1의 "모노는 16진수·UID·타임스탬프에만" 규칙 위반이다.
+
+- `.doc-meta`는 그대로 두되(체인 정보 줄 등 **영문·숫자 전용**),
+- 한글 보조 설명용으로 `.doc-note`를 새로 만든다:
+  `font: 400 var(--text-sm)/1.6 var(--font-body); color: var(--ink-soft);`
+- **모든 `.tsx`를 훑어** `.doc-meta`가 한글 문장에 붙은 곳을 `.doc-note`로 바꾼다.
+  16진수·UID·Unix 타임스탬프·chainId 같은 기계값에는 그대로 둔다.
+
+### [P2] 상태 절의 빈 상태가 비어 있다
+
+`decisionUID`를 넣기 전에는 인장이 렌더링되지 않아, 이 절이 무엇을 하는 곳인지 알 수 없다.
+**빈 상태가 인터페이스를 가르쳐야 한다.**
+
+`status.tsx`에서 `result`가 없을 때 인장 자리에 자리표시를 둔다:
+
+```
+.seal--empty {
+    border-style: dashed;
+    border-color: var(--rule-strong);
+    color: var(--ink-faint);
+    background: none;
+    transform: rotate(-6deg);
+}
+```
+
+문구는 `미조회`, 그 아래 `.doc-note`로
+`"decisionUID를 넣으면 7상태 중 하나가 인장으로 표시됩니다."`
+`aria-hidden="true"`를 주고 `role="img"`는 붙이지 않는다 — 정보가 없는 자리표시다.
+
+### [P2] 두 줄 괘선이 한 줄로 보인다
+
+`box-shadow: 0 3px 0 -2px` 는 화면에서 두 번째 선이 거의 붙어 보인다.
+`::before` 의사요소로 확실히 띄운다:
+
+```css
+.doc-section { position: relative; border-top: 2px solid var(--rule-strong); }
+.doc-section::before {
+    content: ""; position: absolute; inset-inline: 0; inset-block-start: 4px;
+    border-top: 1px solid var(--rule);
+}
+```
+
+`box-shadow` 방식은 제거한다.
+
+### [P2] 세로 리듬이 단조롭다
+
+필드 묶음 간격이 전부 같아서 문서라기보다 설문지처럼 보인다.
+
+- 절 제목(`h2`)과 첫 요소 사이: `--space-6`
+- 같은 의미 묶음 안의 필드끼리: `--space-4`
+- 서로 다른 묶음 사이: `--space-9`
+- 발행 버튼(`.button-row`) 위: `--space-9` — 되돌릴 수 없는 동작 앞에서 한 번 쉰다
+
+`decision.tsx`의 긴 폼에서 최소한 **본문 묶음 / 근거·이유 묶음 / 예상 결과 묶음 /
+참조 묶음**을 `<div className="field-group">`으로 나누고 그 사이에 `--space-9`를 준다.
+
+### [P2] textarea 높이가 전부 같다
+
+결정 본문은 길고 trigger는 짧다. `rows`를 내용에 맞게 다르게 준다
+(본문 6, trigger 3, 근거·이유 3, 부모 UID 2). 시각적 리듬이 생긴다.
+
+## 검증 (R1 후)
+
+```
+cd web && npx tsc --noEmit    # 오류 0
+cd web && npm test            # 40/40 — 줄면 로직을 건드린 것이다
+cd web && npm run build
+```
