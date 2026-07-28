@@ -38,18 +38,22 @@ export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess
     const [status, setStatus] = useState("");
 
     useEffect(() => {
-        if (fixedSettlementUID) setSettlementUID(fixedSettlementUID);
+        if (fixedSettlementUID) {
+            setSettlementUID(fixedSettlementUID);
+            void load(fixedSettlementUID);
+        }
     }, [fixedSettlementUID]);
 
-    async function load() {
-        if (!/^0x[0-9a-fA-F]{64}$/.test(settlementUID)) {
+    async function load(targetUID = settlementUID) {
+        if (!/^0x[0-9a-fA-F]{64}$/.test(targetUID)) {
             setStatus("정산 UID를 확인해 주세요.");
             return;
         }
+        setStatus("불러오는 중…");
         try {
             const filtered = filterActiveChallenges(
                 await readChallengeLogs(SCHEMAS.challenge as Hex),
-                settlementUID as Hex,
+                targetUID as Hex,
             );
             // 지갑 생성 비용이 사실상 0이므로 건수·정렬·랭킹은 신뢰 신호가 될 수 없다.
             const display = await Promise.all(filtered.map(async (item) => ({
@@ -116,7 +120,7 @@ export function Challenge({address, settlementUID: fixedSettlementUID, onSuccess
                 {!address && <p className="notice notice--quiet">지갑을 연결해야 이의를 발행할 수 있습니다.</p>}
                 <div className="button-row">
                     <button className="btn-commit" type="submit" disabled={!address || !isDeployed()}>이의 발행</button>
-                    <button className="btn" type="button" onClick={load} disabled={!isDeployed()}>목록 조회</button>
+                    <button className="btn" type="button" onClick={() => void load()} disabled={!isDeployed()}>목록 조회</button>
                 </div>
             </form>
             {status && <p className="form-status" role="status">{status}</p>}
