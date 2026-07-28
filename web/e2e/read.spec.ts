@@ -1,5 +1,5 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, requireSeed} from "./fixtures";
+import {accounts, advanceChain, chainNow, requireSeed, rpcUrl} from "./fixtures";
 
 test.beforeAll(() => {
     requireSeed();
@@ -26,23 +26,35 @@ test("F4는 기한초과다", async ({page}) => {
 });
 
 test("F2는 정산완료이며 철회 이력이 있다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f2.decisionUID, "정산완료");
+    const fixture = requireSeed().fixtures.f2;
+    await loadStatus(page, fixture.decisionUID, "정산완료");
     await expect(page.locator("section.status-result dl").getByText("정산완료", {exact: true})).toBeVisible();
     await expect(page.getByText("정산 철회 이력 있음")).toBeVisible();
+    const history = page.getByText("이전 정산 (철회됨)", {exact: true}).locator("..");
+    await history.locator("summary").click();
+    await expect(history.getByText(fixture.revokedSettlementUID, {exact: true})).toBeVisible();
+    await expect(history.locator("dt", {hasText: "결과"}).first().locator("+ dd")).toHaveText("OBSERVED");
 });
 
-test("F5는 대기다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f5.decisionUID, "대기");
+test("F5는 새로고침 없이 대기에서 관측중으로 바뀐다", async ({page}) => {
+    const fixture = requireSeed().fixtures.f5;
+    await loadStatus(page, fixture.decisionUID, "대기");
     const status = page.locator("section.status-result");
     await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
     await expect(status.locator("dl").getByText("대기", {exact: true})).toBeVisible();
+    const windowText = await section(page, "예상 결과").locator("dd").filter({hasText: " ~ "}).textContent();
+    const windowStart = Date.parse(windowText!.split(" ~ ")[0].replace(" UTC", "Z")) / 1000;
+    await advanceChain(rpcUrl, Math.max(1, windowStart - await chainNow() + 1));
+    await expect(status.getByRole("img", {name: "상태: 관측중"})).toBeVisible({timeout: 20_000});
 });
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
     await page.goto(`/#/d/${requireSeed().fixtures.f1.decisionUID}`);
     const challenge = page.getByRole("heading", {name: "이의", exact: true}).locator("..");
-    await expect(challenge.getByText(requireSeed().challengeUID, {exact: true})).toBeVisible();
-    await expect(challenge.locator("ul.record-list > li")).toHaveCount(1);
+    const item = challenge.locator("ul.record-list > li");
+    await expect(item).toHaveCount(1);
+    await expect(item).toContainText(`${accounts.B.slice(0, 10)}…${accounts.B.slice(-6)}`);
+    await expect(item).toContainText("NOT_OBSERVED");
     await expect(challenge).not.toContainText(/\d+\s*건/);
     await expect(challenge.getByText("조회된 것이 전부라는 보장은 없습니다.")).toBeVisible();
 });

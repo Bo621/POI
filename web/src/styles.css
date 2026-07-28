@@ -293,6 +293,10 @@ textarea.hex,
     overflow-wrap: anywhere;
 }
 
+.hex {
+    min-inline-size: 0;
+}
+
 .check-field {
     display: flex;
     align-items: center;
@@ -454,6 +458,8 @@ button:disabled {
 
 .record-row__uid {
     min-inline-size: 0;
+    overflow-wrap: normal;
+    white-space: nowrap;
 }
 
 .record-row__detail {
@@ -520,9 +526,18 @@ button:disabled {
 }
 
 .seal--sm {
-    --seal-size: 2.5rem;
+    --seal-size: 3rem;
     border-width: 1.5px;
     font-size: var(--text-xs);
+    overflow-wrap: break-word;
+    padding-inline: 0.35rem;
+}
+
+.challenge-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
 }
 
 .seal--ink {

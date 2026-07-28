@@ -5,8 +5,6 @@ import {CHAIN, EAS_ADDRESS, RESOLVERS, SCHEMAS, SCHEMA_REGISTRY_ADDRESS} from ".
 import {buildDag, type DagResult} from "./graph";
 import {
     getAttestation,
-    getChainTime,
-    readChallengeLogs,
     readDecision,
     readMetricDefinition,
     readSettlement,
@@ -19,9 +17,11 @@ import {Settlement as SettlementForm} from "./settlement";
 import {Challenge} from "./challenge";
 import {rememberDecision} from "./recentStore";
 import {stateLabel} from "./stateLabel";
+import {useChainTime} from "./chainClock";
 
 type Decision = Awaited<ReturnType<typeof readDecision>>;
 type Settlement = Awaited<ReturnType<typeof readSettlement>>;
+const MAX_SETTLEMENT_HISTORY = 8;
 
 const resultLabel = (result: number) => result === RESULT.OBSERVED ? "OBSERVED"
     : result === RESULT.NOT_OBSERVED ? "NOT_OBSERVED" : "INDETERMINATE";
@@ -54,8 +54,8 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [decision, setDecision] = useState<Decision>();
     const [heads, setHeads] = useState<Awaited<ReturnType<typeof readSettlementState>>>();
     const [active, setActive] = useState<Settlement>();
-    const [previous, setPrevious] = useState<Settlement>();
-    const [now, setNow] = useState<bigint>();
+    const [previous, setPrevious] = useState<Settlement[]>([]);
+    const {now} = useChainTime();
     const [error, setError] = useState("");
     const [settlementError, setSettlementError] = useState(false);
     const [dag, setDag] = useState<DagResult>();
@@ -74,7 +74,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         setError("");
         if (loadedUID.current !== uid) {
             loadedUID.current = uid;
-            setDecision(undefined); setHeads(undefined); setActive(undefined); setPrevious(undefined);
+            setDecision(undefined); setHeads(undefined); setActive(undefined); setPrevious([]);
         }
         void (async () => {
             try {
@@ -84,21 +84,27 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
                     const kind = Object.entries(SCHEMAS).find(([, schema]) => schema.toLowerCase() === attestation.schema.toLowerCase())?.[0];
                     throw new Error(`결정 기록이 아닙니다.${kind ? ` (${kind})` : ""}`);
                 }
-                const [loadedDecision, loadedSettlement, chainNow] = await Promise.all([
-                    readDecision(uid), readSettlementState(SCHEMAS.settlement as Hex, uid), getChainTime(),
+                const [loadedDecision, loadedSettlement] = await Promise.all([
+                    readDecision(uid), readSettlementState(SCHEMAS.settlement as Hex, uid),
                 ]);
                 if (!current) return;
-                setDecision(loadedDecision); setHeads(loadedSettlement); setActive(loadedSettlement.active); setNow(chainNow);
+                setDecision(loadedDecision); setHeads(loadedSettlement); setActive(loadedSettlement.active);
                 setMetricError("");
                 void readMetricDefinition(SCHEMAS.decision as Hex, loadedDecision.outcomeMetricId)
                     .then(setMetric)
                     .catch((cause: unknown) => setMetricError(cause instanceof Error ? cause.message : "지표 정의를 불러오지 못했습니다."));
                 if (attestation.revocationTime > 0n) setError("철회된 결정입니다");
                 setSettlementError(false);
+                setPrevious([]);
                 try {
-                    if (loadedSettlement.lastHead !== ZERO_UID && loadedSettlement.lastHead !== loadedSettlement.activeHead) {
-                        setPrevious(await readSettlement(loadedSettlement.lastHead));
+                    const history: Settlement[] = [];
+                    let previousUID = loadedSettlement.active?.supersedes ?? ZERO_UID;
+                    while (previousUID !== ZERO_UID && history.length < MAX_SETTLEMENT_HISTORY) {
+                        const record = await readSettlement(previousUID);
+                        history.push(record);
+                        previousUID = record.supersedes;
                     }
+                    if (current) setPrevious(history);
                 } catch { setSettlementError(true); }
                 setDagError(false);
                 try {
@@ -153,7 +159,9 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             {!address && <><button className="btn-commit" type="button" disabled>정산하기</button><p className="doc-note">지갑을 연결해야 정산할 수 있습니다.</p></>}
             {settlementError && <p className="form-status">확인 불가 <button className="btn" onClick={() => window.location.reload()}>다시 시도</button></p>}
             {active ? <SettlementBlock record={active} address={address} onSuccess={() => setRefreshKey(value => value + 1)} /> : <p className="doc-note">활성 정산이 없습니다.</p>}
-            {previous && <details><summary>이전 정산 (철회됨)</summary><SettlementBlock record={previous} address={address} previous onSuccess={() => setRefreshKey(value => value + 1)} /></details>}
+            {previous.length > 0 && <details><summary>이전 정산 (철회됨)</summary>
+                {previous.map((record) => <SettlementBlock key={record.uid} record={record} address={address} previous onSuccess={() => setRefreshKey(value => value + 1)} />)}
+            </details>}
             <p className="notice--quiet">결과는 관측값으로부터 컨트랙트가 판정합니다. 직접 고를 수 없습니다.</p>
         </section></ErrorBoundary>
         <ErrorBoundary label="공개"><Reveal attestationUID={uid} /></ErrorBoundary>

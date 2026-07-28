@@ -62,8 +62,10 @@ export interface ChallengeLog {
     attester: Address;
     refUID: Hex;
     revocationTime: bigint;
-    claimedResult?: number;
-    source?: string;
+    claimedResult: number;
+    hasObservedValue: boolean;
+    observedValue: bigint;
+    source: string;
 }
 
 const SETTLEMENT_PARAMETERS = [
@@ -221,6 +223,8 @@ export async function readChallengeLogs(challengeSchema: Hex): Promise<Challenge
             refUID: attestation.refUID,
             revocationTime: attestation.revocationTime,
             claimedResult: Number(values[1]),
+            hasObservedValue: values[2],
+            observedValue: values[3],
             source: values[4],
         };
     }));

@@ -10,6 +10,9 @@ const PARAMETERS = [
     {type: "bytes32"}, {type: "uint8"}, {type: "bool"}, {type: "int128"},
     {type: "string"}, {type: "uint64"}, {type: "bytes32"},
 ] as const;
+const resultLabel = (result: number) => ["OBSERVED", "NOT_OBSERVED", "INDETERMINATE"][result] ?? String(result);
+const short = (value: string) => `${value.slice(0, 10)}…${value.slice(-6)}`;
+
 export function filterActiveChallenges(logs: ChallengeLog[], settlementUID: Hex): ChallengeLog[] {
     return logs.filter((log) =>
         log.refUID.toLowerCase() === settlementUID.toLowerCase() && log.revocationTime === 0n
@@ -122,9 +125,12 @@ export function Challenge({address, settlementUID, onSuccess}: {
             <Receipt label="이의 철회" txHash={revokeTxHash} />
             <ul className="record-list">
                 {items.map((item) => (
-                    <li key={item.uid}>
-                        <span className="hex">{item.uid}</span>
-                        <span> · {item.verified === true ? "검증 지갑" : item.verified === false ? "미검증 지갑" : "확인 불가"}</span>
+                    <li className="challenge-row" key={item.uid}>
+                        <span className="hex" title={item.uid}>{short(item.uid)}</span>
+                        <span><span className="hex" title={item.attester}>{short(item.attester)}</span> · {item.verified === true ? "검증 지갑" : item.verified === false ? "미검증 지갑" : "확인 불가"}</span>
+                        <span>{resultLabel(item.claimedResult)}</span>
+                        <span>{item.hasObservedValue ? item.observedValue.toString() : "관측값 없음"}</span>
+                        <span>{item.source}</span>
                         {address?.toLowerCase() === item.attester.toLowerCase() && <button className="btn-quiet" type="button" onClick={() => revoke(item.uid)}>내 이의 철회</button>}
                     </li>
                 ))}

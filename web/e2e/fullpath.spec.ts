@@ -132,8 +132,10 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await challenge.getByLabel("출처").fill("FULL-PATH challenge");
     await challenge.getByRole("button", {name: "이의 발행"}).click();
     const challengeUID = await receiptUID(challenge);
-    await expect(challenge.getByText(challengeUID, {exact: true})).toBeVisible();
-    await expect(challenge.locator("ul.record-list > li")).toHaveCount(1);
+    const challengeItem = challenge.locator("ul.record-list > li");
+    await expect(challengeItem).toHaveCount(1);
+    await expect(challengeItem).toContainText(`${accounts.B.slice(0, 10)}…${accounts.B.slice(-6)}`);
+    await expect(challengeItem).toContainText("OBSERVED");
     await expect(challenge).not.toContainText(/\d+\s*건/);
 
     await pageB.close();

@@ -148,3 +148,56 @@ cd web && npm run test:e2e          # 26 + 강화분, skipped 0
 - F2 상세에서 이전 정산을 펼칠 수 있다
 - F1 상세의 이의 항목에 이의자 주소와 주장 결과가 보인다
 - F5 상세를 연 채 시간을 밀면 새로고침 없이 인장이 바뀐다
+
+---
+
+## 리뷰 대응 R1 — 제품은 고쳐졌다. 테스트 선택자 3건
+
+Claude가 브라우저로 직접 확인한 결과 **제품 결함 3건은 전부 해결됐다.**
+
+```
+이의 항목:  0x33a03f3f…175368 / 0x70997970…dc79C8 · 확인 불가 /
+            NOT_OBSERVED / 92132999 / manual:seed-challenge     ← 이의자·주장·값·출처 전부
+자동 갱신:  새로고침 없이 20초 만에 관측중 → 기한초과            ← 동작함
+```
+
+남은 실패 3건은 **테스트 쪽**이다.
+
+### 1. 또 대소문자다
+
+```
+Expected substring: "0x70997970…dc79c8"
+화면:               "0x70997970…dc79C8"     (EIP-55 체크섬)
+```
+
+E2E R3(단계 7)에서 한 번 고친 문제가 새 단언에서 반복됐다.
+
+**규칙으로 박는다**: `web/e2e`에서 **주소를 비교할 때는 언제나 대소문자를 무시한다.**
+`expect(...).toContainText(new RegExp(escape(short), "i"))` 형태로 통일하고,
+`e2e/fixtures.ts`에 헬퍼를 두어 각 테스트가 직접 대소문자를 다루지 않게 한다.
+
+```ts
+export function shortAddressRe(address: string): RegExp;   // 0x7099…79c8 를 대소문자 무시로
+```
+
+### 2. `status-result`의 위치가 바뀌었다
+
+```
+locator('header.doc-header').locator('+ .status-result')   → 못 찾음
+실제: <section class="status-result">                        (형제 관계가 아님)
+```
+
+`fullpath.spec.ts`가 형제 선택자로 찾는다. **`section.status-result`로 직접 찾는다.**
+`web/e2e` 전체에서 `header.doc-header` 기준의 형제 선택자를 쓰는 자리를 함께 정리한다.
+
+### 3. 자동 갱신 테스트의 대기 시간
+
+`chainClock`의 재동기화 주기가 15초이므로 **20초 이상** 기다려야 한다.
+지금 단언의 타임아웃이 15초라 경계에서 실패한다. `{timeout: 30_000}`으로 둔다.
+**폴링 주기를 줄여 테스트를 통과시키지 말 것** — 매초 RPC를 때리게 된다.
+
+### 검증
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e     # 전부 통과, skipped 0
+```

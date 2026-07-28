@@ -7,7 +7,7 @@ interface Seed {
     accounts: {A: Address; B: Address; C: Address};
     fixtures: {
         f1: {decisionUID: Hex; settlementUID: Hex};
-        f2: {decisionUID: Hex};
+        f2: {decisionUID: Hex; revokedSettlementUID: Hex; activeSettlementUID: Hex};
         f4: {decisionUID: Hex};
         f5: {decisionUID: Hex};
         f_copy: {decisionUID: Hex; decisionCommitment: Hex};
