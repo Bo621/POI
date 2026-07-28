@@ -784,3 +784,33 @@ E2E R2에서 "attester와 commitment는 체인에서 읽는다 — 손으로 넣
 ```
 cd web && npm run test:e2e     # 26/26, skipped 0
 ```
+
+---
+
+## 단계 7 리뷰 대응 R4 — PENDING을 확인할 여유가 없다
+
+```
+waiting for img '상태: 대기'
+실제:      img '상태: 관측 중'
+```
+
+`fullpath`가 `windowStart = chainNow + 120`으로 잡는데, 그 사이 노트 발행·결정 발행 등
+트랜잭션마다 블록이 하나씩 생겨 **확인 시점에 이미 구간이 시작돼 있다.**
+
+**단언을 느슨하게 하지 말 것**(`대기 또는 관측중`으로 바꾸면 무엇을 보장하는지 흐려진다).
+대신 **여유를 늘린다.**
+
+```
+windowStart = chainNow + 600
+windowEnd   = chainNow + 720
+```
+
+이후 단계에서 `advanceChain`으로 `windowEnd`를 넘기므로 전체 흐름에는 영향이 없다.
+
+`web/e2e` 전체에서 같은 방식으로 시각을 잡는 다른 자리가 있으면 함께 확인할 것.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 26/26, skipped 0
+```

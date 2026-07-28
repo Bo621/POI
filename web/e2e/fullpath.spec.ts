@@ -138,7 +138,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const revealPage = await connect(context, accounts.A);
     await revealPage.goto(`/#/d/${decisionUID}`);
     const reveal = section(revealPage, "공개");
-    await reveal.getByLabel("attestationUID").fill(decisionUID);
+    await expect(reveal.getByLabel("attestationUID")).toHaveValue(decisionUID);
     await reveal.getByLabel("salt", {exact: true}).fill(decisionSalt);
     await reveal.getByLabel("payload (JSON)", {exact: true}).fill(JSON.stringify(decisionText));
     await expect(reveal.getByText("commitment가 일치합니다.")).toBeVisible();
