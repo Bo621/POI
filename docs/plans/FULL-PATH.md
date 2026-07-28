@@ -180,3 +180,36 @@ bash scripts/dev_up.sh && cd web && npm run test:e2e     # 16/16
 
 그리고 **일부러 실패하는 발행**(예: 과거 window를 강제로 넣은 상태)에서
 화면에 한국어 사유가 뜨는 것을 확인한다.
+
+---
+
+## 리뷰 대응 R2 — 정산 단계 선택자 중복
+
+R1 이후 결정 커밋이 통과한다(`NoteNotEarlier`가 원인이었고, anvil이 노트와 결정을
+같은 타임스탬프로 채굴할 수 있어 테스트가 1초를 민다). 이제 7단계(정산)에서 멈춘다.
+
+```
+strict mode violation: getByLabel('관측값') resolved to 2 elements:
+  1) checkbox  "관측값 없음"
+  2) textbox   "관측값"
+```
+
+**테스트 선택자 문제다.** `getByLabel`은 부분 일치라 `"관측값 없음"`도 잡는다.
+
+### 고칠 것
+
+- `web/e2e` 전체에서 `getByLabel`을 쓰는 자리를 훑어 **모호한 것에 `{exact: true}`를 준다.**
+  `관측값` 하나만 고치고 끝내지 말 것 — 같은 함정이 다른 라벨에도 있다
+  (`decisionUID`·`settlementUID`·`salt`·`payload` 등 접두어가 겹치는 것들).
+- 나머지 단계(8~12)는 아직 실행된 적이 없다. **거기서 또 막히면 R3로 이어간다.**
+
+### 참고 — 제품 쪽은 그대로 둔다
+
+`"관측값 없음"` 체크박스와 `"관측값"` 입력이 나란히 있는 것은 자연스러운 UI다.
+라벨을 바꾸는 것은 테스트 편의를 위해 제품을 바꾸는 것이므로 하지 않는다.
+
+### 검증
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e     # 16/16
+```

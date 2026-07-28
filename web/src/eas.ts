@@ -1,7 +1,11 @@
+import {messageFromRevert} from "@poi/core";
 import {
+    BaseError,
+    ContractFunctionRevertedError,
     decodeEventLog,
     encodeAbiParameters,
     parseAbi,
+    RawContractError,
     type Address,
     type Hex,
 } from "viem";
@@ -77,6 +81,26 @@ export interface AttestResult {
     txHash: Hex;
 }
 
+export function revertData(error: unknown): Hex | undefined {
+    if (!(error instanceof BaseError)) return undefined;
+
+    const reverted = error.walk(
+        (candidate) => candidate instanceof ContractFunctionRevertedError,
+    );
+    if (reverted instanceof ContractFunctionRevertedError) return reverted.raw;
+
+    const raw = error.walk((candidate) => candidate instanceof RawContractError);
+    if (!(raw instanceof RawContractError)) return undefined;
+    if (typeof raw.data === "string") return raw.data;
+    return raw.data?.data;
+}
+
+function writeError(error: unknown): Error {
+    const data = revertData(error);
+    if (data) return new Error(messageFromRevert(data) ?? data);
+    return error instanceof Error ? error : new Error("발행에 실패했습니다.");
+}
+
 export async function attest(args: {
     schema: Hex;
     data: Hex;
@@ -85,25 +109,34 @@ export async function attest(args: {
 }): Promise<AttestResult> {
     const wallet = getWalletClient();
     const [account] = await wallet.requestAddresses();
-    const txHash = await wallet.writeContract({
-        address: EAS_ADDRESS as Address,
-        abi: EAS_ABI,
-        functionName: "attest",
-        account,
-        args: [{
-            schema: args.schema,
-            data: {
-                recipient: "0x0000000000000000000000000000000000000000",
-                expirationTime: 0n,
-                revocable: args.revocable,
-                refUID: args.refUID,
-                data: args.data,
-                value: 0n,
-            },
-        }],
-        value: 0n,
-    });
+    let txHash: Hex;
+    try {
+        const {request} = await publicClient.simulateContract({
+            address: EAS_ADDRESS as Address,
+            abi: EAS_ABI,
+            functionName: "attest",
+            account,
+            args: [{
+                schema: args.schema,
+                data: {
+                    recipient: "0x0000000000000000000000000000000000000000",
+                    expirationTime: 0n,
+                    revocable: args.revocable,
+                    refUID: args.refUID,
+                    data: args.data,
+                    value: 0n,
+                },
+            }],
+            value: 0n,
+        });
+        txHash = await wallet.writeContract(request);
+    } catch (error) {
+        throw writeError(error);
+    }
     const receipt = await publicClient.waitForTransactionReceipt({hash: txHash});
+    if (receipt.status === "reverted") {
+        throw new Error(`트랜잭션이 온체인에서 실패했습니다. ${txHash}`);
+    }
     for (const log of receipt.logs) {
         try {
             const decoded = decodeEventLog({
@@ -123,13 +156,23 @@ export async function attest(args: {
 export async function revoke(args: {schema: Hex; uid: Hex}): Promise<{txHash: Hex}> {
     const wallet = getWalletClient();
     const [account] = await wallet.requestAddresses();
-    const txHash = await wallet.writeContract({
-        address: EAS_ADDRESS as Address,
-        abi: EAS_ABI,
-        functionName: "revoke",
-        account,
-        args: [{schema: args.schema, data: {uid: args.uid, value: 0n}}],
-        value: 0n,
-    });
+    let txHash: Hex;
+    try {
+        const {request} = await publicClient.simulateContract({
+            address: EAS_ADDRESS as Address,
+            abi: EAS_ABI,
+            functionName: "revoke",
+            account,
+            args: [{schema: args.schema, data: {uid: args.uid, value: 0n}}],
+            value: 0n,
+        });
+        txHash = await wallet.writeContract(request);
+    } catch (error) {
+        throw writeError(error);
+    }
+    const receipt = await publicClient.waitForTransactionReceipt({hash: txHash});
+    if (receipt.status === "reverted") {
+        throw new Error(`트랜잭션이 온체인에서 실패했습니다. ${txHash}`);
+    }
     return {txHash};
 }

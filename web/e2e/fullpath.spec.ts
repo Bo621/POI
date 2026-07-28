@@ -61,6 +61,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await noteDialog.getByRole("button", {name: "발행", exact: true}).click();
     await expectNoAlert(journal, "노트 발행 alert");
     const noteUID = await receiptUID(journal);
+    await advanceChain(rpcUrl, 1);
 
     const decisionText = `FULL-PATH 결정 ${timestamp}`;
     const decision = section(pageA, "결정 커밋");
