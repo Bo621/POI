@@ -79,7 +79,7 @@ contract O7Settle is Script {
         console2.log("settled decision");
         console2.logBytes32(decisionUID);
         console2.log("result", result);
-        console2.log("UID는 broadcast 영수증의 Attested 이벤트 data에서 읽을 것");
+        console2.log("read real UID from broadcast receipt Attested event data");
     }
 
     /// 철회만 한다. `O7_REVOKE_UID`에 철회할 정산 UID.
