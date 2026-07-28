@@ -58,8 +58,8 @@ set_time() {
         echo "체인 시각을 되돌릴 수 없습니다 (현재=${now_ts}, 목표=${target})." >&2
         exit 1
     fi
-    cast rpc evm_increaseTime "${delta}" --rpc-url "${LOCAL_RPC}" >/dev/null
-    cast rpc evm_mine --rpc-url "${LOCAL_RPC}" >/dev/null
+    cast rpc --rpc-url "${LOCAL_RPC}" evm_increaseTime "${delta}" >/dev/null
+    cast rpc --rpc-url "${LOCAL_RPC}" evm_mine >/dev/null
 }
 
 send_transaction() {
@@ -77,8 +77,8 @@ send_transaction() {
     fi
 
     # cast send prints decoded revert information and exits non-zero on failure.
-    cast send "${to}" "${calldata}" \
-        --private-key "${key}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json
+    cast send --private-key "${key}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json \
+        "${to}" "${calldata}"
 }
 
 deploy_resolver() {
@@ -89,8 +89,8 @@ deploy_resolver() {
     local address
     bytecode="$(cd "${ROOT_DIR}/contracts" && forge inspect "src/${contract}.sol:${contract}" bytecode)"
     constructor="$(cast abi-encode 'constructor(address)' "${EAS}")"
-    receipt="$(cast send --create "${bytecode}${constructor#0x}" \
-        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json)"
+    receipt="$(cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" \
+        --confirmations 1 --json --create "${bytecode}${constructor#0x}")"
     address="$(jq -r '.contractAddress // .contract_address // empty' <<<"${receipt}")"
     require_value "${contract} 배포 주소" "${address}"
     printf '%s\n' "${address}"
@@ -103,12 +103,12 @@ register_schema() {
     local predicted
     local receipt
     local emitted
-    predicted="$(cast call "${SCHEMA_REGISTRY}" \
-        'register(string,address,bool)(bytes32)' "${schema}" "${resolver}" "${revocable}" \
-        --from "${ACTOR_A}" --rpc-url "${LOCAL_RPC}")"
-    receipt="$(cast send "${SCHEMA_REGISTRY}" \
-        'register(string,address,bool)' "${schema}" "${resolver}" "${revocable}" \
-        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 --json)"
+    predicted="$(cast call --from "${ACTOR_A}" --rpc-url "${LOCAL_RPC}" \
+        "${SCHEMA_REGISTRY}" 'register(string,address,bool)(bytes32)' \
+        "${schema}" "${resolver}" "${revocable}")"
+    receipt="$(cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" \
+        --confirmations 1 --json "${SCHEMA_REGISTRY}" \
+        'register(string,address,bool)' "${schema}" "${resolver}" "${revocable}")"
     emitted="$(jq -r --arg address "${SCHEMA_REGISTRY,,}" '
         [.logs[]? | select((.address | ascii_downcase) == $address) | .topics[1]] | first // empty
     ' <<<"${receipt}")"
@@ -120,14 +120,14 @@ register_schema() {
 }
 
 initialize_resolvers() {
-    cast send "${NOTE_RESOLVER}" 'initialize(bytes32)' "${NOTE_SCHEMA}" \
-        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
-    cast send "${DECISION_RESOLVER}" 'initialize(bytes32,bytes32)' "${DECISION_SCHEMA}" "${NOTE_SCHEMA}" \
-        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
-    cast send "${SETTLEMENT_RESOLVER}" 'initialize(bytes32,bytes32)' "${SETTLEMENT_SCHEMA}" "${DECISION_SCHEMA}" \
-        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
-    cast send "${CHALLENGE_RESOLVER}" 'initialize(bytes32,bytes32)' "${CHALLENGE_SCHEMA}" "${SETTLEMENT_SCHEMA}" \
-        --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 >/dev/null
+    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+        "${NOTE_RESOLVER}" 'initialize(bytes32)' "${NOTE_SCHEMA}" >/dev/null
+    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+        "${DECISION_RESOLVER}" 'initialize(bytes32,bytes32)' "${DECISION_SCHEMA}" "${NOTE_SCHEMA}" >/dev/null
+    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+        "${SETTLEMENT_RESOLVER}" 'initialize(bytes32,bytes32)' "${SETTLEMENT_SCHEMA}" "${DECISION_SCHEMA}" >/dev/null
+    cast send --private-key "${KEY_A}" --rpc-url "${LOCAL_RPC}" --confirmations 1 \
+        "${CHALLENGE_RESOLVER}" 'initialize(bytes32,bytes32)' "${CHALLENGE_SCHEMA}" "${SETTLEMENT_SCHEMA}" >/dev/null
 }
 
 calculate_phase() {

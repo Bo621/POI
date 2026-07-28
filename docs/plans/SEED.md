@@ -498,3 +498,51 @@ cast send --rpc-url "$LOCAL_RPC" --private-key "$key" --confirmations 1 \
 RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh
 ```
 끝까지 완주해 요약을 출력해야 한다.
+
+---
+
+## 리뷰 대응 R5 — macOS 기본 bash는 3.2다
+
+실행 결과:
+
+```
+scripts/dev_up.sh: line 114: ${SCHEMA_REGISTRY,,}: bad substitution
+scripts/dev_up.sh: line 115: ${emitted,,}: bad substitution
+```
+
+`${var,,}`(소문자 변환)는 **bash 4 이상** 기능이다. macOS의 `/bin/bash`는
+`3.2.57`이고 `#!/usr/bin/env bash`도 그것을 잡는다.
+
+### 고치는 방법
+
+`scripts/*.sh` 전체를 **bash 3.2 호환으로** 훑는다. 확인된 것:
+
+| 줄 | 표현 |
+|---|---|
+| 112 | `${SCHEMA_REGISTRY,,}` |
+| 115 | `${emitted,,}` · `${predicted,,}` |
+| 155 | `${ATTESTED_TOPIC,,}` |
+
+소문자 변환은 아래로 바꾼다.
+
+```bash
+lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+# 사용: "$(lower "$SCHEMA_REGISTRY")"
+```
+
+같은 기준으로 **다른 bash 4 문법도 전부 제거**할 것:
+`${var^^}` · `mapfile` / `readarray` · `declare -A`(연관 배열) · `coproc` ·
+`&>>` · `**` 글롭(globstar).
+
+배열은 bash 3.2에서도 쓸 수 있지만 `${arr[@]}`가 비었을 때 `set -u`와 함께
+오류가 나므로 `${arr[@]+"${arr[@]}"}` 관용구를 쓴다.
+
+`jq`가 필요하면 존재 여부를 스크립트 시작에서 확인하고 없으면 명확한 안내로 중단한다.
+
+### 검증
+
+```bash
+bash --version          # 3.2.x 확인
+bash -n scripts/dev_up.sh
+RPC=https://sepolia-rpc.giwa.io/ bash scripts/dev_up.sh    # 완주해야 한다
+```
