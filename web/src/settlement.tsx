@@ -159,6 +159,7 @@ export function Settlement({address, decisionUID, onSuccess}: {
             const result = await revokeAttestation({schema: SCHEMAS.settlement as Hex, uid: heads.activeHead});
             setRevokeTxHash(result.txHash);
             setStatus("");
+            onSuccess?.();
         } catch (error) {
             setStatus(errorMessage(error));
         }

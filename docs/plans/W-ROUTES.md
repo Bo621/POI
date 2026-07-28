@@ -755,3 +755,32 @@ R6에서 자동 로드를 넣었지만 **발행 성공 후 다시 부르지 않�
 ```
 cd web && npm run test:e2e     # 26/26, skipped 0
 ```
+
+---
+
+## 단계 7 리뷰 대응 R3 — reveal의 attestationUID는 읽기 전용이다
+
+이의 목록 갱신은 해결됐다. 다음 단계에서 막힌다.
+
+```
+locator resolved to <input readonly class="uid" id="reveal-attestation" value="0xf564…" />
+fill(...) → timeout
+```
+
+**제품이 옳다.** 상세 화면에서 공개 대상은 라우트의 UID로 정해지므로 손으로 바꿀 수 없다.
+E2E R2에서 "attester와 commitment는 체인에서 읽는다 — 손으로 넣을 수 없다"고 정한 것과 같은 이유다.
+
+### 고칠 것
+
+`fullpath.spec.ts`에서 `attestationUID`를 채우는 동작을 **제거**하고,
+그 값이 **이미 발행한 결정의 UID와 같은지 단언**한다(더 강한 검사다).
+
+`salt`·`payload`만 채운다.
+
+`web/e2e` 전체에서 `attestationUID`를 채우는 다른 자리가 있는지 함께 확인할 것.
+
+### 검증
+
+```
+cd web && npm run test:e2e     # 26/26, skipped 0
+```

@@ -82,7 +82,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
                 refUID: settlementUID as Hex,
             });
             setReceipt(result);
-            setStatus("");
+            await load();
             onSuccess?.();
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "이의 발행에 실패했습니다.");
@@ -93,7 +93,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
         try {
             const result = await revokeAttestation({schema: SCHEMAS.challenge as Hex, uid});
             setRevokeTxHash(result.txHash);
-            setStatus("");
+            await load();
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "이의 철회에 실패했습니다.");
         }
