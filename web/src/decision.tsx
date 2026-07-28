@@ -237,7 +237,7 @@ export function Decision({address, verification}: {
                             <div className="field"><label htmlFor="decision-threshold">threshold</label><input id="decision-threshold" value={threshold} onChange={(e) => setThreshold(e.target.value)} /></div>
                             <div className="field"><label htmlFor="decision-window-start">windowStart (Unix 초)</label><input id="decision-window-start" type="number" value={windowStart} onChange={(e) => setWindowStart(Number(e.target.value))} /></div>
                             <div className="field"><label htmlFor="decision-window-end">windowEnd (Unix 초)</label><input id="decision-window-end" type="number" value={windowEnd} onChange={(e) => setWindowEnd(Number(e.target.value))} /></div>
-                            <div className="field"><label htmlFor="decision-grace">graceSeconds</label><input id="decision-grace" type="number" min={HOUR} max={MAX_GRACE} value={grace} onChange={(e) => setGrace(Number(e.target.value))} /></div>
+                            <div className="field"><label htmlFor="decision-grace">graceSeconds</label><input id="decision-grace" type="number" value={grace} onChange={(e) => setGrace(Number(e.target.value))} /></div>
                         </fieldset>
                     )}
                 </div>

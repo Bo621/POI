@@ -9,10 +9,14 @@ import {publicClient, withRetry} from "./chain";
 import {
     DOJANG_ADDRESS,
     EAS_ADDRESS,
+    SCHEMAS,
     SCHEMA_REGISTRY_ADDRESS,
     UPBIT_KOREA_ID,
 } from "./config";
 import {DECISION_PARAMETERS, type DecisionFields} from "./eas";
+import type {CommitTagName} from "@poi/core";
+
+export type DecisionCommitTag = Exclude<CommitTagName, "NOTE">;
 
 const REGISTRY_ABI = parseAbi([
     "function getSchema(bytes32 uid) view returns ((bytes32 uid,address resolver,bool revocable,string schema))",
@@ -88,6 +92,35 @@ export async function getAttestation(uid: Hex): Promise<AttestationRecord> {
         functionName: "getAttestation",
         args: [uid],
     })) as Promise<AttestationRecord>;
+}
+
+export async function readRevealTarget(uid: Hex, tag: DecisionCommitTag): Promise<{
+    attester: Address;
+    commitment: Hex;
+}> {
+    let attestation: AttestationRecord;
+    try {
+        attestation = await getAttestation(uid);
+    } catch {
+        throw new Error("해당 attestation을 찾을 수 없습니다.");
+    }
+    if (attestation.uid.toLowerCase() !== uid.toLowerCase()) {
+        throw new Error("해당 attestation을 찾을 수 없습니다.");
+    }
+    if (attestation.schema.toLowerCase() !== SCHEMAS.decision.toLowerCase()) {
+        throw new Error("결정 스키마의 attestation이 아닙니다.");
+    }
+    const values = decodeAbiParameters(DECISION_PARAMETERS, attestation.data);
+    const commitmentIndex: Record<DecisionCommitTag, number> = {
+        DECISION: 3,
+        TRIGGER: 4,
+        EVIDENCE: 5,
+        REASON: 6,
+    };
+    return {
+        attester: attestation.attester,
+        commitment: values[commitmentIndex[tag]] as Hex,
+    };
 }
 
 export async function readDecision(uid: Hex): Promise<DecisionFields & {

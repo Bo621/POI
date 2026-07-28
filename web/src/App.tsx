@@ -41,7 +41,7 @@ export default function App() {
             <Settlement address={address} />
             <Challenge address={address} />
             <Status />
-            <Reveal address={address} />
+            <Reveal />
             <Dag />
             <Passport />
         </main>
