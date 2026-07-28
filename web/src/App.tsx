@@ -18,6 +18,7 @@ import {ZERO_UID, type WalletState} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
 import {loadRecords, needsAction, type RecordRow} from "./records";
 import {Nav} from "./nav";
+import {Home} from "./home";
 
 export default function App() {
     return <ErrorBoundary label="본문"><AppRoute /></ErrorBoundary>;
@@ -37,7 +38,7 @@ function AppRoute() {
     else if (route.name === "me") page = <MePage address={wallet.address} />;
     else if (route.name === "notFound") page = <main><header className="doc-header"><h1>없는 화면입니다.</h1></header>
         <p>{route.raw.startsWith("#/d/") ? "UID는 0x로 시작하는 66자여야 합니다." : route.raw}</p><a href="#/">홈으로</a></main>;
-    else page = <SinglePage wallet={wallet} />;
+    else page = <Home address={wallet.address} />;
     return <><Nav route={route} wallet={wallet} onWalletChange={setWallet} />{page}</>;
 }
 

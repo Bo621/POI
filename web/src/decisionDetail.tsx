@@ -18,6 +18,7 @@ import {ZERO_UID} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
 import {Settlement as SettlementForm} from "./settlement";
 import {Challenge} from "./challenge";
+import {rememberDecision} from "./recentStore";
 
 type Decision = Awaited<ReturnType<typeof readDecision>>;
 type Settlement = Awaited<ReturnType<typeof readSettlement>>;
@@ -71,6 +72,10 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [metric, setMetric] = useState<{decimals: number; definitionHash: Hex}>();
     const [refreshKey, setRefreshKey] = useState(0);
     const loadedUID = useRef<Hex>();
+
+    useEffect(() => {
+        rememberDecision(uid);
+    }, [uid]);
 
     useEffect(() => {
         let current = true;
