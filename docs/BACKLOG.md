@@ -27,7 +27,7 @@
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
 | O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
-| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[~]` 엔드포인트 확인 — `https://sepolia-explorer.giwa.io/api` (chain 91342), `foundry.toml [etherscan]`에 반영. 배포 후 verify만 남음 |
+| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[x]` 4종 모두 `Pass - Verified` (sepolia-explorer.giwa.io) |
 
 ---
 

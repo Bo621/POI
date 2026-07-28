@@ -34,9 +34,21 @@
 | `poi.settlement.v1` | `0x84f169dc66866931bb510e14f04c7d7f62df530dbde50e40a7d7f2eb3ee97c54` | **true** |
 | `poi.challenge.v1` | `0x68c45508ba2a133013581cfa70cdc736847f554224a1876ffd0feb5930ef6d43` | **true** |
 
-> **주의.** 배포 스크립트를 다시 시뮬레이션하면 **다른 UID가 나온다.** 스키마 UID에
-> 리졸버 주소가 들어가는데, 재실행은 새 리졸버를 가정하기 때문이다.
-> 실제 값은 브로드캐스트 영수증의 `SchemaRegistry` 로그에서 읽은 위 값이다.
+> ### ⚠️ UID는 **영수증에서만** 읽는다 — 배포 중 두 번 걸렸다
+>
+> **`forge script`의 `console2.log` 출력과 재시뮬레이션 결과는 실제 온체인 UID가 아니다.**
+>
+> | 걸린 곳 | 왜 |
+> |---|---|
+> | 스키마 UID | 스키마 UID에 리졸버 주소가 들어간다. 재시뮬레이션은 *새* 리졸버를 가정한다 |
+> | attestation UID | EAS의 UID는 블록 시각을 포함한다. 시뮬레이션 시각 ≠ 채굴된 블록 시각 |
+>
+> 두 번째 것은 O4에서 실제로 틀린 UID를 기록했고, 화면에 「해당 기록을 찾을 수 없습니다」가
+> 떠서 발견했다. **항상 `broadcast/<script>/91342/run-latest.json`의 로그에서 읽고,
+> `getAttestation`으로 되읽어 확인할 것.**
+>
+> `Attested` 이벤트에서 uid는 **indexed가 아니라 `data`에 있다.**
+> topics는 `[sig, recipient, attester, schemaUID]`다.
 
 네 리졸버 모두 `schemaUID()`가 위 값과 일치함을 온체인에서 확인했다(초기화 완료).
 
@@ -60,7 +72,7 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 
 | | 값 |
 |---|---|
-| decisionUID | `0x68df5b76a3c268ab6d61316f59ef415b8cb333bc9e3e4d908d393d4f7d7ab654` |
+| decisionUID | `0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe` |
 | decisionCommitment | `0x46cf8091be32da5ca484417a89ab0bdf9bb41597554c0a519c269ca234f39db9` |
 | salt | `0x0f1e2d3c4b5a69788796a5b4c3d2e1f0` |
 | payload | `{"fixture":"O4","intent":"overdue-demo"}` |
@@ -75,7 +87,7 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 
 ```bash
 node --experimental-strip-types verifier/src/reveal-cli.ts \
-  0x68df5b76a3c268ab6d61316f59ef415b8cb333bc9e3e4d908d393d4f7d7ab654 \
+  0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
   --payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
   --rpc https://sepolia-rpc.giwa.io/
@@ -83,26 +95,18 @@ node --experimental-strip-types verifier/src/reveal-cli.ts \
 
 `POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021`이 필요하다.
 
-## 프론트 설정
+## 프론트 빌드
 
-`web/.env.local`에 넣을 값:
-
-```
-VITE_CHAIN_ID=91342
-VITE_RPC_URL=https://sepolia-rpc.giwa.io/
-VITE_EAS_ADDRESS=0x4200000000000000000000000000000000000021
-VITE_SCHEMA_REGISTRY_ADDRESS=0x4200000000000000000000000000000000000020
-VITE_NOTE_RESOLVER=0x83d5c7ad0a024effe6a5d92640f93a19c5be77d0
-VITE_DECISION_RESOLVER=0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
-VITE_SETTLEMENT_RESOLVER=0xbc386addcd3cabbbb62dfcb521939fe4610029d1
-VITE_CHALLENGE_RESOLVER=0x56809bb2aeea0f043fa40ea0ae09411c8af0e127
-VITE_NOTE_SCHEMA=0xbeb96f68b7232b3205fa8bfb65f3d7e260b013088b4db415578d3eafa8db836c
-VITE_DECISION_SCHEMA=0x393daa0863ba418bd31c2026eae9a96305a57d513fa6a74b9a2120b4ce2469ea
-VITE_SETTLEMENT_SCHEMA=0x84f169dc66866931bb510e14f04c7d7f62df530dbde50e40a7d7f2eb3ee97c54
-VITE_CHALLENGE_SCHEMA=0x68c45508ba2a133013581cfa70cdc736847f554224a1876ffd0feb5930ef6d43
+```bash
+bash scripts/build_testnet.sh
 ```
 
-> 실제 키 이름은 `web/src/config.ts`와 대조해서 맞출 것.
+`web/.env.local`을 만들지 않는다 — 그 파일은 `dev_up.sh`가 로컬 anvil 주소로 덮어쓰고
+Vite에서 `.env.*`보다 우선한다. 스크립트는 **셸 환경변수**로 넣고(우선순위가 더 높다),
+빌드 결과에 테스트넷 주소가 실제로 들어갔는지 `grep`으로 확인한 뒤 종료한다.
+**조용히 로컬 주소로 배포되는 것이 최악이라** 그 검사를 넣었다.
+
+값의 출처는 이 문서 하나뿐이다. 스크립트에서 손으로 고치지 말 것.
 
 ## 아직 하지 않은 것
 
@@ -111,7 +115,6 @@ VITE_CHALLENGE_SCHEMA=0x68c45508ba2a133013581cfa70cdc736847f554224a1876ffd0feb59
 | **O6 소유권 이전** | `POIDecisionResolver`의 owner가 아직 배포 지갑이다. multisig로 옮겨야 한다. `renounce`는 하지 않는다 — Phase 1 지표 추가가 필요하다(B13) |
 | **O7 fixture 세트** | SETTLED / 철회→정정 / 이의 있음 4종 |
 | **O8 데모 녹화** | `T_overdue` 이후 |
-| **O9 익스플로러 verify** | `forge verify-contract` |
 | **O2 법률 검토** | 열려 있다. 사용자가 정식 배포 때 보기로 판단 |
 
 ## 되돌릴 수 없는 것
