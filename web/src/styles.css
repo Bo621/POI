@@ -58,9 +58,54 @@ main {
     padding-block: var(--space-12);
 }
 
-.route-wallet {
-    width: min(68ch, calc(100% - 2rem));
-    margin-inline: auto;
+.site-nav {
+    position: sticky;
+    z-index: 10;
+    inset-block-start: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-6);
+    padding: var(--space-3) max(var(--space-4), calc((100% - 68ch) / 2));
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule-strong);
+    box-shadow: 0 3px 0 -2px var(--rule);
+}
+
+.site-nav__brand {
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.site-nav__links,
+.site-nav__wallet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.site-nav__links a[aria-current="page"] {
+    font-weight: 600;
+    text-decoration-thickness: 2px;
+}
+
+.site-nav__link--muted,
+.site-nav__wallet-empty {
+    color: var(--ink-faint);
+}
+
+.site-nav__wallet {
+    margin-inline-start: auto;
+    font-size: var(--text-sm);
+}
+
+.site-nav__wallet .notice,
+.site-nav__wallet .form-status {
+    flex-basis: 100%;
+    margin: 0;
 }
 
 .doc-header {

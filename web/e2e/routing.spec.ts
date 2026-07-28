@@ -10,6 +10,8 @@ test("홈으로 직접 진입한다", async ({page}) => {
     await page.goto("/#/");
 
     await expectAppAt(page, "#/");
+    await expect(page.getByRole("navigation")).toBeVisible();
+    await expect(page.getByRole("link", {name: "홈", exact: true})).toHaveAttribute("aria-current", "page");
 });
 
 test("결정 딥링크로 직접 진입하면 500ms 안에 앱이 뜬다", async ({page}) => {
@@ -18,6 +20,7 @@ test("결정 딥링크로 직접 진입하면 500ms 안에 앱이 뜬다", async
     await page.goto(`/${hash}`);
 
     await expectAppAt(page, hash, 500);
+    await expect(page.getByRole("navigation")).toBeVisible();
 });
 
 test("새로고침해도 URL이 유지된다", async ({page}) => {

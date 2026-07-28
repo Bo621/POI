@@ -14,9 +14,10 @@ interface Props {
     payload: unknown;
     onCancel: () => void;
     onProceed: () => void;
+    publishDisabled?: boolean;
 }
 
-export function SaltBackup({salts, payload, onCancel, onProceed}: Props) {
+export function SaltBackup({salts, payload, onCancel, onProceed, publishDisabled = false}: Props) {
     const [confirmed, setConfirmed] = useState(false);
     const backup = JSON.stringify({salts, payload}, null, 2);
 
@@ -54,7 +55,7 @@ export function SaltBackup({salts, payload, onCancel, onProceed}: Props) {
                 </label>
                 <div className="button-row">
                     <button className="btn-quiet" type="button" onClick={onCancel}>취소</button>
-                    <button className="btn-commit" type="button" disabled={!canProceed({confirmed})} onClick={onProceed}>
+                    <button className="btn-commit" type="button" disabled={publishDisabled || !canProceed({confirmed})} onClick={onProceed}>
                         발행
                     </button>
                 </div>

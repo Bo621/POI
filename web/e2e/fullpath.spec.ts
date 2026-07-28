@@ -24,8 +24,8 @@ async function connect(context: BrowserContext, account: typeof accounts.A): Pro
     const page = await context.newPage();
     await injectWallet(page, account, rpcUrl);
     await page.goto("/");
-    await page.getByRole("button", {name: "지갑 연결"}).click();
-    await expect(section(page, "지갑").getByText(
+    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await expect(page.getByRole("navigation").getByText(
         new RegExp(`${account.slice(0, 6)}…${account.slice(-4)}`, "i"),
     )).toBeVisible();
     return page;
@@ -104,8 +104,8 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const currentTime = await chainNow();
     await advanceChain(rpcUrl, Math.max(1, windowEnd - currentTime + 1));
     await pageA.reload();
-    await pageA.getByRole("button", {name: "지갑 연결"}).click();
-    await expect(section(pageA, "지갑").getByText(
+    await pageA.getByRole("button", {name: "연결", exact: true}).click();
+    await expect(pageA.getByRole("navigation").getByText(
         new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
     )).toBeVisible();
     const awaiting = section(pageA, "상태");

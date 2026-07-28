@@ -14,9 +14,10 @@ import {Passport} from "./passport";
 import {navigate, useRoute} from "./router";
 import {DecisionDetail} from "./decisionDetail";
 import {Verify} from "./verify";
-import {Wallet, ZERO_UID, type VerificationSnapshot, type WalletState} from "./wallet";
+import {ZERO_UID, type WalletState} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
 import {loadRecords, needsAction, type RecordRow} from "./records";
+import {Nav} from "./nav";
 
 export default function App() {
     return <ErrorBoundary label="본문"><AppRoute /></ErrorBoundary>;
@@ -24,14 +25,20 @@ export default function App() {
 
 function AppRoute() {
     const route = useRoute();
-    if (route.name === "decision") return <RoutedDecision uid={route.uid} />;
-    if (route.name === "verify") return <Verify />;
-    if (route.name === "passport") return <main><header className="doc-header"><a href="#/">← 홈</a><h1>Strategy Passport</h1><p className="hex">{route.address}</p></header><Passport address={route.address} /></main>;
-    if (route.name === "record") return <RecordPage />;
-    if (route.name === "me") return <MePage />;
-    if (route.name === "notFound") return <main><header className="doc-header"><h1>없는 화면입니다.</h1></header>
+    const [wallet, setWallet] = useState<WalletState>({
+        verified: false,
+        verifiedAddressUID: ZERO_UID as Hex,
+    });
+    let page;
+    if (route.name === "decision") page = <DecisionDetail uid={route.uid} address={wallet.address} />;
+    else if (route.name === "verify") page = <Verify />;
+    else if (route.name === "passport") page = <main><header className="doc-header"><a href="#/">← 홈</a><h1>Strategy Passport</h1><p className="hex">{route.address}</p></header><Passport address={route.address} /></main>;
+    else if (route.name === "record") page = <RecordPage wallet={wallet} />;
+    else if (route.name === "me") page = <MePage address={wallet.address} />;
+    else if (route.name === "notFound") page = <main><header className="doc-header"><h1>없는 화면입니다.</h1></header>
         <p>{route.raw.startsWith("#/d/") ? "UID는 0x로 시작하는 66자여야 합니다." : route.raw}</p><a href="#/">홈으로</a></main>;
-    return <SinglePage />;
+    else page = <SinglePage wallet={wallet} />;
+    return <><Nav route={route} wallet={wallet} onWalletChange={setWallet} />{page}</>;
 }
 
 function PageHeader({title}: {title: string}) {
@@ -42,21 +49,8 @@ function PageHeader({title}: {title: string}) {
     </header>;
 }
 
-function RecordPage() {
+function RecordPage({wallet}: {wallet: WalletState}) {
     const {now, skewSeconds} = useChainTime();
-    const [address, setAddress] = useState<Address>();
-    const [verification, setVerification] = useState<VerificationSnapshot>({
-        verified: false,
-        verifiedAddressUID: ZERO_UID as Hex,
-    });
-
-    function updateWallet(state: WalletState) {
-        setAddress(state.address);
-        setVerification({
-            verified: state.verified,
-            verifiedAddressUID: state.verifiedAddressUID,
-        });
-    }
 
     return <main>
         <PageHeader title="기록하기" />
@@ -66,11 +60,11 @@ function RecordPage() {
             <li><strong>③ 결정</strong><span>시점 + 예상 결과 고정</span></li>
         </ol>
         {!isDeployed() && <p className="notice" role="status">컨트랙트가 아직 배포되지 않았습니다. 스키마 UID가 설정될 때까지 발행할 수 없습니다.</p>}
-        <Wallet onChange={updateWallet} />
-        <Note address={address} />
+        {!wallet.address && <p className="notice notice--quiet">지갑을 연결하면 발행할 수 있습니다. 작성과 salt 백업은 지금도 가능합니다.</p>}
+        <Note address={wallet.address} />
         <Decision
-            address={address}
-            verification={verification}
+            address={wallet.address}
+            verification={wallet}
             chainNow={now}
             skewSeconds={skewSeconds}
             onPublished={(uid) => navigate({name: "decision", uid})}
@@ -94,8 +88,7 @@ function RecordRows({rows}: {rows: RecordRow[]}) {
     </ul>;
 }
 
-function MePage() {
-    const [address, setAddress] = useState<Address>();
+function MePage({address}: {address?: Address}) {
     const [rows, setRows] = useState<RecordRow[]>();
     const [error, setError] = useState("");
 
@@ -114,7 +107,6 @@ function MePage() {
 
     return <main>
         <PageHeader title="내 기록" />
-        <Wallet onChange={(state) => setAddress(state.address)} />
         {!address && <p className="notice notice--quiet">지갑을 연결하면 내 기록을 불러옵니다.</p>}
         {address && <p className="hex">{address}</p>}
         {rows && <>
@@ -132,29 +124,8 @@ function MePage() {
     </main>;
 }
 
-function RoutedDecision({uid}: {uid: Hex}) {
-    const [address, setAddress] = useState<Address>();
-    return <>
-        <div className="route-wallet"><Wallet onChange={(state) => setAddress(state.address)} /></div>
-        <DecisionDetail uid={uid} address={address} />
-    </>;
-}
-
-function SinglePage() {
+function SinglePage({wallet}: {wallet: WalletState}) {
     const {now, skewSeconds} = useChainTime();
-    const [address, setAddress] = useState<Address>();
-    const [verification, setVerification] = useState<VerificationSnapshot>({
-        verified: false,
-        verifiedAddressUID: ZERO_UID as Hex,
-    });
-
-    function updateWallet(state: WalletState) {
-        setAddress(state.address);
-        setVerification({
-            verified: state.verified,
-            verifiedAddressUID: state.verifiedAddressUID,
-        });
-    }
 
     return (
         <main>
@@ -165,11 +136,10 @@ function SinglePage() {
             {!isDeployed() && (
                 <p className="notice" role="status">컨트랙트가 아직 배포되지 않았습니다. 스키마 UID가 설정될 때까지 발행할 수 없습니다.</p>
             )}
-            <Wallet onChange={updateWallet} />
-            <Note address={address} />
-            <Decision address={address} verification={verification} chainNow={now} skewSeconds={skewSeconds} />
-            <Settlement address={address} />
-            <Challenge address={address} />
+            <Note address={wallet.address} />
+            <Decision address={wallet.address} verification={wallet} chainNow={now} skewSeconds={skewSeconds} />
+            <Settlement address={wallet.address} />
+            <Challenge address={wallet.address} />
             <Status now={now} skewSeconds={skewSeconds} />
             <Reveal />
             <Dag />

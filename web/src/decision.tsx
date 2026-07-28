@@ -1,6 +1,6 @@
 import {useEffect, useState, type FormEvent} from "react";
 import {commitment} from "@poi/core";
-import {bytesToHex, type Address, type Hex} from "viem";
+import {bytesToHex, zeroAddress, type Address, type Hex} from "viem";
 import {clockSkewNotice} from "./chainClock";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
 import {attest, encodeDecisionData, type AttestResult, type DecisionFields} from "./eas";
@@ -153,10 +153,6 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
         event.preventDefault();
         setStatus("");
         if (chainNow === undefined || windowStart === undefined || windowEnd === undefined) return;
-        if (!address) {
-            setStatus("먼저 지갑을 연결해 주세요.");
-            return;
-        }
         const salts = {decision: newSalt(), trigger: newSalt(), evidence: newSalt(), reason: newSalt()};
         const form: DecisionForm = {
             decision,
@@ -172,7 +168,7 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
             graceSeconds: grace,
             parents: parentsText.split(/\s+/).filter(Boolean),
             promotedFromNote: promoted.trim(),
-            attester: address,
+            attester: address ?? zeroAddress,
             verifiedAddressUID: verification.verifiedAddressUID,
             salts,
         };
@@ -185,9 +181,9 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
     }
 
     async function publish() {
-        if (!pending || !isDeployed() || chainNow === undefined) return;
+        if (!pending || !address || !isDeployed() || chainNow === undefined) return;
         try {
-            const payload = buildDecisionPayload(pending, Number(chainNow));
+            const payload = buildDecisionPayload({...pending, attester: address}, Number(chainNow));
             const result = await attest({
                 schema: SCHEMAS.decision as Hex,
                 data: encodeDecisionData(payload.fields),
@@ -250,7 +246,7 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
                     <div className="field"><label htmlFor="decision-parents">부모 UID (공백/줄바꿈 구분, 최대 8)</label><textarea className="hex" id="decision-parents" rows={2} value={parentsText} onChange={(e) => setParentsText(e.target.value)} /></div>
                     <div className="field"><label htmlFor="decision-promoted">승격 노트 UID (선택)</label><input className="uid" id="decision-promoted" value={promoted} onChange={(e) => setPromoted(e.target.value)} /></div>
                 </details>
-                <button className="btn" type="submit" disabled={!address || !isDeployed() || chainNow === undefined}>salt 생성 및 백업</button>
+                <button className="btn" type="submit" disabled={!isDeployed() || chainNow === undefined}>salt 생성 및 백업</button>
             </form>
             {!address && <p className="notice notice--quiet">지갑을 연결해야 결정 기록을 발행할 수 있습니다.</p>}
             {chainNow === undefined && <p className="doc-note">체인 시각을 확인하는 중입니다.</p>}
@@ -268,6 +264,7 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
                     }}
                     onCancel={() => setPending(undefined)}
                     onProceed={publish}
+                    publishDisabled={!address}
                 />
             )}
         </section>

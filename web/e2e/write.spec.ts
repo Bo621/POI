@@ -12,8 +12,8 @@ function section(page: Page, heading: string): Locator {
 async function connect(page: Page, account = accounts.A, hash = "#/record"): Promise<void> {
     await injectWallet(page, account, rpcUrl);
     await page.goto(`/${hash}`);
-    await page.getByRole("button", {name: "지갑 연결"}).click();
-    await expect(section(page, "지갑").getByText(
+    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await expect(page.getByRole("navigation").getByText(
         new RegExp(`${account.slice(0, 6)}…${account.slice(-4)}`, "i"),
     )).toBeVisible();
 }
@@ -38,7 +38,7 @@ test.beforeEach(async ({page}) => {
 });
 
 test("지갑 연결 주소가 축약 표기된다", async ({page}) => {
-    await expect(section(page, "지갑").getByText(
+    await expect(page.getByRole("navigation").getByText(
         new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
     )).toBeVisible();
 });
@@ -74,7 +74,7 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
     await expect(page.getByRole("img", {name: /상태: (대기|관측 중)/})).toBeVisible();
 
     await page.goto("/#/me");
-    await page.getByRole("button", {name: "지갑 연결"}).click();
+    await page.getByRole("button", {name: "연결", exact: true}).click();
     await expect(section(page, "전체").getByText(uid!, {exact: true})).toBeVisible();
 });
 
@@ -107,8 +107,16 @@ test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다
     await expect(settlement.getByRole("button", {name: "정산 발행"})).toBeDisabled();
 });
 
-test("지갑 없이 기록하기에 진입하면 발행 폼이 비활성이고 이유가 보인다", async ({page}) => {
+test("지갑 없이 기록하기에 진입해 작성과 salt 백업을 하고 발행만 비활성이다", async ({page}) => {
     await page.goto("/#/record");
-    await expect(page.getByRole("button", {name: "salt 생성 및 백업"})).toBeDisabled();
-    await expect(page.getByText("지갑을 연결해야 결정 기록을 발행할 수 있습니다.")).toBeVisible();
+    const decision = section(page, "결정 커밋");
+    await decision.getByLabel("결정 내용").fill("지갑 없는 결정");
+    await decision.getByLabel("trigger").fill("지갑 없는 trigger");
+    await expect(decision.getByRole("button", {name: "salt 생성 및 백업"})).toBeEnabled();
+    await decision.getByRole("button", {name: "salt 생성 및 백업"}).click();
+    const dialog = page.getByRole("dialog", {name: "salt 백업"});
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel("저장했습니다").check();
+    await expect(dialog.getByRole("button", {name: "발행", exact: true})).toBeDisabled();
+    await expect(page.getByText("지갑을 연결하면 발행할 수 있습니다. 작성과 salt 백업은 지금도 가능합니다.")).toBeVisible();
 });

@@ -53,10 +53,6 @@ export function Note({address}: {address?: Address}) {
     }
 
     function prepareNote(entry: JournalEntry) {
-        if (!address) {
-            setStatus("먼저 지갑을 연결해 주세요.");
-            return;
-        }
         setPending({content: entry.content, salt: newSalt()});
     }
 
@@ -100,7 +96,7 @@ export function Note({address}: {address?: Address}) {
                     <li key={entry.id}>
                         <p>{entry.content}</p>
                         <small className="timestamp">{new Date(entry.createdAt).toLocaleString("ko-KR")}</small>
-                        <button className="btn" type="button" onClick={() => prepareNote(entry)} disabled={!address || !isDeployed()}>
+                        <button className="btn" type="button" onClick={() => prepareNote(entry)} disabled={!isDeployed()}>
                             노트로 승격
                         </button>
                         <button className="btn-quiet" type="button" onClick={() => save(deleteJournalEntry(entries, entry.id))}>
@@ -118,6 +114,7 @@ export function Note({address}: {address?: Address}) {
                     payload={pending.content}
                     onCancel={() => setPending(undefined)}
                     onProceed={publish}
+                    publishDisabled={!address}
                 />
             )}
         </section>
