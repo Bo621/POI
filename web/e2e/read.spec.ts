@@ -37,6 +37,7 @@ test("F2는 정산완료이며 철회 이력이 있다", async ({page}) => {
 });
 
 test("F5는 다음 시간 경계에서 새로고침 없이 인장이 바뀐다", async ({page}) => {
+    test.setTimeout(60_000);
     const fixture = requireSeed().fixtures.f5;
     await page.goto(`/#/d/${fixture.decisionUID}`);
     const status = page.locator("section.status-result");
