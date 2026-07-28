@@ -213,3 +213,60 @@ strict mode violation: getByLabel('관측값') resolved to 2 elements:
 ```
 bash scripts/dev_up.sh && cd web && npm run test:e2e     # 16/16
 ```
+
+---
+
+## 리뷰 대응 R3 — 정산에서 소유자 판정에 걸린다
+
+R2 이후 정산 단계까지 왔다. 화면 문구:
+
+```
+alert: 결정 작성자만 정산할 수 있습니다.
+```
+
+**그런데 테스트는 결정 작성자 본인(A)으로 접속해 있다.**
+
+`settlement.tsx:105`
+
+```ts
+if (!address || record.attester.toLowerCase() !== address.toLowerCase()) {
+    throw new Error("결정 작성자만 정산할 수 있습니다.");
+}
+```
+
+주소 비교는 대소문자를 무시하므로 그쪽 문제가 아니다.
+**`!address`(지갑 미연결)와 소유자 불일치가 같은 문구로 뭉개져 있다.**
+
+### 고칠 것 1 — `[P2]` 두 상황을 분리한다 (제품)
+
+```ts
+if (!address) throw new Error("먼저 지갑을 연결해 주세요.");
+if (record.attester.toLowerCase() !== address.toLowerCase()) {
+    throw new Error("결정 작성자만 정산할 수 있습니다.");
+}
+```
+
+**같은 패턴이 다른 화면에도 있는지 훑을 것**(`challenge.tsx`·`decision.tsx`·`note.tsx`).
+"왜 막혔는지"를 사용자가 알 수 없는 문구는 되돌릴 수 없는 발행 앞에서 특히 나쁘다.
+
+### 고칠 것 2 — 진짜 원인을 규명한다
+
+1번을 고치면 다음 실행에서 **어느 쪽인지 화면에 뜬다.**
+
+- `"먼저 지갑을 연결해 주세요."`가 뜨면 → **테스트가 정산 전에 연결을 잃었다.**
+  주입 provider나 페이지 전환을 확인한다. 필요하면 정산 직전에 다시 연결한다.
+- `"결정 작성자만…"`이 그대로 뜨면 → 연결된 주소가 A가 아니거나
+  `record.attester`를 잘못 읽고 있다. `read.ts`의 결정 조회를 확인한다.
+
+**추측으로 고치지 말 것.** 다음 실행의 문구를 보고 판단한다.
+
+### 나머지 단계
+
+8~12(정산 후 상태·이의·목록·reveal·다운로드)는 아직 한 번도 실행된 적이 없다.
+거기서 막히면 R4로 이어간다. **끝까지 간 뒤에 완료다.**
+
+### 검증
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e     # 16/16
+```

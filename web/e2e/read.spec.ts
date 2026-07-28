@@ -7,7 +7,7 @@ const fixture = seed;
 
 async function loadStatus(page: Page, uid: string, label: string): Promise<void> {
     const section = page.getByRole("heading", {name: "상태", exact: true}).locator("..");
-    await section.getByLabel("decisionUID").fill(uid);
+    await section.getByLabel("decisionUID", {exact: true}).fill(uid);
     await section.getByRole("button", {name: "상태 조회"}).click();
     await expect(section.getByRole("img", {name: `상태: ${label}`})).toBeVisible();
 }
@@ -44,7 +44,7 @@ test("F5는 대기다", async ({page}) => {
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
     const challenge = section(page, "이의");
-    await challenge.getByLabel("settlementUID").fill(requireSeed().fixtures.f1.settlementUID);
+    await challenge.getByLabel("settlementUID", {exact: true}).fill(requireSeed().fixtures.f1.settlementUID);
     await challenge.getByRole("button", {name: "목록 조회"}).click();
     await expect(challenge.getByText(requireSeed().challengeUID, {exact: true})).toBeVisible();
     await expect(challenge.locator("ul.record-list > li")).toHaveCount(1);
@@ -57,8 +57,8 @@ test.describe("Reveal commitment 대조", () => {
         const reveal = section(page, "공개");
         const data = requireSeed();
         await reveal.getByLabel("attestationUID").fill(uid);
-        await reveal.getByLabel("salt").fill(data.f1Reveal.salt);
-        await reveal.getByLabel("payload (JSON)").fill(JSON.stringify(data.f1Reveal.payload));
+        await reveal.getByLabel("salt", {exact: true}).fill(data.f1Reveal.salt);
+        await reveal.getByLabel("payload (JSON)", {exact: true}).fill(JSON.stringify(data.f1Reveal.payload));
         return reveal;
     }
 
@@ -80,7 +80,7 @@ test.describe("Reveal commitment 대조", () => {
 
 test("DAG에 노드와 조회 완전성 안내가 나온다", async ({page}) => {
     const dag = section(page, "결정 DAG 조회");
-    await dag.getByLabel("decisionUID").fill(requireSeed().fixtures.f1.decisionUID);
+    await dag.getByLabel("decisionUID", {exact: true}).fill(requireSeed().fixtures.f1.decisionUID);
     await dag.getByRole("button", {name: "부모 기록 조회"}).click();
     await expect(dag.getByText("UID", {exact: true})).toBeVisible();
     await expect(dag.getByText("조회된 것이 전부라는 보장은 없습니다.")).toBeVisible();

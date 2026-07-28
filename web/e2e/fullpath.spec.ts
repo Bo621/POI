@@ -93,7 +93,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const decisionUID = await receiptUID(decision);
 
     const status = section(pageA, "상태");
-    await status.getByLabel("decisionUID").fill(decisionUID);
+    await status.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
     await status.getByRole("button", {name: "상태 조회"}).click();
     await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
 
@@ -102,13 +102,13 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await pageA.reload();
     await pageA.getByRole("button", {name: "지갑 연결"}).click();
     const awaiting = section(pageA, "상태");
-    await awaiting.getByLabel("decisionUID").fill(decisionUID);
+    await awaiting.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
     await awaiting.getByRole("button", {name: "상태 조회"}).click();
     await expect(awaiting.getByRole("img", {name: "상태: 정산 대기"})).toBeVisible({timeout: 20_000});
 
     const settlement = section(pageA, "정산");
-    await settlement.getByLabel("decisionUID").fill(decisionUID);
-    await settlement.getByLabel("관측값").fill("92000000");
+    await settlement.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
+    await settlement.getByLabel("관측값", {exact: true}).fill("92000000");
     await settlement.getByLabel("출처").fill("FULL-PATH E2E");
     await settlement.getByLabel("verifierVersion").fill("full-path-e2e");
     await settlement.getByRole("button", {name: "정산 확인"}).click();
@@ -123,7 +123,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await pageA.close();
     const pageB = await connect(context, accounts.B);
     const challenge = section(pageB, "이의");
-    await challenge.getByLabel("settlementUID").fill(settlementUID);
+    await challenge.getByLabel("settlementUID", {exact: true}).fill(settlementUID);
     await challenge.getByLabel("출처").fill("FULL-PATH challenge");
     await challenge.getByRole("button", {name: "이의 발행"}).click();
     const challengeUID = await receiptUID(challenge);
@@ -136,8 +136,8 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const revealPage = await connect(context, accounts.A);
     const reveal = section(revealPage, "공개");
     await reveal.getByLabel("attestationUID").fill(decisionUID);
-    await reveal.getByLabel("salt").fill(decisionSalt);
-    await reveal.getByLabel("payload (JSON)").fill(JSON.stringify(decisionText));
+    await reveal.getByLabel("salt", {exact: true}).fill(decisionSalt);
+    await reveal.getByLabel("payload (JSON)", {exact: true}).fill(JSON.stringify(decisionText));
     await expect(reveal.getByText("commitment가 일치합니다.")).toBeVisible();
     const downloadButton = reveal.getByRole("button", {name: "RevealFile 다운로드"});
     await expect(downloadButton).toBeEnabled();

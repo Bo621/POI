@@ -69,7 +69,7 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
     expect(uid).toMatch(/^0x[0-9a-f]{64}$/i);
 
     const status = section(page, "상태");
-    await status.getByLabel("decisionUID").fill(uid!);
+    await status.getByLabel("decisionUID", {exact: true}).fill(uid!);
     await status.getByRole("button", {name: "상태 조회"}).click();
     await expect(status.getByRole("img", {name: /상태: (대기|관측 중)/})).toBeVisible();
 });
@@ -97,7 +97,7 @@ test("30분 graceSeconds는 한국어 오류로 발행을 막는다", async ({pa
 test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다", async ({page}) => {
     await connect(page, accounts.B);
     const settlement = section(page, "정산");
-    await settlement.getByLabel("decisionUID").fill(requireSeed().fixtures.f1.decisionUID);
+    await settlement.getByLabel("decisionUID", {exact: true}).fill(requireSeed().fixtures.f1.decisionUID);
     await settlement.getByRole("button", {name: "정산 확인"}).click();
     await expect(settlement.getByRole("alert")).toHaveText("결정 작성자만 정산할 수 있습니다.");
     await expect(settlement.getByRole("button", {name: "정산 발행"})).toBeDisabled();
