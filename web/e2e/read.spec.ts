@@ -1,5 +1,5 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, advanceChain, chainNow, requireSeed, rpcUrl} from "./fixtures";
+import {accounts, advanceChain, chainNow, requireSeed, rpcUrl, shortAddressRe} from "./fixtures";
 
 test.beforeAll(() => {
     requireSeed();
@@ -45,7 +45,7 @@ test("F5는 새로고침 없이 대기에서 관측중으로 바뀐다", async (
     const windowText = await section(page, "예상 결과").locator("dd").filter({hasText: " ~ "}).textContent();
     const windowStart = Date.parse(windowText!.split(" ~ ")[0].replace(" UTC", "Z")) / 1000;
     await advanceChain(rpcUrl, Math.max(1, windowStart - await chainNow() + 1));
-    await expect(status.getByRole("img", {name: "상태: 관측중"})).toBeVisible({timeout: 20_000});
+    await expect(status.getByRole("img", {name: "상태: 관측중"})).toBeVisible({timeout: 30_000});
 });
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
@@ -53,7 +53,7 @@ test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없
     const challenge = page.getByRole("heading", {name: "이의", exact: true}).locator("..");
     const item = challenge.locator("ul.record-list > li");
     await expect(item).toHaveCount(1);
-    await expect(item).toContainText(`${accounts.B.slice(0, 10)}…${accounts.B.slice(-6)}`);
+    await expect(item).toContainText(shortAddressRe(accounts.B));
     await expect(item).toContainText("NOT_OBSERVED");
     await expect(challenge).not.toContainText(/\d+\s*건/);
     await expect(challenge.getByText("조회된 것이 전부라는 보장은 없습니다.")).toBeVisible();

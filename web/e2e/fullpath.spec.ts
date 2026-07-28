@@ -8,6 +8,7 @@ import {
     openDetails,
     requireSeed,
     rpcUrl,
+    shortAddressRe,
 } from "./fixtures";
 
 test.beforeAll(() => {
@@ -25,9 +26,7 @@ async function connect(context: BrowserContext, account: typeof accounts.A): Pro
     await injectWallet(page, account, rpcUrl);
     await page.goto("/");
     await page.getByRole("button", {name: "연결", exact: true}).click();
-    await expect(page.getByRole("navigation").getByText(
-        new RegExp(`${account.slice(0, 6)}…${account.slice(-4)}`, "i"),
-    )).toBeVisible();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(account))).toBeVisible();
     return page;
 }
 
@@ -99,17 +98,15 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const decisionUID = (new URL(pageA.url()).hash.match(/0x[0-9a-f]{64}/i) ?? [])[0];
     expect(decisionUID).toBeTruthy();
 
-    const status = pageA.locator("header.doc-header").locator("+ .status-result");
+    const status = pageA.locator("section.status-result");
     await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
 
     const currentTime = await chainNow();
     await advanceChain(rpcUrl, Math.max(1, windowEnd - currentTime + 1));
     await pageA.reload();
     await pageA.getByRole("button", {name: "연결", exact: true}).click();
-    await expect(pageA.getByRole("navigation").getByText(
-        new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
-    )).toBeVisible();
-    const awaiting = pageA.locator("header.doc-header").locator("+ .status-result");
+    await expect(pageA.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
+    const awaiting = pageA.locator("section.status-result");
     await expect(awaiting.getByRole("img", {name: "상태: 정산대기"})).toBeVisible({timeout: 20_000});
 
     const settlement = section(pageA, "정산");
@@ -134,7 +131,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const challengeUID = await receiptUID(challenge);
     const challengeItem = challenge.locator("ul.record-list > li");
     await expect(challengeItem).toHaveCount(1);
-    await expect(challengeItem).toContainText(`${accounts.B.slice(0, 10)}…${accounts.B.slice(-6)}`);
+    await expect(challengeItem).toContainText(shortAddressRe(accounts.B));
     await expect(challengeItem).toContainText("OBSERVED");
     await expect(challenge).not.toContainText(/\d+\s*건/);
 

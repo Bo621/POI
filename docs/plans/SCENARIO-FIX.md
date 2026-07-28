@@ -201,3 +201,46 @@ locator('header.doc-header').locator('+ .status-result')   → 못 찾음
 ```
 bash scripts/dev_up.sh && cd web && npm run test:e2e     # 전부 통과, skipped 0
 ```
+
+---
+
+## 리뷰 대응 R2 — `[P1]` 병렬 워커가 하나의 체인을 공유한다
+
+`section.status-result` 선택자는 맞다(인장이 그 안에 있는 것을 DOM으로 확인했다).
+실패 원인은 **상태 값**이다.
+
+```
+fullpath.spec.ts   evm_increaseTime 으로 체인을 90,000초 민다
+read.spec.ts       F5가 `대기`라고 단언한다
+```
+
+**Playwright가 파일을 병렬로 돌리는데 anvil 체인은 하나뿐이다.**
+한 스펙의 시간 이동이 다른 스펙의 fixture 상태를 무너뜨린다.
+실행 순서에 따라 통과·실패가 갈리는, 지금까지 여러 번 우리를 헤매게 한 원인이다.
+
+### 고칠 것
+
+1. **`playwright.config.ts`에 `workers: 1`, `fullyParallel: false`.**
+   공유 자원(단일 체인)을 쓰는 테스트 묶음이므로 병렬이 애초에 성립하지 않는다.
+   느려지는 것은 감수한다 — **거짓 실패보다 낫다.**
+
+2. **시간에 의존하는 단언을 체인에서 계산한다.**
+   `read.spec.ts`의 F5 상태 단언이 `대기`를 하드코딩한다.
+   앞선 스펙이 시간을 밀었으면 이미 지나가 있다.
+
+   - 자동 갱신 테스트는 **직접 시각을 밀어 전이를 만든다**:
+     현재 상태를 읽고 → `evm_increaseTime`으로 다음 경계를 넘기고 →
+     **인장이 바뀌는 것**을 단언한다. 특정 문구를 하드코딩하지 않는다.
+   - F5의 `대기` 단언이 필요한 테스트는 **파일 맨 앞**에 두거나,
+     `seed.json`의 window와 현재 체인 시각으로 **기대 상태를 계산**해 비교한다.
+
+3. `docs/E2E_BEHAVIOR.md`에 한 줄 추가:
+   **E2E는 단일 체인을 공유하므로 직렬로 실행한다. 시간에 의존하는 단언은
+   체인 시각에서 계산한다.**
+
+### 검증
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e     # 전부 통과, skipped 0
+```
+두 번 연속 실행해도 같은 결과여야 한다.

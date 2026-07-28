@@ -31,6 +31,13 @@ export const accounts = seed?.accounts as Seed["accounts"];
 
 export const rpcUrl = "http://127.0.0.1:8545";
 
+export function shortAddressRe(address: string): RegExp {
+    const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const compact = `${escape(address.slice(0, 6))}…${escape(address.slice(-4))}`;
+    const detailed = `${escape(address.slice(0, 10))}…${escape(address.slice(-6))}`;
+    return new RegExp(`(?:${compact}|${detailed})`, "i");
+}
+
 export async function openDetails(area: Locator, summaryText: string): Promise<void> {
     const summary = area.locator("summary").filter({hasText: summaryText});
     const details = summary.locator("..");

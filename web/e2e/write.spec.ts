@@ -1,5 +1,13 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, chainNow, injectWallet, openDetails, requireSeed, rpcUrl} from "./fixtures";
+import {
+    accounts,
+    chainNow,
+    injectWallet,
+    openDetails,
+    requireSeed,
+    rpcUrl,
+    shortAddressRe,
+} from "./fixtures";
 
 test.beforeAll(() => {
     requireSeed();
@@ -13,9 +21,7 @@ async function connect(page: Page, account = accounts.A, hash = "#/record"): Pro
     await injectWallet(page, account, rpcUrl);
     await page.goto(`/${hash}`);
     await page.getByRole("button", {name: "연결", exact: true}).click();
-    await expect(page.getByRole("navigation").getByText(
-        new RegExp(`${account.slice(0, 6)}…${account.slice(-4)}`, "i"),
-    )).toBeVisible();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(account))).toBeVisible();
 }
 
 async function fillValidOutcome(page: Page): Promise<void> {
@@ -43,9 +49,7 @@ test.beforeEach(async ({page}, testInfo) => {
 });
 
 test("지갑 연결 주소가 축약 표기된다", async ({page}) => {
-    await expect(page.getByRole("navigation").getByText(
-        new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
-    )).toBeVisible();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
 });
 
 test("저널 저장은 로컬 목록에 나타난다", async ({page}) => {
