@@ -1,16 +1,11 @@
 #!/usr/bin/env node
-import {isAddress, isHex, type Address, type Hex} from "viem";
+import {isHex, type Hex} from "viem";
+import {requiredAddress} from "./env.ts";
 import {defaultProviders} from "./providers.ts";
 import {createViemReader} from "./reader.ts";
 import {VERDICT, verifyDecision} from "./verify.ts";
 
 const USAGE = "사용법: poi-verify <decisionUID> [--rpc <url>] [--json] [--no-fetch]";
-
-function requiredAddress(name: string): Address {
-    const value = process.env[name];
-    if (!value || !isAddress(value)) throw new Error(`${name} 환경 변수가 올바른 주소가 아니다.`);
-    return value;
-}
 
 export async function main(argv = process.argv.slice(2)): Promise<number> {
     let rpcUrl = process.env.POI_RPC_URL;

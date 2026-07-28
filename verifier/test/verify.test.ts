@@ -24,6 +24,8 @@ const decision = (overrides: Partial<OnChainDecision> = {}): OnChainDecision => 
     attester: uid("a"),
     time: 1n,
     revocationTime: 0n,
+    decisionCommitment: uid("c"),
+    triggerCommitment: uid("d"),
     hasExpectedOutcome: true,
     outcomeMetricId: METRIC_ID,
     outcomeOp: 1,
@@ -32,6 +34,7 @@ const decision = (overrides: Partial<OnChainDecision> = {}): OnChainDecision => 
     windowEnd: 200n,
     graceSeconds: 10n,
     evidenceCommitment: uid("e"),
+    reasonCommitment: uid("f"),
     ...overrides,
 });
 const settlement = (overrides: Partial<OnChainSettlement> = {}): OnChainSettlement => ({
@@ -62,6 +65,7 @@ class FakeReader implements ChainReader {
         frozen: true,
     };
 
+    async getChainId(): Promise<number> { return 31337; }
     async getChainTime(): Promise<bigint> { return 210n; }
     async getDecision(): Promise<OnChainDecision | undefined> { return this.decision; }
     async getActiveHead(): Promise<Hex> { return this.head; }

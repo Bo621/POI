@@ -12,6 +12,8 @@ export interface OnChainDecision {
     attester: Hex;
     time: bigint;
     revocationTime: bigint;
+    decisionCommitment: Hex;
+    triggerCommitment: Hex;
     hasExpectedOutcome: boolean;
     outcomeMetricId: Hex;
     outcomeOp: number;
@@ -20,6 +22,7 @@ export interface OnChainDecision {
     windowEnd: bigint;
     graceSeconds: bigint;
     evidenceCommitment: Hex;
+    reasonCommitment: Hex;
 }
 
 export interface OnChainSettlement {
@@ -45,6 +48,7 @@ export interface OnChainMetric {
 }
 
 export interface ChainReader {
+    getChainId(): Promise<number>;
     getChainTime(): Promise<bigint>;
     getDecision(uid: Hex): Promise<OnChainDecision | undefined>;
     getActiveHead(decisionUID: Hex): Promise<Hex>;
@@ -56,8 +60,8 @@ export interface ChainReader {
 export interface ViemReaderConfig {
     rpcUrl: string;
     easAddress: Address;
-    settlementResolverAddress: Address;
-    metricRegistryAddress: Address;
+    settlementResolverAddress?: Address;
+    metricRegistryAddress?: Address;
 }
 
 const EAS_ABI = parseAbi([
@@ -111,6 +115,9 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
     });
 
     return {
+        async getChainId() {
+            return publicClient.getChainId();
+        },
         async getChainTime() {
             const block = await publicClient.getBlock();
             return block.timestamp;
@@ -125,7 +132,10 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
                 attester: attestation.attester,
                 time: BigInt(attestation.time),
                 revocationTime: BigInt(attestation.revocationTime),
+                decisionCommitment: decoded[3],
+                triggerCommitment: decoded[4],
                 evidenceCommitment: decoded[5],
+                reasonCommitment: decoded[6],
                 hasExpectedOutcome: decoded[7],
                 outcomeMetricId: decoded[8],
                 outcomeOp: Number(decoded[9]),
@@ -136,6 +146,9 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
             };
         },
         async getActiveHead(decisionUID) {
+            if (!config.settlementResolverAddress) {
+                throw new Error("settlement resolver 주소가 필요하다.");
+            }
             return publicClient.readContract({
                 address: config.settlementResolverAddress,
                 abi: SETTLEMENT_RESOLVER_ABI,
@@ -144,6 +157,9 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
             });
         },
         async getRevokeCount(decisionUID) {
+            if (!config.settlementResolverAddress) {
+                throw new Error("settlement resolver 주소가 필요하다.");
+            }
             const count = await publicClient.readContract({
                 address: config.settlementResolverAddress,
                 abi: SETTLEMENT_RESOLVER_ABI,
@@ -172,6 +188,9 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
             };
         },
         async getMetric(metricId) {
+            if (!config.metricRegistryAddress) {
+                throw new Error("metric registry 주소가 필요하다.");
+            }
             const metric = await publicClient.readContract({
                 address: config.metricRegistryAddress,
                 abi: METRIC_REGISTRY_ABI,
