@@ -31,7 +31,11 @@ export function parseRoute(hash: string): Route {
         return {name: "passport", address: passport[1].toLowerCase() as Address};
     }
 
-    return {name: "notFound", raw: hash};
+    try {
+        return {name: "notFound", raw: decodeURIComponent(hash)};
+    } catch {
+        return {name: "notFound", raw: hash};
+    }
 }
 
 export function routeToHash(route: Route): string {

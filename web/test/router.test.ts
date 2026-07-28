@@ -44,6 +44,17 @@ describe("parseRoute", () => {
         expect(parseRoute("#/없는경로")).toEqual({name: "notFound", raw: "#/없는경로"});
     });
 
+    test("퍼센트 인코딩된 알 수 없는 경로의 raw를 복원한다", () => {
+        expect(parseRoute("#/%EC%97%86%EB%8A%94%EA%B2%BD%EB%A1%9C")).toEqual({
+            name: "notFound",
+            raw: "#/없는경로",
+        });
+    });
+
+    test("잘못된 퍼센트 인코딩은 원문 raw를 보존한다", () => {
+        expect(parseRoute("#/%E0%A4%A")).toEqual({name: "notFound", raw: "#/%E0%A4%A"});
+    });
+
     test("유효한 경로는 hash로 왕복한다", () => {
         const hashes = ["#/", "#/record", "#/me", `#/d/${UID}`, "#/verify", `#/passport/${ADDRESS}`, "#/fixtures"];
         for (const hash of hashes) {

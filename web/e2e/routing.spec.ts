@@ -58,7 +58,9 @@ test("뒤로 간 뒤 앞으로 가면 이동한 URL로 돌아간다", async ({pa
 test("없는 경로에서도 앱과 URL이 유지된다", async ({page}) => {
     await page.goto("/#/없는경로");
 
-    await expectAppAt(page, "#/없는경로");
+    await expectAppAt(page, "#/%EC%97%86%EB%8A%94%EA%B2%BD%EB%A1%9C");
+    await expect.poll(() => page.evaluate(() => decodeURIComponent(window.location.hash)))
+        .toBe("#/없는경로");
 });
 
 test("짧은 UID 경로에서도 앱과 URL이 유지된다", async ({page}) => {
