@@ -1,19 +1,15 @@
 import {useState, type FormEvent} from "react";
-import {encodeAbiParameters, parseAbi, type Address, type Hex} from "viem";
-import {getWalletClient} from "./chain";
-import {EAS_ADDRESS, SCHEMAS, isDeployed} from "./config";
-import {attest} from "./eas";
+import {encodeAbiParameters, type Address, type Hex} from "viem";
+import {SCHEMAS, isDeployed} from "./config";
+import {attest, revoke as revokeAttestation, type AttestResult} from "./eas";
 import {readChallengeLogs, readVerified, type ChallengeLog} from "./read";
+import {Receipt} from "./receipt";
 import {ZERO_UID} from "./wallet";
 
 const PARAMETERS = [
     {type: "bytes32"}, {type: "uint8"}, {type: "bool"}, {type: "int128"},
     {type: "string"}, {type: "uint64"}, {type: "bytes32"},
 ] as const;
-const REVOKE_ABI = parseAbi([
-    "function revoke((bytes32 schema,(bytes32 uid,uint256 value) data) request) payable",
-]);
-
 export function filterActiveChallenges(logs: ChallengeLog[], settlementUID: Hex): ChallengeLog[] {
     return logs.filter((log) =>
         log.refUID.toLowerCase() === settlementUID.toLowerCase() && log.revocationTime === 0n
@@ -33,6 +29,8 @@ export function Challenge({address}: {address?: Address}) {
     const [observedAt, setObservedAt] = useState(0);
     const [noteCommitment, setNoteCommitment] = useState("");
     const [items, setItems] = useState<DisplayChallenge[]>([]);
+    const [receipt, setReceipt] = useState<AttestResult>();
+    const [revokeTxHash, setRevokeTxHash] = useState<Hex>();
     const [status, setStatus] = useState("");
 
     async function load() {
@@ -69,13 +67,14 @@ export function Challenge({address}: {address?: Address}) {
                 settlementUID as Hex, claimedResult, hasValue,
                 hasValue ? BigInt(observedValue) : 0n, source, BigInt(observedAt), note,
             ]);
-            const hash = await attest({
+            const result = await attest({
                 schema: SCHEMAS.challenge as Hex,
                 data,
                 revocable: true,
                 refUID: settlementUID as Hex,
             });
-            setStatus(`이의 발행 트랜잭션: ${hash}`);
+            setReceipt(result);
+            setStatus("");
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "이의 발행에 실패했습니다.");
         }
@@ -83,17 +82,9 @@ export function Challenge({address}: {address?: Address}) {
 
     async function revoke(uid: Hex) {
         try {
-            const wallet = getWalletClient();
-            const [account] = await wallet.requestAddresses();
-            const hash = await wallet.writeContract({
-                address: EAS_ADDRESS as Address,
-                abi: REVOKE_ABI,
-                functionName: "revoke",
-                account,
-                args: [{schema: SCHEMAS.challenge as Hex, data: {uid, value: 0n}}],
-                value: 0n,
-            });
-            setStatus(`이의 철회 트랜잭션: ${hash}`);
+            const result = await revokeAttestation({schema: SCHEMAS.challenge as Hex, uid});
+            setRevokeTxHash(result.txHash);
+            setStatus("");
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "이의 철회에 실패했습니다.");
         }
@@ -119,6 +110,8 @@ export function Challenge({address}: {address?: Address}) {
                 </div>
             </form>
             {status && <p className="form-status" role="status">{status}</p>}
+            <Receipt label="이의" uid={receipt?.uid} txHash={receipt?.txHash} />
+            <Receipt label="이의 철회" txHash={revokeTxHash} />
             <ul className="record-list">
                 {items.map((item) => (
                     <li key={item.uid}>

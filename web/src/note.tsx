@@ -2,7 +2,7 @@ import {useEffect, useState, type FormEvent} from "react";
 import {commitment} from "@poi/core";
 import type {Address, Hex} from "viem";
 import {CHAIN, SCHEMAS, isDeployed} from "./config";
-import {attest, encodeNoteData} from "./eas";
+import {attest, encodeNoteData, type AttestResult} from "./eas";
 import {
     JOURNAL_STORAGE_KEY,
     addJournalEntry,
@@ -12,6 +12,7 @@ import {
     type JournalEntry,
 } from "./journal";
 import {newSalt} from "./decision";
+import {Receipt} from "./receipt";
 import {SaltBackup} from "./saltBackup";
 import {ZERO_UID} from "./wallet";
 
@@ -24,6 +25,7 @@ export function Note({address}: {address?: Address}) {
     const [entries, setEntries] = useState<JournalEntry[]>([]);
     const [content, setContent] = useState("");
     const [pending, setPending] = useState<PendingNote>();
+    const [receipt, setReceipt] = useState<AttestResult>();
     const [status, setStatus] = useState("");
 
     useEffect(() => {
@@ -68,13 +70,14 @@ export function Note({address}: {address?: Address}) {
                 salt: pending.salt,
                 payload: pending.content,
             });
-            const hash = await attest({
+            const result = await attest({
                 schema: SCHEMAS.note as Hex,
                 data: encodeNoteData(contentCommitment),
                 revocable: false,
                 refUID: ZERO_UID,
             });
-            setStatus(`노트 발행 트랜잭션: ${hash}`);
+            setReceipt(result);
+            setStatus("");
             setPending(undefined);
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "노트 발행에 실패했습니다.");
@@ -107,6 +110,7 @@ export function Note({address}: {address?: Address}) {
                 ))}
             </ul>
             {status && <p className="form-status" role="alert">{status}</p>}
+            <Receipt label="노트" uid={receipt?.uid} txHash={receipt?.txHash} />
             {pending && (
                 <SaltBackup
                     salts={{note: pending.salt}}

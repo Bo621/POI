@@ -1,10 +1,10 @@
 import {messageFromRevert, RESULT, scale, settlementResult, type Op, type Result} from "@poi/core";
 import {useState, type FormEvent} from "react";
-import {encodeAbiParameters, isHex, parseAbi, type Address, type Hex} from "viem";
-import {getWalletClient} from "./chain";
-import {EAS_ADDRESS, SCHEMAS, isDeployed} from "./config";
-import {attest} from "./eas";
+import {encodeAbiParameters, isHex, type Address, type Hex} from "viem";
+import {SCHEMAS, isDeployed} from "./config";
+import {attest, revoke as revokeAttestation, type AttestResult} from "./eas";
 import {readDecision, readMetricDecimals, readSettlementHeads} from "./read";
+import {Receipt} from "./receipt";
 import {ZERO_UID} from "./wallet";
 
 export interface SettlementDecision {
@@ -40,10 +40,6 @@ const PARAMETERS = [
     {type: "bytes32"}, {type: "uint8"}, {type: "bool"}, {type: "int128"},
     {type: "string"}, {type: "uint64"}, {type: "string"}, {type: "bytes32"},
 ] as const;
-const REVOKE_ABI = parseAbi([
-    "function revoke((bytes32 schema,(bytes32 uid,uint256 value) data) request) payable",
-]);
-
 export function buildSettlementPayload(
     form: SettlementForm,
     decision: SettlementDecision,
@@ -92,6 +88,8 @@ export function Settlement({address}: {address?: Address}) {
     const [verifierVersion, setVerifierVersion] = useState("");
     const [prepared, setPrepared] = useState<SettlementPayload>();
     const [decision, setDecision] = useState<SettlementDecision>();
+    const [receipt, setReceipt] = useState<AttestResult>();
+    const [revokeTxHash, setRevokeTxHash] = useState<Hex>();
     const [status, setStatus] = useState("");
 
     async function prepare(event: FormEvent) {
@@ -135,13 +133,14 @@ export function Settlement({address}: {address?: Address}) {
     async function publish() {
         if (!prepared?.canPublish || !isDeployed()) return;
         try {
-            const hash = await attest({
+            const result = await attest({
                 schema: SCHEMAS.settlement as Hex,
                 data: encode(prepared),
                 revocable: true,
                 refUID: prepared.decisionUID,
             });
-            setStatus(`정산 발행 트랜잭션: ${hash}`);
+            setReceipt(result);
+            setStatus("");
         } catch (error) {
             setStatus(errorMessage(error));
         }
@@ -152,17 +151,9 @@ export function Settlement({address}: {address?: Address}) {
         try {
             const heads = await readSettlementHeads(SCHEMAS.settlement as Hex, prepared.decisionUID);
             if (heads.activeHead === ZERO_UID) throw new Error("활성 정산이 없습니다.");
-            const wallet = getWalletClient();
-            const [account] = await wallet.requestAddresses();
-            const hash = await wallet.writeContract({
-                address: EAS_ADDRESS as Address,
-                abi: REVOKE_ABI,
-                functionName: "revoke",
-                account,
-                args: [{schema: SCHEMAS.settlement as Hex, data: {uid: heads.activeHead, value: 0n}}],
-                value: 0n,
-            });
-            setStatus(`철회 트랜잭션: ${hash}`);
+            const result = await revokeAttestation({schema: SCHEMAS.settlement as Hex, uid: heads.activeHead});
+            setRevokeTxHash(result.txHash);
+            setStatus("");
         } catch (error) {
             setStatus(errorMessage(error));
         }
@@ -189,6 +180,8 @@ export function Settlement({address}: {address?: Address}) {
             </div>
             {decision && <dl className="doc-fields"><dt>구간 종료</dt><dd className="hex">{decision.windowEnd.toString()}</dd></dl>}
             {status && <p className="form-status" role="alert">{status}</p>}
+            <Receipt label="정산" uid={receipt?.uid} txHash={receipt?.txHash} />
+            <Receipt label="정산 철회" txHash={revokeTxHash} />
         </section>
     );
 }
