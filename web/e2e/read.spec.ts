@@ -1,9 +1,9 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, requireSeed, seed, seedUnavailable} from "./fixtures";
+import {accounts, requireSeed} from "./fixtures";
 
-test.skip(!seed, seedUnavailable);
-
-const fixture = seed;
+test.beforeAll(() => {
+    requireSeed();
+});
 
 async function loadStatus(page: Page, uid: string, label: string): Promise<void> {
     const section = page.getByRole("heading", {name: "상태", exact: true}).locator("..");

@@ -23,9 +23,8 @@ export let seedUnavailable = "";
 
 try {
     seed = JSON.parse(readFileSync(seedPath, "utf8")) as Seed;
-} catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    seedUnavailable = `시드가 없어 E2E를 건너뜁니다. 먼저 bash scripts/dev_up.sh를 실행하세요. (${detail})`;
+} catch {
+    seedUnavailable = "scripts/dev_up.sh 를 먼저 실행하세요.";
 }
 
 export const accounts = seed?.accounts as Seed["accounts"];

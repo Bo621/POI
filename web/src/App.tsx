@@ -10,9 +10,16 @@ import {Reveal} from "./reveal.tsx";
 import {Settlement} from "./settlement";
 import {Status} from "./status";
 import {Passport} from "./passport";
+import {useRoute} from "./router";
 import {Wallet, ZERO_UID, type VerificationSnapshot, type WalletState} from "./wallet";
 
 export default function App() {
+    const route = useRoute();
+    void route;
+    return <SinglePage />;
+}
+
+function SinglePage() {
     const {now, skewSeconds} = useChainTime();
     const [address, setAddress] = useState<Address>();
     const [verification, setVerification] = useState<VerificationSnapshot>({

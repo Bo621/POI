@@ -5,12 +5,13 @@ import {
     advanceChain,
     chainNow,
     injectWallet,
+    requireSeed,
     rpcUrl,
-    seed,
-    seedUnavailable,
 } from "./fixtures";
 
-test.skip(!seed, seedUnavailable);
+test.beforeAll(() => {
+    requireSeed();
+});
 
 const METRIC_ID = "0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf";
 

@@ -1,7 +1,9 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, chainNow, injectWallet, requireSeed, rpcUrl, seed, seedUnavailable} from "./fixtures";
+import {accounts, chainNow, injectWallet, requireSeed, rpcUrl} from "./fixtures";
 
-test.skip(!seed, seedUnavailable);
+test.beforeAll(() => {
+    requireSeed();
+});
 
 function section(page: Page, heading: string): Locator {
     return page.getByRole("heading", {name: heading, exact: true}).locator("..");
