@@ -109,13 +109,13 @@ test("30분 graceSeconds는 한국어 오류로 발행을 막는다", async ({pa
     await expect(page.getByRole("dialog", {name: "salt 백업"})).toHaveCount(0);
 });
 
-test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다", async ({page, context}) => {
+test("B 계정의 F1 결과 등록 시도는 한국어 소유자 오류를 표시한다", async ({page, context}) => {
     await page.close();
     const pageB = await context.newPage();
     await connect(pageB, accounts.B, `#/d/${requireSeed().fixtures.f1.decisionUID}`);
-    const settlement = section(pageB, "정산");
-    await expect(settlement.getByText("결정 작성자만 정산할 수 있습니다.", {exact: true})).toBeVisible();
-    await expect(settlement.getByRole("button", {name: "정산 확인"})).toHaveCount(0);
+    const settlement = section(pageB, "결과 등록");
+    await expect(settlement.getByText("결정 작성자만 결과를 등록할 수 있습니다.", {exact: true})).toBeVisible();
+    await expect(settlement.getByRole("button", {name: "결과 등록하기"})).toHaveCount(0);
 });
 
 test("지갑 없이 기록하기에 진입해 작성과 salt 백업을 하고 발행만 비활성이다", async ({page}) => {

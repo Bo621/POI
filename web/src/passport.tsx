@@ -49,7 +49,7 @@ export function Passport({address}: {address: Address}) {
                     uid={row.uid}
                     state={row.state}
                     detail={`${new Date(Number(row.committedAt) * 1000).toLocaleString("ko-KR")} · ${row.grade}`}
-                    warning={row.hasRevoked ? "정산 철회 이력 있음" : undefined}
+                    warning={row.hasRevoked ? "결과 등록 철회 이력 있음" : undefined}
                 />
             )}</ul>}
             {error && <p className="form-status" role="alert">{error}</p>}

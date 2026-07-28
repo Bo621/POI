@@ -45,7 +45,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
 
     async function load(targetUID = settlementUID) {
         if (!/^0x[0-9a-fA-F]{64}$/.test(targetUID)) {
-            setStatus("정산 UID를 확인해 주세요.");
+            setStatus("결과 등록 UID를 확인해 주세요.");
             return;
         }
         setStatus("불러오는 중…");
@@ -60,7 +60,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
                 verified: await readVerified(item.attester),
             })));
             setItems(display);
-            setStatus(filtered.length ? "이의가 제기된 정산입니다" : "조회된 활성 이의가 없습니다.");
+            setStatus(filtered.length ? "이의가 제기된 결과 등록입니다" : "조회된 활성 이의가 없습니다.");
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "이의 목록을 불러오지 못했습니다.");
         }
@@ -70,7 +70,7 @@ export function Challenge({address, settlementUID, onSuccess}: {
         event.preventDefault();
         try {
             if (!address) throw new Error("먼저 지갑을 연결해 주세요.");
-            if (!/^0x[0-9a-fA-F]{64}$/.test(settlementUID)) throw new Error("정산 UID를 확인해 주세요.");
+            if (!/^0x[0-9a-fA-F]{64}$/.test(settlementUID)) throw new Error("결과 등록 UID를 확인해 주세요.");
             const note = noteCommitment
                 ? (/^0x[0-9a-fA-F]{64}$/.test(noteCommitment) ? noteCommitment as Hex : (() => { throw new Error("noteCommitment를 확인해 주세요."); })())
                 : ZERO_UID;

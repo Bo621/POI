@@ -107,19 +107,19 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await pageA.getByRole("button", {name: "연결", exact: true}).click();
     await expect(pageA.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
     const awaiting = pageA.locator("section.status-result");
-    await expect(awaiting.getByRole("img", {name: "상태: 정산대기"})).toBeVisible({timeout: 20_000});
+    await expect(awaiting.getByRole("img", {name: "상태: 등록대기"})).toBeVisible({timeout: 20_000});
 
-    const settlement = section(pageA, "정산");
+    const settlement = section(pageA, "결과 등록");
     await settlement.getByLabel("관측값", {exact: true}).fill("92000000");
     await settlement.getByLabel("출처").fill("FULL-PATH E2E");
     await settlement.getByLabel("verifierVersion").fill("full-path-e2e");
-    await settlement.getByRole("button", {name: "정산 확인"}).click();
+    await settlement.getByRole("button", {name: "결과 등록하기"}).click();
     await expect(settlement.getByText("OBSERVED", {exact: true})).toBeVisible();
-    await settlement.getByRole("button", {name: "정산 발행"}).click();
-    await expectNoAlert(settlement, "정산 발행 alert");
+    await settlement.getByRole("button", {name: "등록 발행"}).click();
+    await expectNoAlert(settlement, "결과 등록 발행 alert");
     const settlementUID = await receiptUID(settlement);
 
-    await expect(awaiting.getByRole("img", {name: "상태: 정산완료"})).toBeVisible();
+    await expect(awaiting.getByRole("img", {name: "상태: 등록완료"})).toBeVisible();
 
     await pageA.close();
     const pageB = await connect(context, accounts.B);

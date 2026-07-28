@@ -46,7 +46,7 @@ export function SaltBackup({
         <div className="modal-backdrop" role="presentation">
             <section className="modal" role="dialog" aria-modal="true" aria-labelledby="backup-title">
                 <h2 id="backup-title">salt 백업</h2>
-                <p className="notice">salt를 잃어버리면 이 기록은 영구히 공개할 수 없습니다. 정산에는 영향이 없습니다.</p>
+                <p className="notice">salt를 잃어버리면 이 기록은 영구히 공개할 수 없습니다. 결과 등록에는 영향이 없습니다.</p>
                 <pre>{backup}</pre>
                 <div className="button-row">
                     <button className="btn" type="button" onClick={copy}>복사</button>

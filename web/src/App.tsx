@@ -83,9 +83,9 @@ function RecordRows({rows}: {rows: RecordRow[]}) {
             key={row.uid}
             uid={row.uid}
             state={row.state}
-            action={row.state === "AWAITING" ? "정산하기 →" : "보기 →"}
+            action={row.state === "AWAITING" ? "결과 등록하기 →" : "보기 →"}
             detail={`${new Date(Number(row.committedAt) * 1000).toLocaleString("ko-KR")} · ${row.grade}`}
-            warning={row.hasRevoked ? "정산 철회 이력 있음" : undefined}
+            warning={row.hasRevoked ? "결과 등록 철회 이력 있음" : undefined}
         />)}
     </ul>;
 }

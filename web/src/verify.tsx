@@ -22,7 +22,7 @@ export function Verify() {
         <section className="doc-section"><h2>② 오프체인 verifier</h2>
             <pre>$ poi-verify &lt;decisionUID&gt; --rpc &lt;url&gt; --json</pre>
             <p>종료코드 0 일치 · 1 불일치 · 2 조회 실패 · 3 검증 못 함</p>
-            <p className="doc-note">verifier는 업비트에서 값을 다시 가져와 온체인 정산과 대조합니다. 지표 정의는 docs/metrics/ 에 있고 그 문서 해시가 온체인 definitionHash입니다.</p>
+            <p className="doc-note">verifier는 업비트에서 값을 다시 가져와 온체인 결과 등록과 대조합니다. 지표 정의는 docs/metrics/ 에 있고 그 문서 해시가 온체인 definitionHash입니다.</p>
         </section>
     </main>;
 }

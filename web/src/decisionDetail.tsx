@@ -141,7 +141,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             <div className={`seal seal--${label.tone} seal--stamping`} role="img" aria-label={`상태: ${label.seal}`}>{label.seal}</div>
             <dl className="doc-fields"><dt>상태</dt><dd>{label.seal}</dd><dt>등급</dt><dd>{grade}</dd></dl>
         </section></ErrorBoundary>
-        {state.hasRevokedSettlement && <p className="revocation-note">정산 철회 이력 있음</p>}
+        {state.hasRevokedSettlement && <p className="revocation-note">결과 등록 철회 이력 있음</p>}
         <section className="doc-section"><h2>커밋</h2><dl className="doc-fields">
             <dt>발행자</dt><dd className="hex">{decision.attester} · 미검증 지갑</dd>
             <dt>커밋 시각</dt><dd className="timestamp">{time(decision.time)}</dd>
@@ -153,13 +153,15 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             <dt>관측 구간</dt><dd>{time(decision.windowStart)} ~ {time(decision.windowEnd)}</dd>
             <dt>유예</dt><dd>{decision.graceSeconds}초</dd>
         </dl></section>
-        <ErrorBoundary label="정산"><section className="doc-section"><h2>정산</h2>
+        <ErrorBoundary label="결과 등록"><section className="doc-section"><h2>결과 등록</h2>
+            <p className="doc-note">선언한 예상 결과가 실제로 어떻게 됐는지 온체인에 남깁니다.<br />
+                넣는 것은 관측값과 출처뿐이고, 맞았는지 여부는 컨트랙트가 계산합니다.</p>
             {owner && <SettlementForm decisionUID={uid} address={address} onSuccess={() => setRefreshKey(value => value + 1)} />}
-            {address && !owner && <p className="doc-note">결정 작성자만 정산할 수 있습니다.</p>}
-            {!address && <><button className="btn-commit" type="button" disabled>정산하기</button><p className="doc-note">지갑을 연결해야 정산할 수 있습니다.</p></>}
+            {address && !owner && <p className="doc-note">결정 작성자만 결과를 등록할 수 있습니다.</p>}
+            {!address && <><button className="btn-commit" type="button" disabled>결과 등록하기</button><p className="doc-note">지갑을 연결해야 결과를 등록할 수 있습니다.</p></>}
             {settlementError && <p className="form-status">확인 불가 <button className="btn" onClick={() => window.location.reload()}>다시 시도</button></p>}
-            {active ? <SettlementBlock record={active} address={address} onSuccess={() => setRefreshKey(value => value + 1)} /> : <p className="doc-note">활성 정산이 없습니다.</p>}
-            {previous.length > 0 && <details><summary>이전 정산 (철회됨)</summary>
+            {active ? <SettlementBlock record={active} address={address} onSuccess={() => setRefreshKey(value => value + 1)} /> : <p className="doc-note">활성 결과 등록이 없습니다.</p>}
+            {previous.length > 0 && <details><summary>이전 결과 등록 (철회됨)</summary>
                 {previous.map((record) => <SettlementBlock key={record.uid} record={record} address={address} previous onSuccess={() => setRefreshKey(value => value + 1)} />)}
             </details>}
             <p className="notice--quiet">결과는 관측값으로부터 컨트랙트가 판정합니다. 직접 고를 수 없습니다.</p>
@@ -174,7 +176,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
             <dt>체인</dt><dd>{CHAIN.name} · chainId {CHAIN.id}</dd>
             <dt>EAS</dt><dd className="hex">{EAS_ADDRESS}</dd><dt>SchemaRegistry</dt><dd className="hex">{SCHEMA_REGISTRY_ADDRESS}</dd>
             <dt>결정 스키마</dt><dd className="hex">{SCHEMAS.decision}</dd><dt>resolver</dt><dd className="hex">{RESOLVERS.decision}</dd>
-            <dt>정산 스키마</dt><dd className="hex">{SCHEMAS.settlement}</dd><dt>resolver</dt><dd className="hex">{RESOLVERS.settlement}</dd>
+            <dt>결과 등록 스키마</dt><dd className="hex">{SCHEMAS.settlement}</dd><dt>resolver</dt><dd className="hex">{RESOLVERS.settlement}</dd>
             <dt>지표</dt><dd className="hex">{decision.outcomeMetricId}</dd><dt>definitionHash</dt><dd className="hex">{metric?.definitionHash ?? "확인 불가"}</dd>
             {metricError && <><dt>지표 오류</dt><dd className="form-status" role="alert">! {metricError}</dd></>}
             <dt>문서</dt><dd>docs/metrics/{decision.outcomeMetricId}.md</dd>
