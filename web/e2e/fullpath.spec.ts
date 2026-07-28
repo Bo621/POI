@@ -101,6 +101,9 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await advanceChain(rpcUrl, Math.max(1, windowEnd - currentTime + 1));
     await pageA.reload();
     await pageA.getByRole("button", {name: "지갑 연결"}).click();
+    await expect(section(pageA, "지갑").getByText(
+        new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
+    )).toBeVisible();
     const awaiting = section(pageA, "상태");
     await awaiting.getByLabel("decisionUID", {exact: true}).fill(decisionUID);
     await awaiting.getByRole("button", {name: "상태 조회"}).click();
