@@ -321,6 +321,8 @@ mkdir -p "${ROOT_DIR}/docs/fixtures"
     printf '{\n'
     printf '  "generatedBy": "scripts/dev_up.sh",\n'
     printf '  "eas": {"version": "lib v1.4.0", "address": "%s", "schemaRegistryAddress": "%s"},\n' "${EAS}" "${SCHEMA_REGISTRY}"
+    printf '  "addresses": {"schemaRegistry": "%s", "eas": "%s", "note": "%s", "decision": "%s", "settlement": "%s", "challenge": "%s"},\n' \
+        "${SCHEMA_REGISTRY}" "${EAS}" "${NOTE_RESOLVER}" "${DECISION_RESOLVER}" "${SETTLEMENT_RESOLVER}" "${CHALLENGE_RESOLVER}"
     printf '  "t0": "%s",\n' "${T0}"
     printf '  "observationWindow": {"start": "%s", "end": "%s", "purpose": "최근 실제 Upbit 관측값 조회"},\n' "${OBSERVATION_START}" "${OBSERVATION_END}"
     printf '  "fixtureWindow": {"start": "%s", "end": "%s", "purpose": "로컬 UI 시드이며 verifier 대조용이 아님"},\n' "${WINDOW_START}" "${WINDOW_END}"
@@ -341,6 +343,7 @@ mkdir -p "${ROOT_DIR}/docs/fixtures"
 {
     printf 'VITE_RPC_URL=%s\n' "${LOCAL_RPC}"
     printf 'VITE_EAS_ADDRESS=%s\n' "${EAS}"
+    printf 'VITE_SCHEMA_REGISTRY_ADDRESS=%s\n' "${SCHEMA_REGISTRY}"
     printf 'VITE_NOTE_SCHEMA_UID=%s\n' "${NOTE_SCHEMA}"
     printf 'VITE_DECISION_SCHEMA_UID=%s\n' "${DECISION_SCHEMA}"
     printf 'VITE_SETTLEMENT_SCHEMA_UID=%s\n' "${SETTLEMENT_SCHEMA}"

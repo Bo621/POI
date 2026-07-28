@@ -813,3 +813,66 @@ bash scripts/dev_up.sh && cd web && npm run dev
 
 `seed.json`의 `f4.decisionUID`를 상태 조회에 넣으면 **인장 `기한초과`(인주색)** 가
 나와야 한다. 오류 문구가 나오면 고쳐진 것이 아니다.
+
+---
+
+## 리뷰 대응 R10 — F4가 OVERDUE에 도달하지 못한다
+
+R9 이후 상태 조회는 정상 동작한다. 인장이 렌더링되고 등급(`SELF_DECLARED · SEALED`)도 나온다.
+**그러나 F4가 `기한초과`가 아니라 `정산대기`로 나온다.**
+
+실측:
+
+```
+fixtureWindow.end = 1785211852,  graceSeconds = 3600
+→ OVERDUE 도달 시각 = 1785215452
+체인 시각          = 1785212053      (3,399초 모자람)
+```
+
+R2의 타임라인은 포크 전제(`T0 = 실제now - 10800`)였다. R8에서 포크를 버리면서
+`T0 = anvil 시작 시각 ≈ 실제 현재`가 됐고, **마지막 시간 전진이 그만큼 부족해졌다.**
+
+### 고치는 방법
+
+시드 마지막에 **명시적으로** `fixtureWindow.end + graceSeconds`를 넘긴다.
+
+```
+FINAL_TS = fixtureWindow.end + graceSeconds + 300      # 여유 5분
+evm_increaseTime( FINAL_TS - 현재체인시각 ) ; evm_mine
+```
+
+그리고 **F5가 그 뒤에도 PENDING이어야 하므로** F5의 window를 다시 잡는다.
+
+```
+F5.windowStart = FINAL_TS + 7200        # 최종 시각보다 2시간 뒤
+F5.windowEnd   = F5.windowStart + 86400
+```
+
+F5는 phase 1에 발행되므로 `windowStart`가 발행 시각보다 미래라는 I4도 자동으로 만족한다.
+
+### 시드가 끝난 뒤 상태를 스스로 검증하게 한다
+
+지금은 시드가 "완료"만 출력하고 **기대 상태를 확인하지 않는다.** 그래서 이 결함이
+사람이 브라우저를 열어야만 드러났다. 스크립트가 마지막에 직접 확인하고, 어긋나면
+**비영으로 끝낸다.**
+
+```
+F1  activeHead ≠ 0                                    → SETTLED
+F2  activeHead ≠ 0  ∧  revokeCount == 1               → SETTLED + 철회 이력
+F4  activeHead == 0 ∧ 체인시각 ≥ windowEnd + grace    → OVERDUE
+F5  activeHead == 0 ∧ 체인시각 <  windowStart         → PENDING
+```
+
+`cast call`로 읽어 셸에서 비교한다. 실패하면 어떤 fixture가 어떤 값이어서 틀렸는지 출력한다.
+
+**이 자체 검증이 이 항목의 핵심이다.** 시드가 조용히 잘못된 상태를 만들면
+그 위에 쌓는 시나리오·E2E가 전부 거짓이 된다.
+
+### 검증
+
+```bash
+bash scripts/dev_up.sh          # 자체 검증까지 통과해야 한다
+```
+
+그리고 브라우저에서 `f4.decisionUID` → 인장 **`기한초과`(인주색)**,
+`f5.decisionUID` → 인장 **`대기`**.
