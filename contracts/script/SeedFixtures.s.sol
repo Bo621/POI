@@ -40,6 +40,7 @@ contract SeedFixtures is Script {
         address decisionResolver = vm.envAddress("SEED_DECISION_RESOLVER");
         bytes32 decisionSchema = vm.envBytes32("SEED_DECISION_SCHEMA_UID");
         uint64 t0 = uint64(vm.envUint("SEED_T0"));
+        uint64 finalTs = uint64(vm.envUint("SEED_FINAL_TS"));
         int128 priceThreshold = int128(vm.envInt("SEED_PRICE_THRESHOLD"));
         int128 drawdownThreshold = int128(vm.envInt("SEED_DRAWDOWN_THRESHOLD"));
 
@@ -113,8 +114,8 @@ contract SeedFixtures is Script {
                 PRICE_METRIC,
                 1,
                 1,
-                t0 + 14400,
-                t0 + 100800
+                finalTs + 7200,
+                finalTs + 93600
             )
         );
         console2.log("SEED_F1_COMMITMENT");

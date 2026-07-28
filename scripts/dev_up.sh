@@ -236,6 +236,9 @@ OBSERVATION_END="$(( OBSERVATION_START + 600 ))"
 T0="$(cast block latest --rpc-url "${LOCAL_RPC}" --json | jq -r '.timestamp')"
 WINDOW_START="$(( T0 + 1800 ))"
 WINDOW_END="$(( T0 + 2400 ))"
+GRACE_SECONDS=3600
+FINAL_TS="$(( WINDOW_END + GRACE_SECONDS + 300 ))"
+F5_WINDOW_START="$(( FINAL_TS + 7200 ))"
 
 PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${OBSERVATION_START}" "${OBSERVATION_END}")"
 DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${OBSERVATION_START}" "${OBSERVATION_END}")"
@@ -272,6 +275,7 @@ TX_LOGS=("${PHASE1_LOG}" "${PHASE2_LOG}" "${PHASE3_LOG}")
 calculate_phase 1 "${PHASE1_LOG}" \
     SEED_ACTOR_A="${ACTOR_A}" SEED_DECISION_RESOLVER="${DECISION_RESOLVER}" \
     SEED_DECISION_SCHEMA_UID="${DECISION_SCHEMA}" SEED_T0="${T0}" \
+    SEED_FINAL_TS="${FINAL_TS}" \
     SEED_PRICE_THRESHOLD="${PRICE_THRESHOLD}" SEED_DRAWDOWN_THRESHOLD="${DRAWDOWN_THRESHOLD}"
 F1_COMMITMENT="$(sed -n '/SEED_F1_COMMITMENT/{n;s/^[[:space:]]*//;p;q;}' "${PHASE1_LOG}")"
 require_value F1_COMMITMENT "${F1_COMMITMENT}"
@@ -315,6 +319,47 @@ fi
 F2_S2="${ATTEST_UIDS[0]}"
 F1_CHALLENGE="${ATTEST_UIDS[1]}"
 F_COPY_UID="${ATTEST_UIDS[2]}"
+
+set_time "${FINAL_TS}"
+
+ZERO_UID="0x0000000000000000000000000000000000000000000000000000000000000000"
+VERIFY_FAILED=0
+CHAIN_TS="$(cast block latest --rpc-url "${LOCAL_RPC}" --json | jq -r '.timestamp')"
+
+verify_fixture() {
+    local name=$1
+    local uid=$2
+    local expected_head=$3
+    local expected_revoke_count=$4
+    local actual_head
+    local actual_revoke_count
+    actual_head="$(cast call --rpc-url "${LOCAL_RPC}" "${SETTLEMENT_RESOLVER}" \
+        'activeHead(bytes32)(bytes32)' "${uid}")"
+    actual_revoke_count="$(cast call --rpc-url "${LOCAL_RPC}" "${SETTLEMENT_RESOLVER}" \
+        'revokeCount(bytes32)(uint32)' "${uid}")"
+    if [[ "$(lower "${actual_head}")" != "$(lower "${expected_head}")" ||
+        "${actual_revoke_count}" != "${expected_revoke_count}" ]]; then
+        echo "${name} 상태 불일치: activeHead=${actual_head}, revokeCount=${actual_revoke_count}" >&2
+        VERIFY_FAILED=1
+    fi
+}
+
+verify_fixture F1 "${F1_UID}" "${F1_SETTLEMENT}" 0
+verify_fixture F2 "${F2_UID}" "${F2_S2}" 1
+verify_fixture F4 "${F4_UID}" "${ZERO_UID}" 0
+verify_fixture F5 "${F5_UID}" "${ZERO_UID}" 0
+
+if (( CHAIN_TS < WINDOW_END + GRACE_SECONDS )); then
+    echo "F4 상태 불일치: chainTime=${CHAIN_TS}, overdueAt=$(( WINDOW_END + GRACE_SECONDS ))" >&2
+    VERIFY_FAILED=1
+fi
+if (( CHAIN_TS >= F5_WINDOW_START )); then
+    echo "F5 상태 불일치: chainTime=${CHAIN_TS}, windowStart=${F5_WINDOW_START}" >&2
+    VERIFY_FAILED=1
+fi
+if (( VERIFY_FAILED != 0 )); then
+    exit 1
+fi
 
 mkdir -p "${ROOT_DIR}/docs/fixtures"
 {
