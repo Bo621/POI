@@ -185,3 +185,42 @@ bash scripts/dev_up.sh && cd web && npm run test:e2e     # 26/26, skipped 0
 ```
 bash scripts/dev_up.sh && cd web && npm run test:e2e     # 26/26, skipped 0
 ```
+
+---
+
+## 리뷰 대응 R2 — 같은 문제가 상세 화면 테스트에 남았다
+
+23/26. R1을 목록에만 적용하고 **상세 화면 테스트에는 적용하지 않았다.**
+
+```
+getByText('정산완료', {exact:true}) resolved to 2 elements:
+  1) <div role="img" aria-label="상태: 정산 완료" class="seal …">정산완료</div>
+  2) (텍스트 라벨)
+```
+
+### 1. `read.spec.ts`의 상세 상태 단언
+
+인장은 `getByRole("img", {name: …})`로, 텍스트 라벨은 그 절 안으로 좁혀 찾는다.
+**`web/e2e` 전체에서 `getByText("<상태문구>", {exact:true})`를 쓰는 자리를 전수 확인할 것.**
+R1에서 일부만 고쳐 같은 실패가 반복됐다.
+
+### 2. `[P2]` 인장의 `aria-label`과 표시 문구가 다르다
+
+```
+aria-label="상태: 정산 완료"   (띄어쓰기 있음)
+표시 텍스트  "정산완료"          (없음)
+```
+
+W-POLISH §5에서 상태 문구를 한 곳으로 통일했는데 **`aria-label`이 그 통일에서 빠졌다.**
+스크린리더 사용자와 화면이 다른 말을 듣는다.
+
+`stateLabel.ts`의 정본 문구를 `aria-label`에도 쓴다: `상태: 정산완료`.
+**모든 상태에 대해 확인할 것**(`기한 초과`→`기한초과`, `정산 대기`→`정산대기` 등).
+
+E2E의 `getByRole("img", {name: "상태: …"})` 단언도 함께 맞춘다.
+
+### 검증
+
+```
+bash scripts/dev_up.sh && cd web && npm run test:e2e     # 26/26, skipped 0
+```

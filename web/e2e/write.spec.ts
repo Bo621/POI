@@ -80,7 +80,9 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
 
     await page.goto("/#/me");
     await page.getByRole("button", {name: "연결", exact: true}).click();
-    await expect(section(page, "전체").getByText(uid!, {exact: true})).toBeVisible();
+    await expect(section(page, "전체").getByText(
+        new RegExp(`^${uid!.slice(0, 10)}…${uid!.slice(-6)}$`, "i"),
+    )).toBeVisible();
 });
 
 test("과거 windowStart는 한국어 오류로 발행을 막는다", async ({page}) => {
@@ -134,6 +136,7 @@ test("지갑 없이 기록하기에 진입해 작성과 salt 백업을 하고 �
     await dialog.getByLabel("저장했습니다").check();
     await expect(dialog.getByRole("button", {name: "발행", exact: true})).toBeDisabled();
     await expect(dialog.getByText("결정 기록을 발행하려면 지갑을 연결해 주세요.")).toBeVisible();
-    await expect(page.getByText("지갑을 연결하면 발행할 수 있습니다. 작성과 salt 백업은 지금도 가능합니다.")).toBeVisible();
+    await expect(page.getByRole("list", {name: "기록 단계"})
+        .getByText("③ 결정", {exact: true}).locator("..")).toHaveAttribute("aria-current", "step");
     await dialog.getByRole("button", {name: "취소"}).click();
 });

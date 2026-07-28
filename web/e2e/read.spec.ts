@@ -33,7 +33,9 @@ test("F2는 정산완료이며 철회 이력이 있다", async ({page}) => {
 
 test("F5는 대기다", async ({page}) => {
     await loadStatus(page, requireSeed().fixtures.f5.decisionUID, "대기");
-    await expect(page.getByText("대기", {exact: true})).toBeVisible();
+    const status = page.locator("section.status-result");
+    await expect(status.getByRole("img", {name: "상태: 대기"})).toBeVisible();
+    await expect(status.locator("dl").getByText("대기", {exact: true})).toBeVisible();
 });
 
 test("이의 목록은 한 항목이며 건수 표현과 완전성 보장이 없다", async ({page}) => {
@@ -83,6 +85,9 @@ test("DAG에 노드와 조회 완전성 안내가 나온다", async ({page}) => 
 test("Passport에 목록과 비순위 안내가 나온다", async ({page}) => {
     await page.goto(`/#/passport/${accounts.A}`);
     const passport = page.locator("main");
-    await expect(passport.getByText("UID", {exact: true}).first()).toBeVisible();
+    const uid = requireSeed().fixtures.f1.decisionUID;
+    await expect(passport.getByText(
+        new RegExp(`^${uid.slice(0, 10)}…${uid.slice(-6)}$`, "i"),
+    )).toBeVisible();
     await expect(passport.getByText(/순위나 성과 지표가 아닙니다/)).toBeVisible();
 });
