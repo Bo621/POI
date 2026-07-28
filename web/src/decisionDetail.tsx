@@ -128,7 +128,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         </header>
         {error && <p className="notice" role="alert">! {error}</p>}
         <ErrorBoundary label="상태"><section className="status-result">
-            <div className={`seal seal--${label.tone} seal--stamping`} role="img" aria-label={`상태: ${label.ariaLabel}`}>{label.seal}</div>
+            <div className={`seal seal--${label.tone} seal--stamping`} role="img" aria-label={`상태: ${label.seal}`}>{label.seal}</div>
             <dl className="doc-fields"><dt>상태</dt><dd>{label.seal}</dd><dt>등급</dt><dd>{grade}</dd></dl>
         </section></ErrorBoundary>
         {state.hasRevokedSettlement && <p className="revocation-note">정산 철회 이력 있음</p>}

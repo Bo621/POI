@@ -76,7 +76,7 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
     const uid = await decision.locator("dt", {hasText: "UID"}).locator("+ dd").textContent();
     expect(uid).toMatch(/^0x[0-9a-f]{64}$/i);
     await expect(page).toHaveURL(new RegExp(`#\\/d\\/${uid}$`, "i"));
-    await expect(page.getByRole("img", {name: /상태: (대기|관측 중)/})).toBeVisible();
+    await expect(page.getByRole("img", {name: /상태: (대기|관측중)/})).toBeVisible();
 
     await page.goto("/#/me");
     await page.getByRole("button", {name: "연결", exact: true}).click();

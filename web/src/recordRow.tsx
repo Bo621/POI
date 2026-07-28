@@ -17,7 +17,7 @@ export function RecordRowView({uid, state, action = "보기 →", detail, warnin
         <span
             className={`seal seal--sm seal--${label.tone}`}
             role="img"
-            aria-label={`상태: ${label.ariaLabel}`}
+            aria-label={`상태: ${label.seal}`}
         >{label.seal}</span>
         <span className="hex record-row__uid">{shortUID(uid)}</span>
         <span className="record-row__detail">

@@ -15,19 +15,19 @@ function section(page: Page, heading: string): Locator {
 }
 
 test("배포 안내가 없고 F1은 정산완료다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f1.decisionUID, "정산 완료");
+    await loadStatus(page, requireSeed().fixtures.f1.decisionUID, "정산완료");
     await expect(page.getByText("컨트랙트가 아직 배포되지 않았습니다.")).toHaveCount(0);
-    await expect(page.getByText("정산완료", {exact: true})).toBeVisible();
+    await expect(page.locator("section.status-result dl").getByText("정산완료", {exact: true})).toBeVisible();
 });
 
 test("F4는 기한초과다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f4.decisionUID, "기한 초과");
-    await expect(page.getByText("기한초과", {exact: true})).toBeVisible();
+    await loadStatus(page, requireSeed().fixtures.f4.decisionUID, "기한초과");
+    await expect(page.locator("section.status-result dl").getByText("기한초과", {exact: true})).toBeVisible();
 });
 
 test("F2는 정산완료이며 철회 이력이 있다", async ({page}) => {
-    await loadStatus(page, requireSeed().fixtures.f2.decisionUID, "정산 완료");
-    await expect(page.getByText("정산완료", {exact: true})).toBeVisible();
+    await loadStatus(page, requireSeed().fixtures.f2.decisionUID, "정산완료");
+    await expect(page.locator("section.status-result dl").getByText("정산완료", {exact: true})).toBeVisible();
     await expect(page.getByText("정산 철회 이력 있음")).toBeVisible();
 });
 

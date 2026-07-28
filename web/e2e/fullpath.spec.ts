@@ -110,7 +110,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
         new RegExp(`${accounts.A.slice(0, 6)}…${accounts.A.slice(-4)}`, "i"),
     )).toBeVisible();
     const awaiting = pageA.locator("header.doc-header").locator("+ .status-result");
-    await expect(awaiting.getByRole("img", {name: "상태: 정산 대기"})).toBeVisible({timeout: 20_000});
+    await expect(awaiting.getByRole("img", {name: "상태: 정산대기"})).toBeVisible({timeout: 20_000});
 
     const settlement = section(pageA, "정산");
     await settlement.getByLabel("관측값", {exact: true}).fill("92000000");
@@ -122,7 +122,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     await expectNoAlert(settlement, "정산 발행 alert");
     const settlementUID = await receiptUID(settlement);
 
-    await expect(awaiting.getByRole("img", {name: "상태: 정산 완료"})).toBeVisible();
+    await expect(awaiting.getByRole("img", {name: "상태: 정산완료"})).toBeVisible();
 
     await pageA.close();
     const pageB = await connect(context, accounts.B);
