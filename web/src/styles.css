@@ -1,7 +1,7 @@
 :root {
     color-scheme: light dark;
     --font-display: "Gowun Batang", serif;
-    --font-body: "IBM Plex Sans KR", sans-serif;
+    --font-body: "Pretendard Variable", Pretendard, system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", monospace;
     --text-xs: clamp(0.75rem, 0.73rem + 0.1vw, 0.8125rem);
     --text-sm: clamp(0.8125rem, 0.79rem + 0.12vw, 0.875rem);
@@ -178,6 +178,28 @@ p {
     inset-inline: 0;
     inset-block-start: 4px;
     border-top: 1px solid var(--rule);
+}
+
+/* N4 기와 — 절 머리에 처마 끝처럼 짧은 인주색 선 하나. 장식이 아니라 서명이다.
+   길이와 불투명도를 키우지 말 것. */
+.doc-section::after {
+    content: "";
+    position: absolute;
+    inset-block-start: -2px;
+    inset-inline-start: 0;
+    inline-size: 4.5rem;
+    block-size: 2px;
+    background: var(--seal);
+    opacity: 0.55;
+}
+
+/* N3 조항 표시. ::before는 접근성 트리에 들어가지 않으므로
+   스크린리더 문구와 E2E의 heading 조회가 그대로 유지된다 — 그래서 이 방식을 골랐다. */
+.doc-section > h2::before {
+    content: "// ";
+    color: var(--seal);
+    font-family: var(--font-mono);
+    font-weight: 500;
 }
 
 .doc-form {
