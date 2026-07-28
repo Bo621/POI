@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./src/verify.ts",
   "bin": {
-    "poi-verify": "./src/cli.ts"
+    "poi-verify": "./src/cli.ts",
+    "poi-reveal": "./src/reveal-cli.ts"
   },
   "scripts": {
     "test": "node --experimental-strip-types --test test/*.test.ts",
