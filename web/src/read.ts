@@ -162,6 +162,17 @@ export async function readChallengeLogs(challengeSchema: Hex): Promise<Challenge
     }));
 }
 
+export async function readDecisionLogs(decisionSchema: Hex, attester: Address) {
+    const logs = await withRetry(() => publicClient.getLogs({
+        address: EAS_ADDRESS,
+        event: ATTESTED_EVENT,
+        args: {attester, schema: decisionSchema},
+        fromBlock: 0n,
+        toBlock: "latest",
+    }));
+    return Promise.all(logs.map((log) => readDecision(log.args.uid!)));
+}
+
 export async function readVerified(address: Address): Promise<boolean | "unknown"> {
     try {
         return await withRetry(() => publicClient.readContract({

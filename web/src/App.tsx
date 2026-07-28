@@ -2,11 +2,13 @@ import {useState} from "react";
 import type {Address, Hex} from "viem";
 import {CHAIN, isDeployed} from "./config";
 import {Decision} from "./decision";
+import {Dag} from "./dag";
 import {Challenge} from "./challenge";
 import {Note} from "./note";
 import {Reveal} from "./reveal.tsx";
 import {Settlement} from "./settlement";
 import {Status} from "./status";
+import {Passport} from "./passport";
 import {Wallet, ZERO_UID, type VerificationSnapshot, type WalletState} from "./wallet";
 
 export default function App() {
@@ -40,6 +42,8 @@ export default function App() {
             <Challenge address={address} />
             <Status />
             <Reveal address={address} />
+            <Dag />
+            <Passport />
         </main>
     );
 }
