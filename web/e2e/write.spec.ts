@@ -1,5 +1,5 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
-import {accounts, chainNow, injectWallet, requireSeed, rpcUrl} from "./fixtures";
+import {accounts, chainNow, injectWallet, openDetails, requireSeed, rpcUrl} from "./fixtures";
 
 test.beforeAll(() => {
     requireSeed();
@@ -23,7 +23,7 @@ async function fillValidOutcome(page: Page): Promise<void> {
     const chainTimestamp = await chainNow();
     await decision.getByLabel("결정 내용").fill(`E2E 결정 ${chainTimestamp}`);
     await decision.getByLabel("trigger").fill("E2E trigger");
-    await decision.getByText("예상 결과 선언 (선택)", {exact: true}).click();
+    await openDetails(decision, "예상 결과 선언 (선택)");
     await decision.getByLabel("예상 결과 선언").check();
     await decision.getByLabel("metricId").fill(
         "0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf",
@@ -99,7 +99,7 @@ test("30분 graceSeconds는 한국어 오류로 발행을 막는다", async ({pa
 });
 
 test("B 계정의 F1 정산 시도는 한국어 소유자 오류를 표시한다", async ({page}) => {
-    await connect(page, accounts.B, "#/");
+    await connect(page, accounts.B, `#/d/${requireSeed().fixtures.f1.decisionUID}`);
     const settlement = section(page, "정산");
     await settlement.getByLabel("decisionUID", {exact: true}).fill(requireSeed().fixtures.f1.decisionUID);
     await settlement.getByRole("button", {name: "정산 확인"}).click();

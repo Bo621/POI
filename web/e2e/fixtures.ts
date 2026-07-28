@@ -1,6 +1,6 @@
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
-import type {Page} from "@playwright/test";
+import type {Locator, Page} from "@playwright/test";
 import type {Address, Hex} from "viem";
 
 interface Seed {
@@ -30,6 +30,14 @@ try {
 export const accounts = seed?.accounts as Seed["accounts"];
 
 export const rpcUrl = "http://127.0.0.1:8545";
+
+export async function openDetails(area: Locator, summaryText: string): Promise<void> {
+    const summary = area.locator("summary").filter({hasText: summaryText});
+    const details = summary.locator("..");
+    if (await details.getAttribute("open") === null) {
+        await summary.click();
+    }
+}
 
 export async function chainNow(): Promise<number> {
     const response = await fetch(rpcUrl, {

@@ -5,6 +5,7 @@ import {
     advanceChain,
     chainNow,
     injectWallet,
+    openDetails,
     requireSeed,
     rpcUrl,
 } from "./fixtures";
@@ -64,12 +65,14 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const noteUID = await receiptUID(journal);
     await advanceChain(rpcUrl, 1);
 
+    await pageA.goto("/#/record");
     const decisionText = `FULL-PATH 결정 ${timestamp}`;
     const decision = section(pageA, "결정 커밋");
     const decisionTime = await chainNow();
     const windowEnd = decisionTime + 240;
     await decision.getByLabel("결정 내용").fill(decisionText);
     await decision.getByLabel("trigger").fill("FULL-PATH trigger");
+    await openDetails(decision, "예상 결과 선언 (선택)");
     await decision.getByLabel("예상 결과 선언").check();
     await decision.getByLabel("metricId").fill(METRIC_ID);
     await decision.getByLabel("op").fill("0");
@@ -126,6 +129,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
 
     await pageA.close();
     const pageB = await connect(context, accounts.B);
+    await pageB.goto(`/#/d/${decisionUID}`);
     const challenge = section(pageB, "이의");
     await challenge.getByLabel("settlementUID", {exact: true}).fill(settlementUID);
     await challenge.getByLabel("출처").fill("FULL-PATH challenge");
@@ -138,6 +142,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
 
     await pageB.close();
     const revealPage = await connect(context, accounts.A);
+    await revealPage.goto(`/#/d/${decisionUID}`);
     const reveal = section(revealPage, "공개");
     await reveal.getByLabel("attestationUID").fill(decisionUID);
     await reveal.getByLabel("salt", {exact: true}).fill(decisionSalt);
