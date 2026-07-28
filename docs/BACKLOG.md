@@ -20,7 +20,7 @@
 | O2 | **P0** | 법률 검토 게이트 (B14) | — | `[ ]` 정산 상태·이의 공개 범위가 기획 A.6과 충돌하지 않음을 확인. **되돌릴 수 없는 온체인 공개 전** |
 | O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[ ]` 리졸버 4종 배포 → 스키마 4종 등록(settlement·challenge만 `revocable=true`) → `initialize` → 각 리졸버 `ready` |
 | O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[ ]` `windowStart=now, windowEnd=now+10m, graceSeconds=1h` 커밋. tx 해시와 `T_overdue` 기록 |
-| O5 | **P0** | `addMetric × 6` (등록 즉시 frozen) | O3, V3 | `[ ]` `definitionHash ≠ 0`. 문서 없는 지표는 등록 금지 |
+| O5 | **P0** | `addMetric × 2` (등록 즉시 frozen) | O3, V3 | `[ ]` V3 완료 — `definitionHash`는 `docs/metrics/manifest.json`에 있다. 배포(O3) 후 실행만 남음 |
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
 | O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
@@ -119,12 +119,15 @@ C8의 9종과 합쳐 `FOUNDRY_PROFILE=fork` 29/29). CT18은 온체인 항목이 
 |---|---|---|---|
 | V1 | **P0** | verifier v1.0 골격 — decisionUID 입력 → 판정 출력 | `[x]` `verifier/`. E2·E4·E5·E9 전부 `@poi/core` 재사용(두 벌을 만들지 않는다). `VERIFIER_VERSION = "poi-verifier/1.0.0"` 고정. `ChainReader` 인터페이스 분리로 테스트는 네트워크 없이 14/14 |
 | V2 | **P0** | 온체인 정산과 대조 | `[x]` `MISMATCH` → 종료코드 1 · 사용법·결정 없음 → 2 · 그 외 0. 온체인 자기정합 검사 + 독립 관측 대조. 지표 provider는 **인터페이스만** — 구현은 V3 뒤 |
-| V3 | **P0** | **metric 정의 문서 6종** (§11.3) | `[ ]` 계산식·소스·간격·UTC·결측치·half-up·데이터셋 스냅샷 해시. 문서 해시 = `definitionHash` |
+| V3 | **P0** | **metric 정의 문서** (§11.3) | `[x]` **2종** (사용자 결정 — 나머지 4종은 Phase 1). `BTC_PRICE_KRW_AT_END`(decimals 0) · `BTC_MAX_DRAWDOWN_IN_WINDOW`(decimals 1). 업비트 공개 1분봉·UTC·보간 없음·half-up·스냅샷 해시. 해시는 `cast keccak`로 생성해 `docs/metrics/manifest.json`에 고정, core 테스트가 문서 바이트로 재계산해 대조 |
 | V4 | P1 | reveal 검증 CLI | `[ ]` `(salt, payload)` → C 재계산. 타인 commitment 복사본은 실패(CT18) |
 
 ### V3 대상 지표 6종
 
-`BTC_30D_REALIZED_VOL_AT_END` · `BTC_60D_REALIZED_VOL_AT_END` · `BTC_MAX_DRAWDOWN_IN_WINDOW` · `ETH_MAX_DRAWDOWN_IN_WINDOW` · `BTC_PRICE_KRW_AT_END` · `ETH_BTC_RATIO_AT_END`
+MVP 등록: **`BTC_PRICE_KRW_AT_END` · `BTC_MAX_DRAWDOWN_IN_WINDOW`** (2종)
+
+Phase 1로 미룸: `BTC_30D_REALIZED_VOL_AT_END` · `BTC_60D_REALIZED_VOL_AT_END` · `ETH_MAX_DRAWDOWN_IN_WINDOW` · `ETH_BTC_RATIO_AT_END`.
+지표는 append-only라 나중에 추가할 수 있고, 등록하지 않은 지표는 컨트랙트가 거부한다.
 
 ---
 
