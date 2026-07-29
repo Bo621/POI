@@ -14,14 +14,14 @@
 | # | 문항 | 상태 | 제출물 |
 |---|---|---|---|
 | 3 | 팀 소개 (링크) | ⏳ | **[POI_team.pdf](POI_team.pdf) 생성 완료** (2쪽) — Drive 업로드 후 링크만 |
-| 4 | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · 460자 |
+| 4 | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · 432자 |
 | 5 | 트랙 선택 | ✅ | Track 03 |
-| 6 | 한 줄 요약 (50자) | ✅ | 36자 |
+| 6 | 한 줄 요약 (50자) | ✅ | 35자 |
 | 7 | 피치덱 | ⏳ | **[pitch/POI_pitch.pdf](pitch/POI_pitch.pdf) 생성 완료** (14쪽 16:9) — Drive 업로드만 |
 | 8 | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | 9 | 컨트랙트 링크 (Verified) | ✅ | 4종 전부 `Pass - Verified` |
 | 10 | 기술 문서 / 원페이저 | ✅ | `https://vestat.gitbook.io/poi` |
-| 11 | 추가 지원 요청 (500자) | ✅ | 421자 |
+| 11 | 추가 지원 요청 (500자) | ✅ | 487자 |
 | 12 | GIWA 팀에 전할 말 (500자) | ✅ | 461자 |
 
 ## 남은 셋 — 전부 사용자 계정이 필요하다
