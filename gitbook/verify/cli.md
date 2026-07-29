@@ -21,7 +21,10 @@ node --experimental-strip-types verifier/src/cli.ts \
 node --experimental-strip-types verifier/src/reveal-cli.ts \
   0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
-  --payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
+  > **`--payload` 는 JSON 이다.** 결정 본문이 문자열이면 큰따옴표까지 포함해야 한다.
+
+```bash
+--payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
   --rpc $POI_RPC_URL
 ```
 

@@ -72,6 +72,19 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [metric, setMetric] = useState<{decimals: number; definitionHash: Hex}>();
     const [metricError, setMetricError] = useState("");
     const [refreshKey, setRefreshKey] = useState(0);
+
+    /**
+     * 발행은 영수증까지 기다리는데도 바로 다시 읽으면 옛 값이 온다 —
+     * 공개 RPC 는 노드가 여러 대라 쓰기 직후 읽기가 아직 반영되지 않는다.
+     * 실제로 정산이 온체인에 올랐는데 화면은 「등록대기」로 남았다.
+     * 그래서 한 번이 아니라 몇 번 더 읽는다.
+     */
+    const refreshSoon = () => {
+        setRefreshKey((value) => value + 1);
+        for (const delay of [2500, 6000, 12000]) {
+            setTimeout(() => setRefreshKey((value) => value + 1), delay);
+        }
+    };
     const loadedUID = useRef<Hex>();
 
     useEffect(() => {
@@ -165,13 +178,13 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         <ErrorBoundary label="결과 등록"><section className="doc-section"><h2>결과 등록</h2>
             <p className="doc-note">선언한 예상 결과가 실제로 어떻게 됐는지 온체인에 남깁니다.<br />
                 넣는 것은 관측값과 출처뿐이고, 맞았는지 여부는 컨트랙트가 계산합니다.</p>
-            {owner && <SettlementForm decisionUID={uid} address={address} onSuccess={() => setRefreshKey(value => value + 1)} />}
+            {owner && <SettlementForm decisionUID={uid} address={address} onSuccess={refreshSoon} />}
             {address && !owner && <p className="doc-note">결정 작성자만 결과를 등록할 수 있습니다.</p>}
             {!address && <><button className="btn-commit" type="button" disabled>결과 등록하기</button><p className="doc-note">지갑을 연결해야 결과를 등록할 수 있습니다.</p></>}
             {settlementError && <p className="form-status">확인 불가 <button className="btn" onClick={() => window.location.reload()}>다시 시도</button></p>}
-            {active ? <SettlementBlock record={active} address={address} onSuccess={() => setRefreshKey(value => value + 1)} /> : <p className="doc-note">활성 결과 등록이 없습니다.</p>}
+            {active ? <SettlementBlock record={active} address={address} onSuccess={refreshSoon} /> : <p className="doc-note">활성 결과 등록이 없습니다.</p>}
             {previous.length > 0 && <details><summary>이전 결과 등록 (철회됨)</summary>
-                {previous.map((record) => <SettlementBlock key={record.uid} record={record} address={address} previous onSuccess={() => setRefreshKey(value => value + 1)} />)}
+                {previous.map((record) => <SettlementBlock key={record.uid} record={record} address={address} previous onSuccess={refreshSoon} />)}
             </details>}
             <p className="notice--quiet">결과는 관측값으로부터 컨트랙트가 판정합니다. 직접 고를 수 없습니다.</p>
         </section></ErrorBoundary>

@@ -132,17 +132,24 @@ export function Wallet({state, onChange}: {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [load]);
 
+    // '미검증' 만 쓰면 결함처럼 읽힌다. 실제로는 도장(Dojang) Verified Address 가
+    // 없다는 사실 서술이고, POI 사용에는 아무 제약이 없다.
     const badge = state.verified === true
-        ? "검증 지갑"
+        ? "도장 검증 지갑"
         : state.verified === false
-            ? "미검증 지갑 (사용 가능)"
-            : "확인 불가";
+            ? "일반 지갑"
+            : "도장 조회 실패";
+    const badgeTitle = state.verified === true
+        ? "도장(Dojang) Verified Address 를 가진 지갑입니다."
+        : state.verified === false
+            ? "도장 Verified Address 가 없는 지갑입니다. 기록·정산·이의 모두 그대로 쓸 수 있고, '커밋 시점에 검증 지갑이었다'는 명제 하나만 빠집니다."
+            : "도장 컨트랙트 조회에 실패했습니다. 검증 여부를 알 수 없습니다.";
 
     return (
         <div className="site-nav__wallet">
             {state.address
                 ? <span className={`wallet-badge wallet-badge--${state.verified === true ? "verified" : state.verified === false ? "unverified" : "unknown"}`}>
-                    <a className="hex" href={`#/passport/${state.address.toLowerCase()}`}>{shortAddress(state.address)}</a> {badge}
+                    <a className="hex" href={`#/passport/${state.address.toLowerCase()}`}>{shortAddress(state.address)}</a> <span title={badgeTitle}>{badge}</span>
                 </span>
                 : <span className="site-nav__wallet-empty">지갑 연결 안 됨</span>}
             {state.address

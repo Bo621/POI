@@ -1,5 +1,6 @@
 import {useEffect, useRef} from "react";
 import type {Route} from "./router";
+import {CHAIN} from "./config";
 import {ThemeToggle} from "./theme";
 import {Wallet, type WalletState} from "./wallet";
 
@@ -48,6 +49,7 @@ export function Nav({route, wallet, onWalletChange}: {
         </div>
         <ThemeToggle />
         <Wallet state={wallet} onChange={onWalletChange} />
-        <span className="site-nav__chain" aria-label="chainId 91342">· 91342</span>
+        {/* '91342' 만 두면 개발자만 아는 숫자다. 어느 체인을 보고 있는지 밝히는 표시다. */}
+        <span className="site-nav__chain" title={`chainId ${CHAIN.id}`}>{CHAIN.name} · {CHAIN.id}</span>
     </nav>;
 }

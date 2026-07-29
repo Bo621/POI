@@ -23,7 +23,15 @@ async function readPayload(path: string): Promise<unknown> {
             process.stdin.on("error", reject);
         })
         : await readFile(path, "utf8");
-    return JSON.parse(source);
+    try {
+        return JSON.parse(source) as unknown;
+    } catch {
+        // 원문을 그대로 넣는 실수가 흔하다. 문자열도 JSON 이어야 한다.
+        throw new Error(
+            "payload 는 JSON 이어야 합니다. 결정 본문이 문자열이면 큰따옴표로 감싸세요.\n"
+            + '  예: --payload <(printf \'%s\' \'"BTC 가격이 오른다"\')',
+        );
+    }
 }
 
 export async function main(argv = process.argv.slice(2)): Promise<number> {
