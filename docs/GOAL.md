@@ -173,7 +173,7 @@ ENS 조회 · 경로 존재형 지표 · 오라클 등급 · 서브그래프/백
 X4·X5   ─┬─► V1·V2 verifier
          └─► W1~W8 프론트          ← 12개, 가장 큰 리스크. P1 항목(W9~W12)은 잘라낼 수 있다
 C4 ─► C5 ─► C6 ─► 공격 테스트 17종 ─► C9 배포 스크립트
-V3 metric 문서 6종 ─► O5 addMetric   ← definitionHash=0을 컨트랙트가 거부하므로 문서가 배포를 막는다
+V3 metric 문서 6종 ─► O5 addMetric   ← definitionHash=0을 거부하므로 문서 없이는 등록 자체가 불가
 O1 파우셋 · O2 법률 게이트 ─► O3 배포 ─► O4 fixture ─► (70분) ─► O8 녹화
 ```
 

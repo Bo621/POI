@@ -156,6 +156,49 @@ contract POISettlementResolverTest is Test {
 
     // --- 통과 경로 ----------------------------------------------------------
 
+    // --- B2 재현 가능성 전제 -------------------------------------------------
+
+    /// @dev 출처가 없으면 제3자가 같은 관측을 재현할 수 없다.
+    function test_Attest_RevertsOnEmptySource() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.source = "";
+        vm.expectRevert(POISettlementResolver.SourceRequired.selector);
+        _attest(_attestation(keccak256("s.emptySource"), ALICE, st));
+    }
+
+    /// @dev 검증기 버전이 없으면 어떤 절차로 계산했는지 특정되지 않는다.
+    function test_Attest_RevertsOnEmptyVerifierVersion() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.verifierVersion = "";
+        vm.expectRevert(POISettlementResolver.VerifierVersionRequired.selector);
+        _attest(_attestation(keccak256("s.emptyVer"), ALICE, st));
+    }
+
+    function test_Attest_RevertsOnOverlongSource() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.source = "0123456789012345678901234567890123456789012345678901234567890123456789";
+        vm.expectRevert(POISettlementResolver.SourceTooLong.selector);
+        _attest(_attestation(keccak256("s.longSource"), ALICE, st));
+    }
+
+    function test_Attest_RevertsOnOverlongVerifierVersion() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.verifierVersion = "poi-verifier/1.0.0-aaaaaaaaaaaaaaaaaaaaaaaaa";
+        vm.expectRevert(POISettlementResolver.VerifierVersionTooLong.selector);
+        _attest(_attestation(keccak256("s.longVer"), ALICE, st));
+    }
+
+    /// @dev 관측 자체를 못 한 경우(INDETERMINATE)는 출처를 요구하지 않는다.
+    function test_Attest_AllowsEmptySourceWhenIndeterminate() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.hasObservedValue = false;
+        st.observedValue = 0;
+        st.result = 2;
+        st.source = "";
+        st.verifierVersion = "";
+        assertTrue(_attest(_attestation(keccak256("s.indet"), ALICE, st)));
+    }
+
     function test_Attest_AcceptsFirstSettlement() public {
         Attestation memory a = _attestation(_settlement());
         assertTrue(_attest(a));

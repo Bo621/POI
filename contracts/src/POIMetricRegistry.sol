@@ -28,6 +28,7 @@ abstract contract POIMetricRegistry is POIResolverBase {
     mapping(bytes32 metricId => MetricSpec) public metrics;
 
     error MetricFrozen();
+    error RegistryIsSealed();
     error ZeroMetricId();
     error MetricMustBeAllowed();
     error MetricDefinitionRequired();
@@ -39,7 +40,20 @@ abstract contract POIMetricRegistry is POIResolverBase {
     /// @dev `definitionHash == 0`을 거부하는 이유(§11.3): 그 문서가 없으면
     ///      "누구나 같은 절차로 재현"이 성립하지 않는다. 재현 불가능한 지표는
     ///      정산의 근거가 될 수 없으므로 등록 자체를 막는다.
+    /// @dev 봉인하면 지표를 영영 추가할 수 없다 — 되돌릴 수 없다.
+    ///      **Phase 1 에서는 호출하지 않는다.** 지표를 더 등록해야 한다.
+    ///      그동안의 방어는 소유권 multisig 이전이다.
+    bool public registrySealed;
+
+    event RegistrySealed();
+
+    function sealRegistry() external onlyOwner {
+        registrySealed = true;
+        emit RegistrySealed();
+    }
+
     function addMetric(bytes32 metricId, MetricSpec calldata spec) external onlyOwner {
+        if (registrySealed) revert RegistryIsSealed();
         if (metrics[metricId].frozen) revert MetricFrozen();
         if (metricId == 0) revert ZeroMetricId();
         if (!spec.allowed) revert MetricMustBeAllowed();

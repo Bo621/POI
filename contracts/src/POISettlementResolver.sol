@@ -32,6 +32,14 @@ contract POISettlementResolver is POIResolverBase {
     /// @notice 철회 횟수. 프론트의 「정산 철회 이력 있음」 표시(F8)가 이 값을 쓴다.
     mapping(bytes32 decisionUID => uint32 count) public revokeCount;
 
+    error SourceRequired();
+    error VerifierVersionRequired();
+    error SourceTooLong();
+    error VerifierVersionTooLong();
+
+    uint256 private constant MAX_SOURCE = 64;
+    uint256 private constant MAX_VERIFIER_VERSION = 32;
+
     error MustBeRevocable();
     error MalformedPayload();
     error RefUIDMismatch();
@@ -104,6 +112,15 @@ contract POISettlementResolver is POIResolverBase {
     ///      구간 안 아무 시점이나 될 수 있으면 발행자가 유리한 순간을 골라 관측할 수 있다.
     function _checkResult(POICodec.SettlementData memory s, POICodec.DecisionData memory d) private pure {
         if (s.observedAt != d.windowEnd) revert ObservedAtMustBeWindowEnd(); // I8
+
+        if (s.hasObservedValue) {
+            // 출처와 검증기 버전이 없으면 제3자가 같은 절차를 밟을 수 없다 —
+            // 재현 가능성이 이 시스템의 전제다.
+            if (bytes(s.source).length == 0) revert SourceRequired();
+            if (bytes(s.verifierVersion).length == 0) revert VerifierVersionRequired();
+            if (bytes(s.source).length > MAX_SOURCE) revert SourceTooLong();
+            if (bytes(s.verifierVersion).length > MAX_VERIFIER_VERSION) revert VerifierVersionTooLong();
+        }
 
         if (!s.hasObservedValue) {
             if (s.result != RESULT_INDETERMINATE) revert MustBeIndeterminate(); // I16
