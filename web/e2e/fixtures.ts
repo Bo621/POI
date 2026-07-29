@@ -138,3 +138,13 @@ export function requireSeed(): Seed {
     if (!seed) throw new Error(seedUnavailable);
     return seed;
 }
+
+/**
+ * 이미 승인된 지갑이면 앱이 `eth_accounts` 로 자동 복원하므로 '연결' 버튼이 없다.
+ * 버튼이 있을 때만 누른다 — 없다고 실패하면 안 된다.
+ * (전에는 도장 조회를 기다리느라 버튼이 잠깐 보였고, 테스트가 그 창에 의존했다.)
+ */
+export async function ensureConnected(page: import("@playwright/test").Page): Promise<void> {
+    const button = page.getByRole("button", {name: "연결", exact: true});
+    if (await button.count()) await button.click();
+}

@@ -1,5 +1,5 @@
 import {expect, test, type Page} from "@playwright/test";
-import {accounts, injectWallet, requireSeed, rpcUrl, shortAddressRe} from "./fixtures";
+import {accounts, ensureConnected, injectWallet, requireSeed, rpcUrl, shortAddressRe} from "./fixtures";
 
 test.beforeAll(() => {
     requireSeed();
@@ -38,7 +38,7 @@ test("지갑 미연결 상태에서 제목이 nav 에 가리지 않는다", asyn
 test("지갑 연결 상태에서 제목이 nav 에 가리지 않는다", async ({page}) => {
     await injectWallet(page, accounts.A, rpcUrl);
     await page.goto("/#/record");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
 
     for (const path of PATHS) await expectHeadingNotCovered(page, path);
@@ -51,7 +51,7 @@ test("좁은 화면에서 nav 가 줄바꿈돼도 제목을 가리지 않는다"
     await page.setViewportSize({width: 380, height: 760});
     await injectWallet(page, accounts.A, rpcUrl);
     await page.goto("/#/record");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
 
     const navBox = await page.locator(".site-nav").boundingBox();
@@ -63,7 +63,7 @@ test("발행 경고는 nav 가 아니라 기록하기에 있다", async ({page})
     const warning = /검증 지갑 스냅샷 UID를 찾지 못했습니다/;
     await injectWallet(page, accounts.A, rpcUrl);
     await page.goto("/#/record");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
 
     // 발행 시점 경고다 — 탐색 영역에 있으면 조회만 하는 화면에서도 계속 보인다.
@@ -79,7 +79,7 @@ test("새로고침해도 연결이 유지된다", async ({page}) => {
     // 이걸 쓰지 않아서 새로고침할 때마다 '지갑 연결 안 됨' 으로 돌아갔다.
     await injectWallet(page, accounts.A, rpcUrl);
     await page.goto("/#/me");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
 
     await page.reload();
@@ -90,10 +90,32 @@ test("새로고침해도 연결이 유지된다", async ({page}) => {
 test("연결을 해제하면 상태가 지워진다", async ({page}) => {
     await injectWallet(page, accounts.A, rpcUrl);
     await page.goto("/#/me");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
 
     await page.getByRole("button", {name: "연결 해제", exact: true}).click();
     await expect(page.getByRole("navigation").getByText("지갑 연결 안 됨")).toBeVisible();
     await expect(page.locator("main").getByText("지갑을 연결하면 내 기록을 불러옵니다.")).toBeVisible();
+});
+
+test("새로고침 직후 '연결' 버튼이 다시 나타나지 않는다", async ({page}) => {
+    // 복원은 되지만 도장 조회를 기다리느라 몇 초간 '연결 안 됨' 으로 보였고,
+    // 그 사이 사용자가 '연결' 을 눌러 불필요한 지갑 프롬프트가 떴다.
+    // 주소는 eth_accounts 로 즉시 알 수 있으므로 검증 조회를 기다릴 이유가 없다.
+    await injectWallet(page, accounts.A, rpcUrl);
+    await page.goto("/#/me");
+    await ensureConnected(page);
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
+
+    // 공개 RPC 는 느리다. 로컬 anvil 로는 이 결함이 재현되지 않으므로 지연을 넣는다.
+    // 도장 조회(isVerified·getLogs)를 기다리면 그동안 '연결' 버튼이 보인다.
+    await page.route(rpcUrl, async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        await route.continue();
+    });
+
+    await page.reload();
+    // 짧은 창이라도 '연결' 이 보이면 사용자는 누른다 — 실제로 그렇게 겪었다.
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible({timeout: 3000});
+    await expect(page.getByRole("button", {name: "연결", exact: true})).toHaveCount(0);
 });

@@ -1,6 +1,7 @@
 import {expect, test, type BrowserContext, type Locator, type Page} from "@playwright/test";
 import {readFile} from "node:fs/promises";
 import {
+    ensureConnected,
     accounts,
     advanceChain,
     chainNow,
@@ -25,7 +26,7 @@ async function connect(context: BrowserContext, account: typeof accounts.A): Pro
     const page = await context.newPage();
     await injectWallet(page, account, rpcUrl);
     await page.goto("/");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(account))).toBeVisible();
     return page;
 }
@@ -104,7 +105,7 @@ test("저널부터 reveal 다운로드까지 전체 성공 경로를 완주한�
     const currentTime = await chainNow();
     await advanceChain(rpcUrl, Math.max(1, windowEnd - currentTime + 1));
     await pageA.reload();
-    await pageA.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(pageA);
     await expect(pageA.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
     const awaiting = pageA.locator("section.status-result");
     await expect(awaiting.getByRole("img", {name: "상태: 등록대기"})).toBeVisible({timeout: 20_000});

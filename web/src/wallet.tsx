@@ -61,17 +61,22 @@ export function Wallet({state, onChange}: {
 
     /** 주소가 정해진 뒤의 검증 스냅샷 조회. 연결·복원·계정 변경이 모두 이 경로를 탄다. */
     const load = useCallback(async (address: Address) => {
+        // **주소를 먼저 반영한다.** 도장 조회(isVerified + getLogs 9만 블록)를 기다리면
+        // 새로고침 직후 몇 초 동안 화면이 '연결 안 됨' 으로 보이고, 그 사이 사용자가
+        // '연결' 을 눌러 불필요한 지갑 프롬프트가 뜬다. 실제로 그렇게 겪었다.
+        onChange({address, verified: "unknown", verifiedAddressUID: ZERO_UID});
+
         let verified: boolean | "unknown";
-            try {
-                verified = await withRetry(() => publicClient.readContract({
-                    address: DOJANG_ADDRESS,
-                    abi: DOJANG_ABI,
-                    functionName: "isVerified",
-                    args: [address, UPBIT_KOREA_ID],
-                }));
-            } catch {
-                verified = "unknown";
-            }
+        try {
+            verified = await withRetry(() => publicClient.readContract({
+                address: DOJANG_ADDRESS,
+                abi: DOJANG_ABI,
+                functionName: "isVerified",
+                args: [address, UPBIT_KOREA_ID],
+            }));
+        } catch {
+            verified = "unknown";
+        }
 
         let verifiedAddressUID = ZERO_UID;
         try {
