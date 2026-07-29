@@ -178,7 +178,10 @@ initialize_resolvers() {
     send_and_wait "${KEY_A}" \
         "${NOTE_RESOLVER}" 'initialize(bytes32)' "${NOTE_SCHEMA}" >/dev/null
     send_and_wait "${KEY_A}" \
-        "${DECISION_RESOLVER}" 'initialize(bytes32,bytes32)' "${DECISION_SCHEMA}" "${NOTE_SCHEMA}" >/dev/null
+        "${DECISION_RESOLVER}" 'initialize(bytes32,bytes32,bytes32,address)' \
+        "${DECISION_SCHEMA}" "${NOTE_SCHEMA}" \
+        0x0000000000000000000000000000000000000000000000000000000000000000 \
+        0x0000000000000000000000000000000000000000 >/dev/null
     send_and_wait "${KEY_A}" \
         "${SETTLEMENT_RESOLVER}" 'initialize(bytes32,bytes32)' "${SETTLEMENT_SCHEMA}" "${DECISION_SCHEMA}" >/dev/null
     send_and_wait "${KEY_A}" \

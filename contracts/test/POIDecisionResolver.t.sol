@@ -426,6 +426,12 @@ contract POIDecisionResolverTest is Test {
         bare.attest(_attestation(d));
     }
 
+    function test_SetVerifiedAddressSource_RevertsForNonOwner() public {
+        vm.prank(ALICE);
+        vm.expectRevert();
+        r.setVerifiedAddressSource(keccak256("attackerSchema"), ALICE);
+    }
+
     function _storeVerifiedWith(bytes32 uid, bytes32 schema, address issuer) internal returns (bytes32) {
         Attestation memory v = Attestation({
             uid: uid,

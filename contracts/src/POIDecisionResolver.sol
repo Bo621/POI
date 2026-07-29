@@ -33,6 +33,11 @@ contract POIDecisionResolver is POIMetricRegistry {
     /// @dev Dojang Verified Address 스키마와 허용 발급자.
     ///      이걸 검사하지 않으면 **자기가 자기에게 발급한 아무 attestation** 을
     ///      Verified Address 로 위장할 수 있다 — "커밋 시점에 검증 지갑이었다"가 거짓이 된다.
+    /// @dev 신뢰 루트 변경은 조용히 일어나면 안 된다 — 감사가 불가능해진다.
+    event VerifiedAddressSourceChanged(
+        bytes32 previousSchema, address previousIssuer, bytes32 newSchema, address newIssuer
+    );
+
     bytes32 public verifiedSchemaUID;
     address public verifiedIssuer;
 
@@ -87,6 +92,7 @@ contract POIDecisionResolver is POIMetricRegistry {
     /// @dev Dojang 스키마 UID 는 외부 확인이 늦어질 수 있어 초기화 후에도 설정할 수 있게 둔다.
     ///      owner 만 가능하고, 설정 전에는 검증 스냅샷을 아예 받지 않는다.
     function setVerifiedAddressSource(bytes32 verifiedSchema, address issuer) external onlyOwner {
+        emit VerifiedAddressSourceChanged(verifiedSchemaUID, verifiedIssuer, verifiedSchema, issuer);
         verifiedSchemaUID = verifiedSchema;
         verifiedIssuer = issuer;
     }

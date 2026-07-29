@@ -188,15 +188,51 @@ contract POISettlementResolverTest is Test {
         _attest(_attestation(keccak256("s.longVer"), ALICE, st));
     }
 
-    /// @dev 관측 자체를 못 한 경우(INDETERMINATE)는 출처를 요구하지 않는다.
-    function test_Attest_AllowsEmptySourceWhenIndeterminate() public {
+    /// @dev **INDETERMINATE 도 provenance 를 남겨야 한다** — "어디를 조회했는데 값이 없었다"가
+    ///      기록되지 않으면 관측 실패 자체를 검증할 수 없다.
+    function test_Attest_RevertsOnEmptySourceWhenIndeterminate() public {
+        POICodec.SettlementData memory st = _indeterminate();
+        st.source = "";
+        vm.expectRevert(POISettlementResolver.SourceRequired.selector);
+        _attest(_attestation(keccak256("s.indetNoSource"), ALICE, st));
+    }
+
+    function test_Attest_AcceptsIndeterminateWithProvenance() public {
+        assertTrue(_attest(_attestation(keccak256("s.indet"), ALICE, _indeterminate())));
+    }
+
+    /// @dev 경계 — 64/32 는 통과, 65/33 은 거부.
+    function test_Attest_AcceptsSourceAtExactLimit() public {
         POICodec.SettlementData memory st = _settlement();
+        st.source = "0123456789012345678901234567890123456789012345678901234567890123"; // 64
+        assertTrue(_attest(_attestation(keccak256("s.src64"), ALICE, st)));
+    }
+
+    function test_Attest_RevertsOnSourceOneOverLimit() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.source = "01234567890123456789012345678901234567890123456789012345678901234"; // 65
+        vm.expectRevert(POISettlementResolver.SourceTooLong.selector);
+        _attest(_attestation(keccak256("s.src65"), ALICE, st));
+    }
+
+    function test_Attest_AcceptsVerifierVersionAtExactLimit() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.verifierVersion = "01234567890123456789012345678901"; // 32
+        assertTrue(_attest(_attestation(keccak256("s.ver32"), ALICE, st)));
+    }
+
+    function test_Attest_RevertsOnVerifierVersionOneOverLimit() public {
+        POICodec.SettlementData memory st = _settlement();
+        st.verifierVersion = "012345678901234567890123456789012"; // 33
+        vm.expectRevert(POISettlementResolver.VerifierVersionTooLong.selector);
+        _attest(_attestation(keccak256("s.ver33"), ALICE, st));
+    }
+
+    function _indeterminate() internal view returns (POICodec.SettlementData memory st) {
+        st = _settlement();
         st.hasObservedValue = false;
         st.observedValue = 0;
         st.result = 2;
-        st.source = "";
-        st.verifierVersion = "";
-        assertTrue(_attest(_attestation(keccak256("s.indet"), ALICE, st)));
     }
 
     function test_Attest_AcceptsFirstSettlement() public {

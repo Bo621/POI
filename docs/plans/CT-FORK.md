@@ -28,7 +28,7 @@
      poi.challenge.v1   (아래 전체 문자열)                                  revocable = true
 6. initialize
      note.initialize(noteUID)
-     decision.initialize(decisionUID, noteUID)
+     decision.initialize(decisionUID, noteUID, verifiedSchemaUID, verifiedIssuer)
      settlement.initialize(settlementUID, decisionUID)
      challenge.initialize(challengeUID, settlementUID)
 7. decision.addMetric(METRIC, MetricSpec({allowed: true, decimals: 1, kind: 0,

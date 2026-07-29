@@ -113,14 +113,13 @@ contract POISettlementResolver is POIResolverBase {
     function _checkResult(POICodec.SettlementData memory s, POICodec.DecisionData memory d) private pure {
         if (s.observedAt != d.windowEnd) revert ObservedAtMustBeWindowEnd(); // I8
 
-        if (s.hasObservedValue) {
-            // 출처와 검증기 버전이 없으면 제3자가 같은 절차를 밟을 수 없다 —
-            // 재현 가능성이 이 시스템의 전제다.
-            if (bytes(s.source).length == 0) revert SourceRequired();
-            if (bytes(s.verifierVersion).length == 0) revert VerifierVersionRequired();
-            if (bytes(s.source).length > MAX_SOURCE) revert SourceTooLong();
-            if (bytes(s.verifierVersion).length > MAX_VERIFIER_VERSION) revert VerifierVersionTooLong();
-        }
+        // 출처와 검증기 버전이 없으면 제3자가 같은 절차를 밟을 수 없다 —
+        // 재현 가능성이 이 시스템의 전제다. **관측 실패(INDETERMINATE)도 마찬가지다** —
+        // "어디를 어떤 절차로 조회했는데 값이 없었다"가 남아야 검증이 가능하다.
+        if (bytes(s.source).length == 0) revert SourceRequired();
+        if (bytes(s.verifierVersion).length == 0) revert VerifierVersionRequired();
+        if (bytes(s.source).length > MAX_SOURCE) revert SourceTooLong();
+        if (bytes(s.verifierVersion).length > MAX_VERIFIER_VERSION) revert VerifierVersionTooLong();
 
         if (!s.hasObservedValue) {
             if (s.result != RESULT_INDETERMINATE) revert MustBeIndeterminate(); // I16

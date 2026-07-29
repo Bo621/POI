@@ -790,3 +790,11 @@ pre {
 .wallet-choice img {
     border-radius: 2px;
 }
+
+/* 입력 제약을 라벨 옆에 조용히 붙인다 — 실패하고 나서 알게 되면 늦다. */
+.field label .hint {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    margin-inline-start: 0.5ch;
+}
