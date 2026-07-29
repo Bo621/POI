@@ -25,7 +25,7 @@
 | O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[x]` `0x68df5b76…b654` · **T_overdue = 1785256156 (2026-07-29 01:29:16 KST)** |
 | O5 | **P0** | `addMetric × 2` (등록 즉시 frozen) | O3, V3 | `[x]` 2종 등록·frozen 확인 (tx `0x1aa6aab0…` · `0x794c8136…`) |
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
-| O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
+| O7 | P1 | 데모용 fixture 세트 | O4 | `[x]` 등록완료+이의 · 철회→정정 · 기한초과 3종. 이의자는 별도 지갑 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
 | O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[x]` 4종 모두 `Pass - Verified` (sepolia-explorer.giwa.io) |
 

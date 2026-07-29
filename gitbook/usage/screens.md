@@ -24,6 +24,9 @@ stateDiagram-v2
     AWAITING --> SETTLED: 유예 안에 결과 등록
     AWAITING --> OVERDUE: 유예 경과
     OVERDUE --> SETTLED_LATE: 기한 후 등록
+    SETTLED --> AWAITING: 정산 철회 (activeHead=0)
+    SETTLED_LATE --> OVERDUE: 정산 철회 (activeHead=0)
+    AWAITING --> SETTLED: 정정 재발행 (supersedes)
 
     note right of OVERDUE
         미발행이 드러나는 자리.

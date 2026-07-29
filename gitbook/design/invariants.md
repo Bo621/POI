@@ -38,7 +38,7 @@ flowchart LR
     U["사용자"] -->|"attest()"| E["EAS<br/>(GIWA 프리디플로이)"]
     E -->|"onAttest 훅"| R["POI 리졸버<br/>불변식 검사"]
     R -->|"false / revert"| X["트랜잭션 실패"]
-    R -->|"true"| S["온체인 기록"]
+    R -->|"true 반환"| E2["EAS 가 attestation 을 저장"]
 ```
 
 새 레지스트리를 만들지 않습니다. 조회·철회·참조는 EAS 표준을 그대로 씁니다.

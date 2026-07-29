@@ -13,10 +13,12 @@
 * [신뢰 경계](problem/trust-boundary.md)
 
 ## 설계
+* [시스템 아키텍처](design/architecture.md)
 * [컨트랙트 불변식](design/invariants.md)
 * [commitment 설계와 복사 공격](design/commitment.md)
 * [지표 정의의 온체인 고정](design/metrics.md)
 * [비정규 payload 차단](design/encoding.md)
+* [보안 모델](design/security.md)
 
 ## GIWA
 * [비용](giwa/cost.md)
@@ -34,6 +36,7 @@
 * [종료코드의 의미](verify/exit-codes.md)
 
 ## 한계
+* [배포 상태표](limits/status.md)
 * [하지 못한 것](limits/not-yet.md)
 * [로드맵](limits/roadmap.md)
 
