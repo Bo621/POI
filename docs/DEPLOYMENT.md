@@ -56,6 +56,31 @@
 
 네 리졸버 모두 `schemaUID()`가 위 값과 일치함을 온체인에서 확인했다(초기화 완료).
 
+## 익스플로러 검증 (O9)
+
+네 컨트랙트 모두 `sepolia-explorer.giwa.io` 에서 **독립 검증**됐다 (2026-07-29).
+
+> `forge verify-contract` 는 바이트코드가 같은 구 컨트랙트를 「verified twin」 으로
+> 찾아 "이미 검증됨"이라며 건너뛴다. **그 상태는 `is_verified: false` 다** —
+> 남의 소스를 빌려 보여줄 뿐이다. `--force` 로도 안 되고,
+> etherscan 호환 엔드포인트(`?module=contract&action=verifysourcecode`)에
+> standard-json 을 직접 POST 해야 twin 참조가 사라진다.
+
+```bash
+forge verify-contract <addr> <path:Name> --chain-id 91342 --verifier blockscout \
+  --verifier-url https://sepolia-explorer.giwa.io/api --show-standard-json-input > input.json
+curl -X POST "https://sepolia-explorer.giwa.io/api?module=contract&action=verifysourcecode" \
+  --data-urlencode "codeformat=solidity-standard-json-input" \
+  --data-urlencode "contractaddress=<addr>" \
+  --data-urlencode "contractname=<path:Name>" \
+  --data-urlencode "compilerversion=v0.8.30+commit.73712a01" \
+  --data-urlencode "constructorArguements=0000000000000000000000004200000000000000000000000000000000000021" \
+  --data-urlencode "sourceCode@input.json"
+```
+
+확인: `GET /api/v2/smart-contracts/<addr>` 의 `is_verified` 가 `true` 이고
+`verified_twin_address_hash` 가 `null` 이어야 한다.
+
 ## 지표 (O5)
 
 `POIDecisionResolver`에 등록. **등록 즉시 `frozen = true`** — 정의는 변경 불가.
