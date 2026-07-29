@@ -108,9 +108,6 @@ export function Wallet({state, onChange}: {
             {!state.address && <button className="btn" type="button" onClick={connect} disabled={connecting}>
                 {connecting ? "연결 중…" : "연결"}
             </button>}
-            {state.address && state.verifiedAddressUID === ZERO_UID && (
-                <p className="notice notice--quiet">검증 지갑 스냅샷 UID를 찾지 못했습니다 (0으로 기록됩니다)</p>
-            )}
             {error && <p className="form-status" role="alert">{error}</p>}
         </div>
     );

@@ -249,8 +249,10 @@ summary {
     color: var(--seal);
 }
 
+/* 부가 문구까지 인주색이 되면 사실 서술(예: '검증 안 됨')이 경고로 읽힌다.
+   강조는 단계 제목에만 준다. */
 .record-progress li[aria-current="step"] span {
-    color: var(--seal);
+    color: var(--ink-soft);
 }
 
 details.field-group > summary {
