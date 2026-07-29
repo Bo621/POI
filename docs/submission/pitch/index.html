@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>POI — Proof of Insight · GASOK</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --seal:oklch(.637 .249 30.9);        /* #FF2200 — GIWA 원색과 같은 값 */
+  --seal-dim:oklch(.637 .249 30.9/.14);
+  --gold:oklch(.806 .136 85);
+  --ink:oklch(.966 .006 100);          /* #F5F5F0 */
+  --ink-soft:oklch(.800 .006 100);
+  --ink-faint:oklch(.660 .006 100);    /* #9A9A94 */
+  --paper:oklch(.145 .006 100);
+  --paper-up:oklch(.190 .006 100);
+  --rule:oklch(.300 .006 100);
+  --mono:"IBM Plex Mono",monospace;
+  --body:"Pretendard Variable",Pretendard,system-ui,sans-serif;
+  --display:"Gowun Batang",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font:400 clamp(15px,1.05vw,18px)/1.65 var(--body);
+  font-variant-numeric:tabular-nums;
+  overflow:hidden;
+}
+
+/* ── 슬라이드 ───────────────────────────────── */
+.deck{height:100dvh;position:relative}
+.slide{
+  position:absolute;inset:0;
+  display:none;
+  padding:clamp(2.5rem,5vw,5.5rem) clamp(2rem,7vw,9rem) 5.5rem;
+  overflow-y:auto;
+  animation:rise .5s cubic-bezier(.16,1,.3,1);
+}
+.slide[data-on]{display:flex;flex-direction:column;justify-content:center}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:none}}
+
+/* 절 라벨 — GASOK 의 // 모티프 */
+.tag{
+  font:500 clamp(.7rem,.82vw,.8rem)/1 var(--mono);
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--seal);margin-bottom:clamp(1rem,2.2vw,2rem);
+  display:flex;align-items:baseline;gap:.9em;
+}
+.tag b{color:var(--ink-faint);font-weight:500}
+
+h1{font:700 clamp(2.1rem,4.6vw,4rem)/1.12 var(--display);letter-spacing:-.02em}
+h2{font:700 clamp(1.55rem,3.1vw,2.7rem)/1.2 var(--display);letter-spacing:-.015em;max-width:22ch}
+.lede{margin-top:clamp(1.1rem,2.2vw,1.8rem);max-width:52ch;color:var(--ink-soft);font-size:1.05em}
+.lede strong{color:var(--ink);font-weight:600}
+em{color:var(--seal);font-style:normal;font-weight:600}
+.quiet{color:var(--ink-faint);font-size:.85em;line-height:1.6}
+.mono{font-family:var(--mono);font-size:.9em}
+
+/* 처마 끝 — POI 인장의 서명 */
+.eave{position:relative;padding-top:1.15rem}
+.eave::before{content:"";position:absolute;top:0;left:0;width:4.5rem;height:2px;background:var(--seal);opacity:.75}
+
+/* ── 표 ─────────────────────────────────────── */
+table{border-collapse:collapse;width:100%;max-width:min(100%,72rem);margin-top:clamp(1.2rem,2.4vw,2rem);font-size:.94em}
+th,td{text-align:left;padding:.72em .9em;border-bottom:1px solid var(--rule);vertical-align:top}
+th{color:var(--ink-faint);font:500 .8em/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+.yes{color:var(--gold)}
+.no{color:var(--ink-faint)}
+.hot{color:var(--seal);font-weight:600}
+
+/* ── 도표 ───────────────────────────────────── */
+figure{margin-top:clamp(1.3rem,2.6vw,2.2rem)}
+figcaption{margin-top:.9rem;color:var(--ink-faint);font-size:.82em;max-width:56ch}
+svg{width:100%;height:auto;max-width:min(100%,78rem);display:block}
+.s-lab{font:500 12px var(--mono);fill:var(--ink-faint);letter-spacing:.06em}
+.s-txt{font:400 13px var(--body);fill:var(--ink)}
+.s-hot{font:600 13px var(--body);fill:var(--seal)}
+.s-line{stroke:var(--rule);stroke-width:1}
+.s-seal{stroke:var(--seal);stroke-width:2}
+
+pre{
+  margin-top:clamp(1.2rem,2.4vw,1.9rem);padding:1.15rem 1.35rem;
+  background:var(--paper-up);border-left:2px solid var(--seal);
+  font:400 clamp(.76rem,.95vw,.9rem)/1.75 var(--mono);
+  overflow-x:auto;color:var(--ink-soft);max-width:min(100%,72rem);
+}
+pre b{color:var(--ink);font-weight:500}
+pre i{color:var(--seal);font-style:normal}
+
+.cols{display:grid;gap:clamp(1.4rem,3vw,3rem);grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));margin-top:clamp(1.3rem,2.6vw,2.2rem);max-width:min(100%,72rem)}
+.cols h3{font:600 .95em/1.4 var(--body);color:var(--seal);margin-bottom:.5rem}
+
+/* ── 크롬 ───────────────────────────────────── */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;height:3.4rem;
+  display:flex;align-items:center;gap:1.4rem;
+  padding:0 clamp(2rem,7vw,9rem);
+  border-top:1px solid var(--rule);background:var(--paper);
+  font:500 .72rem/1 var(--mono);letter-spacing:.1em;color:var(--ink-faint);
+}
+.bar .brand{color:var(--ink)}
+.bar .n{margin-left:auto;color:var(--ink)}
+.bar .n .tot{color:var(--ink-faint)}
+.prog{position:fixed;left:0;bottom:0;height:2px;background:var(--seal);transition:width .45s cubic-bezier(.16,1,.3,1);z-index:2}
+.nav{position:fixed;bottom:.7rem;right:clamp(2rem,7vw,9rem);display:flex;gap:.4rem}
+.nav button{
+  width:2rem;height:2rem;border:1px solid var(--rule);background:transparent;
+  color:var(--ink-faint);font:400 1rem/1 var(--mono);cursor:pointer;
+  transition:color .18s,border-color .18s;
+}
+.nav button:hover{color:var(--seal);border-color:var(--seal)}
+.nav button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* 표지 */
+.cover{justify-content:center}
+.cover h1{font-size:clamp(3rem,8vw,7rem);line-height:.98}
+.cover .sub{font:400 clamp(1rem,1.8vw,1.5rem)/1.4 var(--display);color:var(--ink-soft);margin-top:.4rem}
+.cover .meta{margin-top:clamp(2.5rem,5vw,4.5rem);font:500 .8rem/1.9 var(--mono);letter-spacing:.12em;color:var(--ink-faint)}
+.cover .claim{margin-top:clamp(1.6rem,3vw,2.6rem);font:400 clamp(1.05rem,2.1vw,1.7rem)/1.5 var(--body);max-width:26ch;color:var(--ink)}
+
+a{color:var(--seal);text-decoration-thickness:1px;text-underline-offset:3px}
+@media(max-width:640px){.slide{padding:2rem 1.4rem 5rem}h2{max-width:none}}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<main class="deck" id="deck">
+
+<!-- 1 ─────────────────────────────────────── -->
+<section class="slide cover" data-on>
+  <div class="tag">// GASOK · TRACK 03 GIWA-NATIVE IDEAS</div>
+  <h1>POI</h1>
+  <div class="sub">Proof of Insight</div>
+  <p class="claim">투자 판단을 <em>결과가 나오기 전에</em> 온체인에 고정하고, 누구나 나중에 검증한다.</p>
+  <div class="meta">GIWA SEPOLIA · CHAIN 91342 · 배포 완료<br>2026.07</div>
+</section>
+
+<!-- 2 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 01 <b>문제</b></div>
+  <h2>남는 건 거래 기록이지 <em>판단</em>이 아니다</h2>
+  <p class="lede">거래는 거래소에 남고 수익률도 남는다. <strong>“왜 그렇게 판단했는가”는 아무 데도 남지 않는다.</strong></p>
+  <p class="lede">그래서 결과를 본 뒤에 이렇게 말할 수 있다 — <em>“나는 그럴 줄 알았다.”</em></p>
+  <table>
+    <tr><td>트레이딩 저널</td><td class="no">사후 수정 가능</td></tr>
+    <tr><td>SNS 예측</td><td class="no">지우면 그만</td></tr>
+    <tr><td>리더보드</td><td class="no">성과만 보고 판단은 안 본다</td></tr>
+  </table>
+</section>
+
+<!-- 3 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 02 <b>해법</b></div>
+  <h2>결과를 알기 전에 잠근다</h2>
+  <figure>
+  <svg viewBox="0 0 900 210" role="img" aria-label="t0 커밋, t1 관측 구간 종료, t2 결과 등록으로 이어지는 타임라인">
+    <line class="s-line" x1="40" y1="96" x2="860" y2="96"/>
+    <g>
+      <circle cx="120" cy="96" r="7" fill="var(--seal)"/>
+      <text class="s-lab" x="120" y="70" text-anchor="middle">T0</text>
+      <text class="s-hot" x="120" y="134" text-anchor="middle">결정 커밋</text>
+      <text class="s-txt" x="120" y="156" text-anchor="middle" font-size="12">내용은 해시로만</text>
+      <text class="s-txt" x="120" y="174" text-anchor="middle" font-size="12">관측 구간 선언</text>
+    </g>
+    <rect x="127" y="88" width="366" height="16" fill="var(--seal-dim)"/>
+    <text class="s-lab" x="310" y="82" text-anchor="middle">관측 구간</text>
+    <g>
+      <circle cx="500" cy="96" r="7" fill="none" stroke="var(--ink-faint)" stroke-width="2"/>
+      <text class="s-lab" x="500" y="70" text-anchor="middle">T1</text>
+      <text class="s-txt" x="500" y="134" text-anchor="middle">구간 종료</text>
+      <text class="s-txt" x="500" y="156" text-anchor="middle" font-size="12">관측값 확정</text>
+    </g>
+    <g>
+      <circle cx="760" cy="96" r="7" fill="var(--gold)"/>
+      <text class="s-lab" x="760" y="70" text-anchor="middle">T2</text>
+      <text class="s-txt" x="760" y="134" text-anchor="middle">결과 등록</text>
+      <text class="s-txt" x="760" y="156" text-anchor="middle" font-size="12">발행자가 아니라</text>
+      <text class="s-hot" x="760" y="174" text-anchor="middle" font-size="12">컨트랙트가 계산</text>
+    </g>
+    <path d="M505 96 L753 96" class="s-line" stroke-dasharray="3 5"/>
+  </svg>
+  <figcaption>결정은 철회할 수 없다. 정산과 이의는 정정할 수 있고, 그 이력이 화면에 남는다.</figcaption>
+  </figure>
+</section>
+
+<!-- 4 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 03 <b>신뢰 경계</b></div>
+  <h2>무엇을 보장하고 무엇을 보장하지 않는가</h2>
+  <figure>
+  <svg viewBox="0 0 900 250" role="img" aria-label="컨트랙트 강제, 소유자 제출, 미보장의 3층 구조">
+    <rect x="20" y="14" width="860" height="72" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1.5"/>
+    <text class="s-lab" x="40" y="40" fill="var(--seal)">컨트랙트가 강제 — 어기면 트랜잭션이 되돌아간다</text>
+    <text class="s-txt" x="40" y="66" font-size="13">관측 구간이 커밋 이후 (I4) · 정산 산술이 관측값과 일치 (I17) · 결정 간 선후 관계 (I2) · 지표 정의 frozen</text>
+
+    <rect x="20" y="96" width="860" height="62" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
+    <text class="s-lab" x="40" y="122">소유자가 제출 — 제3자가 재현·이의 가능</text>
+    <text class="s-txt" x="40" y="146" font-size="13">관측값 자체</text>
+
+    <rect x="20" y="168" width="860" height="62" fill="none" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text class="s-lab" x="40" y="194">보장하지 않음</text>
+    <text class="s-txt" x="40" y="218" font-size="13" fill="var(--ink-faint)">관측값의 진실성 · 이유의 진실성 · 실제 거래와의 정합성 · 기록의 완전성</text>
+  </svg>
+  <figcaption>POI가 실제로 보장하는 것은 <strong>“이 바이트가 그 시점 이전에 존재했다”</strong>이다. 그 이상을 주장하지 않는다.</figcaption>
+  </figure>
+</section>
+
+<!-- 5 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 04 <b>강제</b></div>
+  <h2>세 줄의 코드가 사후 서사를 막는다</h2>
+  <pre><i>if</i> (d.windowStart &lt; attestTime) <b>revert WindowInPast();</b>      <i>// I4</i>
+<i>if</i> (p.time &gt;= a.time)           <b>revert ParentNotEarlier();</b>  <i>// I2</i>
+<i>if</i> (s.result != expect)         <b>revert ResultMismatch();</b>    <i>// I17</i></pre>
+  <table>
+    <tr><td>I4</td><td>관측 구간을 과거로 못 잡는다 <span class="quiet">(예상 결과를 선언한 결정에 적용)</span></td></tr>
+    <tr><td>I2</td><td>부모 결정이 자식보다 엄격히 빨라야 한다</td></tr>
+    <tr><td>I17</td><td>관측값과 모순되는 결과를 기록할 수 없다 <span class="quiet">(산술 일치만 — 관측값의 진실성은 별개)</span></td></tr>
+  </table>
+  <p class="lede eave">그리고 <strong>지표 정의 문서의 바이트 해시</strong>가 온체인에 박혀 등록 즉시 <span class="mono">frozen</span>이다. 기준을 나중에 바꿀 수 없다.</p>
+</section>
+
+<!-- 6 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 05 <b>왜 GIWA인가 ①</b></div>
+  <h2>비용이 시점 해상도를 정한다</h2>
+  <figure>
+  <svg viewBox="0 0 900 200" role="img" aria-label="GIWA 0.53원 대 이더리움 L1 5040원 비용 비교">
+    <text class="s-lab" x="20" y="40">커밋 1건</text>
+    <text class="s-txt" x="150" y="42" font-weight="600">GIWA</text>
+    <rect x="230" y="28" width="4" height="18" fill="var(--seal)"/>
+    <text class="s-hot" x="248" y="42">0.53원</text>
+
+    <text class="s-txt" x="150" y="86" font-weight="600">이더리움 L1</text>
+    <rect x="230" y="72" width="620" height="18" fill="var(--rule)"/>
+    <text class="s-txt" x="248" y="86" font-size="13" fill="var(--ink)">5,040원</text>
+    <text class="s-hot" x="700" y="86" font-size="15" font-weight="700">약 9,500배</text>
+
+    <line class="s-line" x1="20" y1="118" x2="880" y2="118"/>
+    <text class="s-lab" x="20" y="148">결정 커밋 36건 / 년</text>
+    <text class="s-txt" x="230" y="150">GIWA <tspan class="s-hot">19원</tspan>　　　이더리움 L1 <tspan fill="var(--ink)">181,000원</tspan></text>
+    <text class="s-lab" x="20" y="182" fill="var(--ink-faint)">추정치 — 가스 가격만 실측. gas 120,000 · ETH $3,000/1,400원 · L1 10 gwei 가정</text>
+  </svg>
+  </figure>
+  <p class="lede eave">비용을 줄이려 배치하면 <strong>같은 배치 안의 부모→자식 관계가 끊긴다</strong>(I2 · EAS 배치는 timestamp가 같다). 절감은 기본가스뿐이라 약 17%에 그친다.</p>
+</section>
+
+<!-- 7 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 06 <b>왜 GIWA인가 ②</b></div>
+  <h2>새 신뢰 축을 세우지 않는다</h2>
+  <figure>
+  <svg viewBox="0 0 900 140" role="img" aria-label="사용자에서 EAS를 거쳐 POI 리졸버가 불변식을 검사하는 구조">
+    <g>
+      <rect x="20" y="42" width="140" height="52" fill="none" stroke="var(--rule)"/>
+      <text class="s-txt" x="90" y="73" text-anchor="middle">사용자</text>
+    </g>
+    <path d="M164 68 L246 68" class="s-line" marker-end="url(#a)"/>
+    <text class="s-lab" x="205" y="58" text-anchor="middle">attest()</text>
+    <g>
+      <rect x="250" y="42" width="200" height="52" fill="none" stroke="var(--ink-faint)"/>
+      <text class="s-txt" x="350" y="66" text-anchor="middle">EAS</text>
+      <text class="s-lab" x="350" y="84" text-anchor="middle">GIWA 프리디플로이</text>
+    </g>
+    <path d="M454 68 L536 68" class="s-line" marker-end="url(#a)"/>
+    <text class="s-lab" x="495" y="58" text-anchor="middle">onAttest</text>
+    <g>
+      <rect x="540" y="42" width="200" height="52" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1.5"/>
+      <text class="s-hot" x="640" y="66" text-anchor="middle">POI 리졸버</text>
+      <text class="s-lab" x="640" y="84" text-anchor="middle" fill="var(--seal)">불변식 검사</text>
+    </g>
+    <path d="M744 56 L826 30" class="s-line" marker-end="url(#a)"/>
+    <text class="s-lab" x="836" y="28">기록</text>
+    <path d="M744 80 L826 108" class="s-seal" marker-end="url(#b)"/>
+    <text class="s-lab" x="836" y="112" fill="var(--seal)">revert</text>
+    <defs>
+      <marker id="a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" fill="var(--ink-faint)"/></marker>
+      <marker id="b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" fill="var(--seal)"/></marker>
+    </defs>
+  </svg>
+  </figure>
+  <table>
+    <tr><td>EAS 프리디플로이</td><td>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
+    <tr><td>도장 Verified Address</td><td>KYC 결속 온체인 신원</td></tr>
+    <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
+  </table>
+</section>
+
+<!-- 8 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 07 <b>경쟁</b></div>
+  <h2>진짜 대안은 “EAS로 직접 만드는 것”</h2>
+  <table>
+    <tr><th></th><th>트레이딩 저널</th><th>리더보드</th><th>EAS 직접 구축</th><th>POI</th></tr>
+    <tr><td>시점 보증</td><td class="no">✗</td><td class="no">—</td><td class="yes">✓ 기본 제공</td><td class="yes">✓</td></tr>
+    <tr><td>관측 구간 소급 차단</td><td class="no">✗</td><td class="no">✗</td><td>직접 설계해야</td><td class="yes">✓</td></tr>
+    <tr><td>정산 산술 온체인 강제</td><td class="no">✗</td><td class="no">✗</td><td>직접 설계해야</td><td class="yes">✓</td></tr>
+    <tr><td>미발행 노출 · 이의</td><td class="no">✗</td><td class="no">✗</td><td>직접 설계해야</td><td class="yes">✓</td></tr>
+    <tr><td>성과 랭킹</td><td class="no">✗</td><td class="yes">✓ 핵심</td><td class="no">자유</td><td class="hot">✗ 의도적 배제</td></tr>
+  </table>
+  <p class="lede eave"><strong>EAS로 직접 만들면 이 전부를 구현할 수 있다. 불가능한 게 아니다.</strong> 차별점은 기술 장벽이 아니라 <em>어떤 불변식을 고르고 무엇을 금지했는가</em>다. 랭킹·점수·비교를 넣는 순간 사후 서사를 막는다는 목적 자체가 무너진다.</p>
+</section>
+
+<!-- 9 ─────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 08 <b>지금 살아 있는 것</b></div>
+  <h2>테스트넷에서 전 경로가 돈다</h2>
+  <table>
+    <tr><td>컨트랙트</td><td>리졸버 4종 — <span class="yes">익스플로러 Verified</span></td></tr>
+    <tr><td>스키마</td><td>EAS 4종 등록·초기화</td></tr>
+    <tr><td>지표</td><td>2종 등록, 문서 해시로 <span class="mono">frozen</span></td></tr>
+    <tr><td>화면</td><td><span class="hot">공개 URL — 지갑 없이 조회·검증</span></td></tr>
+    <tr><td>검증기</td><td><span class="mono">poi-verify</span> · <span class="mono">poi-reveal</span> CLI</td></tr>
+    <tr><td>테스트</td><td>384개 <span class="quiet">— 2026-07-29 한 자리 연속 실행</span></td></tr>
+  </table>
+  <pre><b>https://poi-web-production.up.railway.app</b></pre>
+</section>
+
+<!-- 10 ────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 09 <b>데모</b></div>
+  <h2>네 상태가 동시에 살아 있다</h2>
+  <figure>
+  <svg viewBox="0 0 900 130" role="img" aria-label="기한초과, 등록완료와 이의, 철회 이력, 오프체인 MATCH 네 가지 상태">
+    <g><circle cx="110" cy="52" r="34" fill="none" stroke="var(--seal)" stroke-width="2"/><text class="s-hot" x="110" y="57" text-anchor="middle" font-size="12">기한초과</text></g>
+    <g><circle cx="320" cy="52" r="34" fill="none" stroke="var(--gold)" stroke-width="2"/><text class="s-txt" x="320" y="57" text-anchor="middle" font-size="12" fill="var(--gold)">등록완료</text></g>
+    <g><circle cx="530" cy="52" r="34" fill="none" stroke="var(--ink-faint)" stroke-width="2"/><text class="s-txt" x="530" y="57" text-anchor="middle" font-size="12">철회 이력</text></g>
+    <g><rect x="706" y="30" width="150" height="44" fill="none" stroke="var(--ink-faint)"/><text class="s-txt" x="781" y="57" text-anchor="middle" font-family="var(--mono)" font-size="13">MATCH</text></g>
+    <text class="s-lab" x="110" y="112" text-anchor="middle">미발행이 드러난다</text>
+    <text class="s-lab" x="320" y="112" text-anchor="middle">+ 제3자 이의</text>
+    <text class="s-lab" x="530" y="112" text-anchor="middle">철회 → 정정</text>
+    <text class="s-lab" x="781" y="112" text-anchor="middle">오프체인 독립 재현</text>
+  </svg>
+  </figure>
+  <p class="lede eave"><em>미발행을 숨기지 않는 것</em>이 이 제품의 태도다. 예상 결과를 선언하고 결과를 올리지 않으면 「기한초과」로 남는다.</p>
+</section>
+
+<!-- 11 ────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 10 <b>가장 큰 반론</b></div>
+  <h2>“좋은 판단만 골라 기록하면?”</h2>
+  <p class="lede"><strong>맞다. 완전성은 보장되지 않는다.</strong> 조회된 것이 전부라는 보장도 없다.</p>
+  <table>
+    <tr><td>미발행을 드러낸다</td><td>선언하고 안 올리면 「기한초과」로 남는다</td></tr>
+    <tr><td>건수를 세지 않는다</td><td>지갑 생성 비용이 0이라 개수는 언제든 부풀릴 수 있다</td></tr>
+    <tr><td>목록에 명시한다</td><td>「조회된 것이 전부라는 보장은 없습니다」</td></tr>
+    <tr><td>비교·랭킹을 만들지 않는다</td><td>선택 기록으로 순위를 만들면 거짓말이 된다</td></tr>
+  </table>
+  <p class="lede eave"><strong>한 지갑 안에서의 선택적 기록은 남는다.</strong> 지금 구조로 못 푼다. Phase 2의 실행 정합성 검증이 이 문제를 좁힌다.</p>
+</section>
+
+<!-- 12 ────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 11 <b>첫 사용자</b></div>
+  <h2>누가 왜 반복해서 커밋하는가</h2>
+  <div class="cols">
+    <div>
+      <h3>첫 10명</h3>
+      <p>공개적으로 판단을 말하는 사람들 — 뉴스레터·리서치 작성자. <strong>이미 사후 검증 압력을 받고 있고</strong>, 반박 수단이 없다.</p>
+    </div>
+    <div>
+      <h3>왜 쓰는가</h3>
+      <p class="quiet">지금 — “내가 그때 이렇게 말했다”를 증명할 방법이 없다</p>
+      <p>POI 이후 — 링크 하나로 제3자가 직접 확인한다</p>
+    </div>
+  </div>
+  <p class="lede eave"><strong>검증 실험</strong> — 30일 안에 10명이 각 3건 이상 커밋하고, 그중 절반 이상이 관측 구간 종료 후 결과를 등록하는가. 등록률이 낮으면 <em>미발행 노출이 사용자에게 위협으로 작동한다는 뜻</em>이고, 설계를 다시 봐야 한다.</p>
+</section>
+
+<!-- 13 ────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 12 <b>사업 가설</b></div>
+  <h2>누가 비용을 내는가</h2>
+  <p class="lede"><strong>아직 검증되지 않은 가설이다.</strong></p>
+  <table>
+    <tr><th></th><th>대가</th><th>시점</th></tr>
+    <tr><td>B2C 구독</td><td>저널·장기 리포트·외부 공유 프로필</td><td class="quiet">Phase 3</td></tr>
+    <tr><td>Verification Fee</td><td>제3자가 요청하는 정기 검증·갱신</td><td class="quiet">Phase 3</td></tr>
+    <tr><td>B2B</td><td>리서치 기관의 발행물 신뢰도 부착</td><td class="quiet">미검증</td></tr>
+  </table>
+  <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 온체인 비용이 건당 0.53원이라 사용자 부담이 사실상 없고, 먼저 확인할 것은 <em>판단이 쌓이는가</em>다.</p>
+</section>
+
+<!-- 14 ────────────────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 13 <b>팀 · 요청</b></div>
+  <h2>믿으라고 하지 않는다.<br>확인하라고 한다.</h2>
+  <div class="cols">
+    <div>
+      <h3>팀</h3>
+      <p><strong>1인 (대표 · 풀스택)</strong><br>컨트랙트 · 프론트 · 검증기 전부</p>
+    </div>
+    <div>
+      <h3>GASOK에 요청하는 것 — 하나</h3>
+      <p><em>Upbit Oracle 사양과 일정.</em></p>
+      <p class="quiet">오라클이 관측값을 독립 증명하면 신뢰 경계가 「소유자 제출」에서 「독립 판정」으로 넘어간다. 03번 도식에서 가장 약한 칸이 채워진다.</p>
+    </div>
+  </div>
+  <pre><b>https://poi-web-production.up.railway.app</b>
+https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66</pre>
+</section>
+
+</main>
+
+<div class="bar">
+  <span class="brand">POI</span>
+  <span>PROOF OF INSIGHT</span>
+  <span class="n"><span id="cur">01</span><span class="tot"> / 14</span></span>
+</div>
+<nav class="nav" aria-label="슬라이드 이동">
+  <button id="prev" aria-label="이전 슬라이드">‹</button>
+  <button id="next" aria-label="다음 슬라이드">›</button>
+</nav>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const prog=document.getElementById('prog'), cur=document.getElementById('cur');
+let i=0;
+function go(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>k===i?s.setAttribute('data-on',''):s.removeAttribute('data-on'));
+  prog.style.width=((i+1)/slides.length*100)+'%';
+  cur.textContent=String(i+1).padStart(2,'0');
+  location.hash=i?('#'+(i+1)):'';
+  slides[i].scrollTop=0;
+}
+document.getElementById('next').onclick=()=>go(i+1);
+document.getElementById('prev').onclick=()=>go(i-1);
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(i+1)}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(i-1)}
+  if(e.key==='Home')go(0); if(e.key==='End')go(slides.length-1);
+});
+addEventListener('hashchange',()=>{const n=parseInt(location.hash.slice(1))||1; if(n-1!==i)go(n-1)});
+go((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>
