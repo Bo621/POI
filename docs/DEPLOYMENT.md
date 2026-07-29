@@ -131,11 +131,11 @@ I4 가 소급 설정을 막는다. 데모 편의로 핵심 방어를 우회하�
 | | UID |
 |---|---|
 | **결정 — 등록완료 + 이의** | `0x3f845e794b96ba9df4383aaf5bd1b886730538e3aa9b5c8d5d91d8b4ec51ce0d` |
-| └ 정산 | `0xffb39d70a4d657cb31686b28d151f06dbf674399ececb044ebfe1b62980b4e32` |
-| └ **이의 (지갑 B)** | `0x3ab287c6b3a33f75fb5eccb1102928ce0dfc64eac4ed8cecfbc0b3d9927dc37e` |
+| └ 정산 | `0x4924bd9a386dfc9ab0b29c810207595f05fdf9554a7925510cc4d0856143534f` |
+| └ **이의 (지갑 B)** | `0x9cb1f76884e7c4ab61659efd85a46a19afbf4dd4657a1f66dd7934b836455c3d` |
 | **결정 — 철회 이력** | `0x22f65981071834acd8ec6efae7ca9f4874cb845e635f2e9453d8c17634fc6f7d` |
-| └ S1 (철회됨) | `0x1b8bd05c1ef57e1014416d24f57d278938bce8e56a22f26c54fa2fbc3f9012cf` |
-| └ S2 (정정) | `0x9bc914a5ac66c25abdeb3a02dc399a6efc9e3921559ae73c060cb2a666b98c24` |
+| └ S1 (철회됨) | `0x03fbfece60c64cd41d1b70d9cb3bc55d311093d7cce5c8bf3ab37bdc7d0b9095` |
+| └ S2 (정정) | `0xfdee0986581f52addcb6026570f3964e5d9fd58b0e9331207f478b1133cff69e` |
 
 이의자 지갑: `0xca89C0F26C99B89F2638649D9b597cA264c7Af5c` — **정산자와 다른 주소다.**
 컨트랙트는 자기 정산에 대한 이의를 막지 않지만, 같은 주소면 제3자 이의로 읽히지 않는다.

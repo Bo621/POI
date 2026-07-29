@@ -164,7 +164,7 @@ GIWA 생태계에 **편입**된다.
 | 지표 | 2종 등록, 문서 해시로 **frozen** |
 | 화면 | **공개 URL — 지갑 없이 조회·검증** |
 | 검증기 | `poi-verify` · `poi-reveal` CLI |
-| 테스트 | **392개** (2026-07-29 한 자리 연속 실행) |
+| 테스트 | **407개** (2026-07-29 한 자리 연속 실행) |
 
 ```
 https://poi-static-production.up.railway.app

@@ -63,7 +63,9 @@ fi
 
 echo "== 3. 업로드"
 cd "${STAGE}"
-railway up --service poi-web --detach
+# 서비스 이름이 틀리면 railway 는 업로드까지 성공하고 조용히 아무것도 배포하지 않는다.
+# 실제로 poi-web 으로 올려 한 시간을 날렸다 — 실서비스는 poi-static 하나뿐이다.
+railway up --service poi-static --detach
 
 echo
 echo "배포 시작됨. 확인:"
