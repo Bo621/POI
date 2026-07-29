@@ -304,6 +304,24 @@ export async function readDecisionLogs(decisionSchema: Hex, attester: Address) {
  * 「업비트 KYC 검증」과 「테스트넷 파우셋 검증」은 **다르다** —
  * 뭉뚱그리면 화면이 사실보다 강한 말을 하게 된다.
  */
+/**
+ * 이 발급자가 컨트랙트에 등록돼 있는지 묻는다.
+ *
+ * **프론트가 발급자를 하드코딩하면 온체인 허용 집합과 갈라진다** —
+ * 실제로 UPBIT 하나만 비교하다가 파우셋 검증을 스스로 버렸다.
+ * 컨트랙트가 진실이므로 컨트랙트에 묻는다.
+ */
+export async function readIssuerAllowed(issuer: Address): Promise<boolean> {
+    const resolver = await resolverFor(SCHEMAS.decision as Hex);
+    const label = await withRetry(() => publicClient.readContract({
+        address: resolver,
+        abi: parseAbi(["function issuerLabel(address issuer) view returns (bytes32)"]),
+        functionName: "issuerLabel",
+        args: [issuer],
+    }));
+    return !/^0x0+$/i.test(label as string);
+}
+
 export async function readVerificationLabel(verifiedUID: Hex): Promise<string | undefined> {
     if (/^0x0+$/i.test(verifiedUID)) return undefined;
     const attestation = await getAttestation(verifiedUID);

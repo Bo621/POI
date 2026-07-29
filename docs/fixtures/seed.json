@@ -3,17 +3,17 @@
   "accounts": {"A": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", "B": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", "C": "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"},
   "eas": {"version": "lib v1.4.0", "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512", "schemaRegistryAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3"},
   "addresses": {"schemaRegistry": "0x5fbdb2315678afecb367f032d93f642f64180aa3", "eas": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512", "note": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0", "decision": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9", "settlement": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9", "challenge": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"},
-  "t0": "0x6a6a0632",
-  "window": {"start": "1785335098", "end": "1785335698", "graceSeconds": 3600},
-  "observations": {"BTC_PRICE_KRW_AT_END": "92285000", "BTC_MAX_DRAWDOWN_IN_WINDOW": "0"},
+  "t0": "0x6a6a107f",
+  "window": {"start": "1785337735", "end": "1785338335", "graceSeconds": 3600},
+  "observations": {"BTC_PRICE_KRW_AT_END": "92060000", "BTC_MAX_DRAWDOWN_IN_WINDOW": "1"},
   "schemas": {"note": "0x7c46682107b07f5242b6b77354ee3ad5260ef055e972dc9b3d0f1241d882a537", "decision": "0xba131ebf36651a68742033e73ed656936858a5a912c07613f0c997c875fbf486", "settlement": "0x7ed0779346f0fe41b576ee7cc8af2525812fa80ed84e0993fd037d09b073b4f4", "challenge": "0x4a36108163be43f9b3dab2e4bf51b422e05adfa80c38293cffe479840f3cf14b"},
   "fixtures": {
-    "f1": {"decisionUID": "0x3e4aee6c3e1e1d7a805eec6a6af3a2abfd0e4ad0431b5a1b95ae41278b9d3df2", "settlementUID": "0x7270adb5ee1c048fe5844341fd9da88da2cc237671e3219cd56e47a42360d644", "expectedState": "SETTLED"},
-    "f2": {"decisionUID": "0x31e31bd4a9a268b3f812b551949c3ab5cdd3f10e020def4cc8fdce0a0b278ba1", "revokedSettlementUID": "0x46b6ed9d648c39755bd2ca4bac8e97ea720dcce73e13b3269ef215cd09e86edb", "activeSettlementUID": "0x698ed97d1eb982487c113f506d7765c75a61960d9af94dff785377b9b7c4a968", "expectedState": "SETTLED", "hasRevokedSettlement": true},
-    "f4": {"decisionUID": "0xa1705ed3776b8a9cb3052424209bfa3849bddf00128c611b5c839ca4cfd1c894", "expectedState": "OVERDUE"},
-    "f5": {"decisionUID": "0x157923c6ea468682bf0b9a0ad14959e380021dea10845ad1862f0789ed976c9d", "expectedState": "PENDING"},
-    "f_copy": {"decisionUID": "0x9e7663223367740b52c3ccd24caa296784943ad77120f44fa69af3b05178ac5d", "decisionCommitment": "0x1b415c7acf1ede2666dac1d1a286ebb59c8ff100e0f4b31e545f402ce4b08099", "copiedFromDecisionUID": "0x3e4aee6c3e1e1d7a805eec6a6af3a2abfd0e4ad0431b5a1b95ae41278b9d3df2", "expectation": "A의 salt/payload로 대조하면 attester가 B이므로 실패한다"}
+    "f1": {"decisionUID": "0x104210c8e0cbf43ea5288c8d55fcd3715984be9b1a60cbc042a983f29f622a25", "settlementUID": "0x2099713760abd0f0b43df33af5d2a079fc8de27ea7aadba1849769b74a70076d", "expectedState": "SETTLED"},
+    "f2": {"decisionUID": "0xcea412da52f651fa6f2e69445760c74a98a1f20c0cb08eed21b0d5d7e2e8f152", "revokedSettlementUID": "0x25acfb198f5847ade23782f2bf4f575742db678da9482e4f221874dd01cbb97a", "activeSettlementUID": "0x68f11f7acbcaa1207b0ca8861e9cb5b8d87a148482aa221c86089e8a1ac58b44", "expectedState": "SETTLED", "hasRevokedSettlement": true},
+    "f4": {"decisionUID": "0xb4811c974ec9bcb15116f7e19e8d2c7ff43d0443b2a6117c4021fd97b258212e", "expectedState": "OVERDUE"},
+    "f5": {"decisionUID": "0x3bbaf0a1e647eb0c8dd8a42cc5af5c08f1c225eb83b4b6189deec48382327969", "expectedState": "PENDING"},
+    "f_copy": {"decisionUID": "0x2263349461f9a5997eace8e7a417ed43c27d21319e60c83dd275dd32093d5a49", "decisionCommitment": "0x1b415c7acf1ede2666dac1d1a286ebb59c8ff100e0f4b31e545f402ce4b08099", "copiedFromDecisionUID": "0x104210c8e0cbf43ea5288c8d55fcd3715984be9b1a60cbc042a983f29f622a25", "expectation": "A의 salt/payload로 대조하면 attester가 B이므로 실패한다"}
   },
-  "challengeUID": "0xf50ea518610115857a805d224e36892da5af4a3aa3114e436178114c6f65d532",
+  "challengeUID": "0x81a14efe1826e5d008eeb3edeb5619bdbe36c209640b7ef3f844b4d406d8361c",
   "f1Reveal": {"salt": "0x00112233445566778899aabbccddeeff", "payload": {"fixture": "F1", "intent": "seed-success"}}
 }

@@ -103,7 +103,7 @@ POI 개발 중 이 체계가 실제로 잡아낸 것들:
 ```
 공개 URL      https://poi-static-production.up.railway.app
 컨트랙트      sepolia-explorer.giwa.io — 리졸버 4 종 Pass - Verified
-테스트        422 개 (contracts 169 · core 62 · verifier 59 · web 95 · e2e 37)
+테스트        423 개 (contracts 169 · core 62 · verifier 59 · web 96 · e2e 37)
 ```
 
 지갑 없이 조회 · 검증이 됩니다.

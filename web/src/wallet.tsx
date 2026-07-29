@@ -15,9 +15,8 @@ import {
     DOJANG_SCHEMA_UID,
     EAS_ADDRESS,
     UPBIT_KOREA_ID,
-    DOJANG_ISSUER,
 } from "./config";
-import {getAttestation, getChainTime} from "./read";
+import {getAttestation, getChainTime, readIssuerAllowed} from "./read";
 
 const ZERO_UID = `0x${"00".repeat(32)}` as Hex;
 const DOJANG_ABI = parseAbi([
@@ -50,13 +49,13 @@ export interface VerificationCandidate {
  * 여기서 거르지 않으면 사용자는 이유를 모른 채 발행에 실패한다.
  */
 export function pickValidVerification(
-    candidates: VerificationCandidate[], now: bigint, issuer: string,
+    candidates: VerificationCandidate[], now: bigint, isAllowedIssuer: (issuer: string) => boolean,
 ): Hex | undefined {
     for (let index = candidates.length - 1; index >= 0; index -= 1) {
         const a = candidates[index]!;
         if (a.revocationTime !== 0n) continue;
         if (a.expirationTime !== 0n && a.expirationTime <= now) continue;
-        if (a.attester.toLowerCase() !== issuer.toLowerCase()) continue;
+        if (!isAllowedIssuer(a.attester)) continue;
         return a.uid;
     }
     return undefined;
@@ -89,7 +88,19 @@ async function findLatestVerificationUID(address: Address): Promise<Hex> {
             // 조회 실패한 건은 후보에서 뺀다. 붙이지 않는 쪽이 안전하다.
         }
     }
-    return pickValidVerification(candidates, now, DOJANG_ISSUER) ?? ZERO_UID;
+    // 허용 발급자는 **컨트랙트에 묻는다.** 프론트가 하드코딩하면 온체인과 갈라진다.
+    const allowed = new Map<string, boolean>();
+    for (const c of candidates) {
+        const key = c.attester.toLowerCase();
+        if (allowed.has(key)) continue;
+        try {
+            allowed.set(key, await readIssuerAllowed(c.attester as Address));
+        } catch {
+            allowed.set(key, false);   // 못 물어보면 붙이지 않는다
+        }
+    }
+    return pickValidVerification(candidates, now, (issuer) => allowed.get(issuer.toLowerCase()) === true)
+        ?? ZERO_UID;
 }
 
 export function shortAddress(address: Address): string {
