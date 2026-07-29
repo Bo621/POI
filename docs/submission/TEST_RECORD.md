@@ -14,8 +14,8 @@
 | core | **62 pass, 0 fail** | `npm test` |
 | verifier | **58 pass, 0 fail** | `npm test` |
 | web | **87 passed** (16 files) | `npm test` |
-| e2e | **27 passed** | `npm run test:e2e` (실제 체인 상대) |
-| **합계** | **384** | |
+| e2e | **31 passed** | `npm run test:e2e` (실제 체인 상대) |
+| **합계** | **388** | |
 
 ## 이 수치가 뜻하는 것과 뜻하지 않는 것
 

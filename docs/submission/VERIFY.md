@@ -35,7 +35,8 @@ cast call $DECISION_RESOLVER \
   0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf --rpc-url $RPC
 
 # 저장소의 정의 문서 해시
-cast keccak "$(cat docs/metrics/BTC_PRICE_KRW_AT_END.md)"
+# 파일 **원본 바이트**의 해시다. `$(cat …)` 는 끝 개행을 지워 다른 값이 나온다.
+cast keccak "0x$(xxd -p -c 999999 < docs/metrics/BTC_PRICE_KRW_AT_END.md | tr -d '\n')"
 ```
 
 **두 값이 같습니다.** 그리고 마지막 필드가 `true` — `frozen`입니다.
@@ -72,13 +73,15 @@ if (s.result != expect) revert ResultMismatch();   // I17
 ## 5. 누구나 같은 절차로 재현한다
 
 ```bash
-git clone <repo> && cd poi && pnpm install
+git clone https://github.com/Bo621/POI.git && cd POI && pnpm install
 export POI_RPC_URL=$RPC
 export POI_EAS_ADDRESS=$EAS
 export POI_SETTLEMENT_RESOLVER_ADDRESS=0xbc386addcd3cabbbb62dfcb521939fe4610029d1
 export POI_METRIC_REGISTRY_ADDRESS=$DECISION_RESOLVER
 
-node --experimental-strip-types verifier/src/cli.ts <decisionUID> --json
+# 결과가 등록된 결정 — MATCH (종료코드 0)
+node --experimental-strip-types verifier/src/cli.ts \
+  0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69 --json
 ```
 
 검증기는 온체인 정산을 읽고, **업비트 공개 1분봉으로 관측값을 직접 다시 계산해** 대조합니다.
@@ -99,9 +102,10 @@ node --experimental-strip-types verifier/src/cli.ts <decisionUID> --json
 누구나 대조할 수 있습니다.
 
 ```bash
-node --experimental-strip-types verifier/src/reveal-cli.ts <decisionUID> \
-  --salt <salt> \
-  --payload <(printf '%s' '<원문 JSON>') \
+node --experimental-strip-types verifier/src/reveal-cli.ts \
+  0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe \
+  --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
+  --payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
   --rpc $RPC
 ```
 
@@ -133,7 +137,7 @@ cd contracts && forge test              # 150
 cd core      && npm test                # 62
 cd verifier  && npm test                # 58
 cd web       && npm test                # 87
-cd web       && npm run test:e2e        # 27 (실제 체인 상대)
+cd web       && npm run test:e2e        # 31 (실제 체인 상대)
 ```
 
 포크 테스트(`FOUNDRY_PROFILE=fork`)는 **실제 EAS 바이트코드**를 상대로 돕니다 —
@@ -145,6 +149,10 @@ cd web       && npm run test:e2e        # 27 (실제 체인 상대)
 
 **"검증 가능하다"고 쓰는 것과 검증 가능한 것은 다릅니다.**
 
-위 항목 중 하나라도 실행해서 실패한다면 그건 결함입니다. 실제로 개발 중
-화면을 눈으로 확인하다가 **조건 기호 6개가 전부 잘못 표시되던 것**을 발견했습니다
-(`op=1`은 `≥`인데 `≠`로 표시). 단위 테스트 80개가 통과하는 동안 아무도 잡지 못했습니다.
+위 항목 중 하나라도 실행해서 실패한다면 그건 결함입니다. 실제로 그렇게 세 번 잡았습니다.
+
+- 화면을 눈으로 보다가 **조건 기호 6개가 전부 잘못 표시되던 것** (`op=1`은 `≥`인데 `≠`)
+- 지갑을 연결하고서야 **nav 가 본문 제목을 가리던 것**
+- 이 문서의 **2번 명령이 틀렸던 것** — `$(cat …)` 가 끝 개행을 지워 해시가 달라졌습니다
+
+**셋 다 단위 테스트가 통과하는 동안 살아 있었습니다.**

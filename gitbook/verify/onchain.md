@@ -16,7 +16,8 @@ cast call $DECISION_RESOLVER \
   "metrics(bytes32)(bool,uint8,uint8,bytes32,bool)" \
   "0x83b04966e07f0f83592e71060b3356d7""16b4dff9f824bd76d0f9d149c54cafcf" --rpc-url $RPC
 
-cast keccak "$(cat docs/metrics/BTC_PRICE_KRW_AT_END.md)"
+# 파일 **원본 바이트**의 해시다. `$(cat …)` 는 끝 개행을 지워 다른 값이 나온다.
+cast keccak "0x$(xxd -p -c 999999 < docs/metrics/BTC_PRICE_KRW_AT_END.md | tr -d '\n')"
 ```
 
 온체인 `definitionHash`와 저장소 원본 문서의 해시가 같고 마지막 필드는 `true`,
