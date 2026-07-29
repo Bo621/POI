@@ -159,6 +159,82 @@ commitment 프리이미지에 **attester** 가 들어가므로, 남의 commitmen
 
 ---
 
+## S10 — 도장 검증을 직접 받고 커밋한다 ★
+
+**「누가 말했는가」를 심사자가 직접 만든다.** 우리 말을 믿을 필요가 없다.
+
+```bash
+# 1. 도장 Verified Address 를 받는다 (0.001 ETH, 유효기간 30일)
+cast send 0x63CCe2b569A7bC35895ee24306c1512fefc06121 'payAndIssueEAS()' \
+  --value 1000000000000000 --rpc-url https://sepolia-rpc.giwa.io --private-key <내 키>
+
+# 2. 받았는지 도장에 물어본다
+cast call 0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9 \
+  'isVerified(address,bytes32)(bool)' <내 주소> \
+  0xaa92f8c143657dde575de430aecaea6ca91f2e6072339b16932d426895d8d678 \
+  --rpc-url https://sepolia-rpc.giwa.io
+```
+
+그 다음 화면에서 지갑을 다시 연결하고 **S6 처럼 결정을 커밋**한다.
+
+**기대**: 결정 상세의 `발행자` 줄이 「미검증 지갑」이 아니라
+**「도장 검증 — TESTNET FAUCET」** 으로 바뀐다. `검증 스냅샷` 에 UID 가 찍힌다.
+
+> 프론트가 발급자를 하드코딩하지 않는다 — **컨트랙트의 `issuerLabel` 을 읽어**
+> 허용 집합을 확인한다. 그래서 업비트 검증이든 파우셋 검증이든 같은 경로로 붙는다.
+
+## S11 — 남의 검증 스냅샷을 훔쳐 붙인다 ★
+
+**막히는 것을 보는 것이 목적이다.**
+
+우리 검증 결정(`0x3f592f21…6938`)의 스냅샷 UID 는 공개돼 있다.
+그걸 **내 결정에** 붙이면 어떻게 되는가?
+
+```bash
+cd contracts
+export ATTACK_EAS=0x4200000000000000000000000000000000000021
+export ATTACK_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
+export ATTACK_METRIC_ID=0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf
+export ATTACK_ATTESTER=<내 주소>
+export ATTACK_STOLEN_UID=0xc1f5746c7b49993e98d470d93da24153fdfd84fe86f6cd53f65da02b85fd4bb5
+
+# --broadcast 없이 = 시뮬레이션만, 가스를 쓰지 않는다
+forge script script/JudgeDojangAttack.s.sol \
+  --rpc-url https://sepolia-rpc.giwa.io --private-key <내 키>
+```
+
+**기대**: `[Revert] BadVerifiedUID()`
+
+검증은 **수취인에게 발급된 것**이다. `recipient != attester` 면 컨트랙트가 거부한다.
+남의 KYC 를 빌려 「검증 지갑」 행세를 할 수 없다.
+
+## S12 — 허용 발급자 집합을 읽는다 (무료)
+
+```bash
+DR=0x0f25917176a405bb9022e5b417e0d57348b30f89
+R=https://sepolia-rpc.giwa.io
+
+cast call $DR 'issuerLabel(address)(bytes32)' 0x09B170CA2A006081042992bCE7379B85a02149C6 --rpc-url $R
+cast call $DR 'issuerLabel(address)(bytes32)' 0x63CCe2b569A7bC35895ee24306c1512fefc06121 --rpc-url $R
+cast call $DR 'issuerLabel(address)(bytes32)' 0x1111111111111111111111111111111111111111 --rpc-url $R
+```
+
+**기대**: `UPBIT KOREA` · `TESTNET FAUCET` · **`0x00…00`(등록 안 됨 = 거부)**
+
+`cast --to-ascii` 로 읽으면 라벨이 보인다. 컨트랙트가 **어느 발급자를 신뢰하는지
+온체인에 이름으로 남긴다** — 「업비트 KYC 검증」과 「테스트넷 파우셋 검증」은 다르고,
+화면도 그 둘을 구별해 표시한다.
+
+스키마가 정말 도장 것인지도 확인할 수 있다.
+
+```bash
+cast call 0x4200000000000000000000000000000000000020 \
+  'getSchema(bytes32)((bytes32,address,bool,string))' \
+  $(cast call $DR 'verifiedSchemaUID()(bytes32)' --rpc-url $R) --rpc-url $R
+```
+
+**기대**: 스키마 내용이 `bool isVerified` — [GIWA 문서](https://docs.giwa.io/giwa-ecosystem/dojang/contracts)의 Verified Address 와 같다.
+
 ---
 
 ## 실행 기록 — 2026-07-29

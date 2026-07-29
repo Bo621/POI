@@ -30,6 +30,25 @@ echo "# 테스트 전수 실행 — $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "# 커밋 $(git rev-parse --short HEAD)$([ -n "$(git status --porcelain)" ] && echo ' (워킹트리 변경 있음)')"
 echo
 
+# E2E 는 로컬 anvil 시드를 상대로 돈다. **시드가 낡으면 F5(시간 경계) 테스트가 반드시 깨진다**
+# — 이미 지나간 경계를 기다릴 수는 없기 때문이다. 오늘만 세 번 겪었다.
+# 사람에게 「재시드하세요」라고 말하는 대신 스크립트가 판단한다.
+SEED="docs/fixtures/seed.json"
+NEED_SEED=0
+if ! curl -s -m 3 -X POST http://127.0.0.1:8545 -H 'content-type: application/json' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' >/dev/null 2>&1; then
+    echo "# 로컬 체인이 꺼져 있다 — 시드한다"; NEED_SEED=1
+elif [ -f "${SEED}" ] && [ -n "$(find "${SEED}" -mmin +60 2>/dev/null)" ]; then
+    echo "# 시드가 60분 넘게 낡았다 — 다시 시드한다 (F5 시간 경계 테스트가 깨진다)"; NEED_SEED=1
+fi
+if [ "${NEED_SEED}" -eq 1 ]; then
+    if ! ./scripts/dev_up.sh >"${LOG_DIR}/seed.log" 2>&1; then
+        echo "시드 실패 — ${LOG_DIR}/seed.log"; exit 1
+    fi
+    echo "# 시드 완료"
+fi
+echo
+
 run contracts "tests passed"         bash -c 'cd contracts && forge test'
 run core      "^# (tests|pass|fail)" bash -c 'cd core && npm test'
 run verifier  "^# (tests|pass|fail)" bash -c 'cd verifier && npm test'
