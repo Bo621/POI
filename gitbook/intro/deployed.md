@@ -18,45 +18,45 @@
 
 | 컨트랙트 | 주소 |
 |---|---|
-| `POINoteResolver` | `0xa8bd89b229dcb07e90e84df18e0fae27fa965f0c` |
-| `POIDecisionResolver` | `0xd4786313817f1bfd14fc6047fdce9db8382e879a` |
-| `POISettlementResolver` | `0x2b21d233b51bc08d0e54458470c4bfef364baee6` |
-| `POIChallengeResolver` | `0x74e6165fa656d4ad89cad1bcc0af32598193f3e0` |
+| `POINoteResolver` | `0x03822d12dddb59d28cf1197853c5ae85beb1d165` |
+| `POIDecisionResolver` | `0x2b379095a8b296e2c61f8153e06fc4cdef56af57` |
+| `POISettlementResolver` | `0x87c7a8b3970986e51a8b24e78078540115a70c8c` |
+| `POIChallengeResolver` | `0xa7203c170dedb490e32c492cdbe9e968c57168aa` |
 
 ## 스키마
 
 | 스키마 | UID | revocable |
 |---|---|---|
-| `poi.note.v1` | `0x6fe68a0d4cc7b82ec548a7d0f438b496e6a7c93086a6481d9a836abb51539f6a` | false |
-| `poi.decision.v1` | `0xd129ba8915e7d92f61c544d557ddd9ddf6a40ae0defed80faebdb6955e4b3b34` | false |
-| `poi.settlement.v1` | `0x017887d2b08c27d4bc084f6c9cdca331e80601e4d0622f93ee56f9791fa80379` | **true** |
-| `poi.challenge.v1` | `0xe21648ef88b4be1e5eb7f86512d911970ea699a0dbb44a08fa9587ee30ab4cb6` | **true** |
+| `poi.note.v1` | `0x12817297a9c8381a81d2b22ff35ca98ce0ee4e21618e3e39fb638e161a475d11` | false |
+| `poi.decision.v1` | `0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151` | false |
+| `poi.settlement.v1` | `0xb9d802583bb9fecf0846389b40d584510cada0f685d6a25774a1a54f0fb857c4` | **true** |
+| `poi.challenge.v1` | `0x34405f11f0450d75d061fccb958fe5133a51c9a0851c7c4708dbe52925e0efff` | **true** |
 
 ## OVERDUE fixture
 
 | | 값 |
 |---|---|
-| decisionUID | `0x919d43269abba2b82fd463761dda85cd78d44f633224a86bd3ec293e39ffc30f` |
+| decisionUID | `0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e` |
 | decisionCommitment | `0x46cf8091be32da5ca484417a89ab0bdf9bb41597554c0a519c269ca234f39db9` |
 | salt | `0x0f1e2d3c4b5a69788796a5b4c3d2e1f0` |
 | payload | `{"fixture":"O4","intent":"overdue-demo"}` |
-| windowStart | `1785251956` — 2026-07-29 00:19:16 KST |
-| windowEnd | `1785252556` — 00:29:16 KST |
+| windowStart | `1785338205` — 2026-07-29 00:19:16 KST |
+| windowEnd | `1785338805` — 00:29:16 KST |
 | graceSeconds | `3600` (1시간) |
-| **T_overdue** | **`1785256156` — 2026-07-29 01:29:16 KST** |
+| **T_overdue** | **`1785342405` — 2026-07-29 01:29:16 KST** |
 
 ## 데모 fixture (O7)
 
-관측 구간 `1785252583 ~ 1785253183` · 관측값 **92,602,000** (BTC/KRW, 업비트 1분봉)
+관측 구간 `1785338307 ~ 1785338907` · 관측값 **91,998,000** (BTC/KRW, 업비트 1분봉)
 
 | | UID |
 |---|---|
-| 결정 — 등록완료 + 이의 | `0x3f845e794b96ba9df4383aaf5bd1b886730538e3aa9b5c8d5d91d8b4ec51ce0d` |
-| └ 정산 | `0x4924bd9a386dfc9ab0b29c810207595f05fdf9554a7925510cc4d0856143534f` |
-| └ 이의 (별도 지갑) | `0x9cb1f76884e7c4ab61659efd85a46a19afbf4dd4657a1f66dd7934b836455c3d` |
-| 결정 — 철회 이력 | `0x22f65981071834acd8ec6efae7ca9f4874cb845e635f2e9453d8c17634fc6f7d` |
-| └ S1 (철회됨) | `0x03fbfece60c64cd41d1b70d9cb3bc55d311093d7cce5c8bf3ab37bdc7d0b9095` |
-| └ S2 (정정) | `0xfdee0986581f52addcb6026570f3964e5d9fd58b0e9331207f478b1133cff69e` |
+| 결정 — 등록완료 + 이의 | `0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8` |
+| └ 정산 | `0x7bd0d1ab80dfdfdafe666a60d4dca6ced77e8d0134780445dbeecd5641b82548` |
+| └ 이의 (별도 지갑) | `0x583bd2fe63d99c27e8b3d4030a007c617fdb9f4fc16d93b5b0ec094ac78c1bd1` |
+| 결정 — 철회 이력 | `0xaced96705a1806810bc469938071f692f6c7c249ce6ecacfc27e34a11149c49b` |
+| └ S1 (철회됨) | `0x36b1e6685077f38b2f77a6a7bb0cb49c6456ce861160f246bd12ccef4d6691df` |
+| └ S2 (정정) | `0x9883b7ce2a66d935523f927109671e2a9215e57f6ed7dfb9a59e1c91e774b033` |
 
 이의자 지갑 `0xca89C0F26C99B89F2638649D9b597cA264c7Af5c` 는 **정산자와 다른 주소**입니다.
 컨트랙트는 자기 정산에 대한 이의를 막지 않지만, 같은 주소면 제3자 이의로 읽히지 않습니다.

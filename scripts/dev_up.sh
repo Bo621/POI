@@ -369,6 +369,8 @@ fi
     printf 'POI_EAS_ADDRESS=%s\n' "${EAS}"
     printf 'POI_SETTLEMENT_RESOLVER_ADDRESS=%s\n' "${SETTLEMENT_RESOLVER}"
     printf 'POI_METRIC_REGISTRY_ADDRESS=%s\n' "${DECISION_RESOLVER}"
+    # 검증기는 스키마를 확인해야 한다 — 없으면 다른 스키마의 attestation 을 결정으로 읽는다.
+    printf 'POI_DECISION_SCHEMA_UID=%s\n' "${DECISION_SCHEMA}"
 } >"${ROOT_DIR}/.env.verifier"
 
 verify_with_cli() {
@@ -382,6 +384,7 @@ verify_with_cli() {
         POI_EAS_ADDRESS="${EAS}" \
         POI_SETTLEMENT_RESOLVER_ADDRESS="${SETTLEMENT_RESOLVER}" \
         POI_METRIC_REGISTRY_ADDRESS="${DECISION_RESOLVER}" \
+        POI_DECISION_SCHEMA_UID="${DECISION_SCHEMA}" \
         node --experimental-strip-types verifier/src/cli.ts \
         "${uid}" --rpc "${LOCAL_RPC}" --json)" || status=$?
     if (( status != 0 )); then

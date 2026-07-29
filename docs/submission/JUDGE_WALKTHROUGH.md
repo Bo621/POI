@@ -32,15 +32,15 @@ nav 오른쪽에 `GIWA Sepolia · 91342` 가 보인다. **집계 숫자·비율�
 
 | 인장 | UID | 무엇을 보여주나 |
 |---|---|---|
-| 🔴 기한초과 | `0x919d4326…545ebe` | **미발행이 드러난다** |
-| 🔵 등록완료 | `0x3f845e79…591a69` | 결과 등록 + **제3자 이의** |
-| 🔵 등록완료 | `0x22f65981…56ba21` | **결과 등록 철회 이력 있음** |
+| 🔴 기한초과 | `0xc2b03f01…545ebe` | **미발행이 드러난다** |
+| 🔵 등록완료 | `0x4fd150e4…591a69` | 결과 등록 + **제3자 이의** |
+| 🔵 등록완료 | `0xaced9670…56ba21` | **결과 등록 철회 이력 있음** |
 
 상세에서 확인할 것:
 
 - `커밋` — 발행자 주소가 링크다. 누르면 그 지갑의 다른 판단으로 간다
 - `예상 결과` — 조건이 `> 1`, 관측 구간이 UTC 로 명시
-- `결과 등록` — 관측값 `92602000`, 출처 `upbit-1m-candles`
+- `결과 등록` — 관측값 `91998000`, 출처 `upbit-1m-candles`
 - `이의` — 이의자가 **정산자와 다른 주소**(`0xca89C0F2…Af5c`)
 - 목록마다 「조회된 것이 전부라는 보장은 없습니다」
 
@@ -53,11 +53,12 @@ git clone https://github.com/Bo621/POI.git && cd POI && pnpm install
 
 export POI_RPC_URL=https://sepolia-rpc.giwa.io/
 export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
-export POI_SETTLEMENT_RESOLVER_ADDRESS=0x2b21d233b51bc08d0e54458470c4bfef364baee6
-export POI_METRIC_REGISTRY_ADDRESS=0xd4786313817f1bfd14fc6047fdce9db8382e879a
+export POI_SETTLEMENT_RESOLVER_ADDRESS=0x87c7a8b3970986e51a8b24e78078540115a70c8c
+export POI_METRIC_REGISTRY_ADDRESS=0x2b379095a8b296e2c61f8153e06fc4cdef56af57
+export POI_DECISION_SCHEMA_UID=0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151
 
 node --experimental-strip-types verifier/src/cli.ts \
-  0x3f845e794b96ba9df4383aaf5bd1b886730538e3aa9b5c8d5d91d8b4ec51ce0d --json
+  0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8 --json
 ```
 
 **기대**: `"verdict": "MATCH"` · 종료코드 `0`.
@@ -70,7 +71,7 @@ node --experimental-strip-types verifier/src/cli.ts \
 ## S4 — 기준이 고정돼 있는지 본다
 
 ```bash
-cast call 0xd4786313817f1bfd14fc6047fdce9db8382e879a \
+cast call 0x2b379095a8b296e2c61f8153e06fc4cdef56af57 \
   "metrics(bytes32)(bool,uint8,uint8,bytes32,bool)" \
   0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf \
   --rpc-url https://sepolia-rpc.giwa.io/
@@ -87,7 +88,7 @@ cast keccak "0x$(xxd -p -c 999999 < docs/metrics/BTC_PRICE_KRW_AT_END.md | tr -d
 ## S5 — 컨트랙트 소스를 본다
 
 ```
-https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e879a
+https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
 ```
 
 **기대**: `Pass - Verified`. 리졸버 4종 모두 검증돼 있다.
@@ -166,7 +167,7 @@ commitment 프리이미지에 **attester** 가 들어가므로, 남의 commitmen
 |---|---|
 | S1 홈 (지갑 없음) | ✅ 3줄 소개 · 집계 숫자 없음 · chainId 91342 |
 | S2 예시 증서 | ✅ 기한초과 · 등록완료+이의 · 철회 이력 세 상태 |
-| S3 오프체인 재현 | ✅ `MATCH` · 종료코드 0 · 재계산값 `92602000` = 온체인 |
+| S3 오프체인 재현 | ✅ `MATCH` · 종료코드 0 · 재계산값 `91998000` = 온체인 |
 | S4 지표 해시 대조 | ✅ `0xdb9b1a42…` 일치 · `frozen = true` |
 | S5 컨트랙트 소스 | ✅ 4종 `Pass - Verified` |
 | S6 결정 커밋 | ✅ 폼·salt 백업 강제 동작 |

@@ -37,7 +37,7 @@
 
 
 > **1인 팀이라는 사실을 숨기지 말 것.** 혼자 여기까지 만들었다는 것 자체가
-> 심사 기준 03(실현 가능성)·05(팀 역량)의 근거다. 배포된 컨트랙트와 407개 테스트가 증거다.
+> 심사 기준 03(실현 가능성)·05(팀 역량)의 근거다. 배포된 컨트랙트와 414개 테스트가 증거다.
 > 백엔드 「합류 예정」은 이름·확정 의사·시점이 없으면 적지 않는다.
 
 ## 심사 기준 대조
@@ -58,22 +58,22 @@
 | | 근거 |
 |---|---|
 | 01 실제 구현 수준 | 4상태 fixture 가 테스트넷에 살아 있음 |
-| 02 기술 완성도 | 불변식 온체인 강제 · 테스트 407개 ([TEST_RECORD.md](TEST_RECORD.md)) |
+| 02 기술 완성도 | 불변식 온체인 강제 · 테스트 414개 ([TEST_RECORD.md](TEST_RECORD.md)) |
 
 ## 확보된 링크
 
 ```
 문항 8
 https://poi-static-production.up.railway.app
-  /#/d/0x919d4326…ffc30f   기한초과
-  /#/d/0x3f845e79…51ce0d   등록완료 + 제3자 이의
-  /#/d/0x22f65981…fc6f7d   철회 이력 + 정정
+  /#/d/0xc2b03f01…f22c5e   기한초과
+  /#/d/0x4fd150e4…abb3f8   등록완료 + 제3자 이의
+  /#/d/0xaced9670…49c49b   철회 이력 + 정정
 
 문항 9 — 전부 Pass - Verified
-https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e879a
-https://sepolia-explorer.giwa.io/address/0x2b21d233b51bc08d0e54458470c4bfef364baee6
-https://sepolia-explorer.giwa.io/address/0x74e6165fa656d4ad89cad1bcc0af32598193f3e0
-https://sepolia-explorer.giwa.io/address/0xa8bd89b229dcb07e90e84df18e0fae27fa965f0c
+https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
+https://sepolia-explorer.giwa.io/address/0x87c7a8b3970986e51a8b24e78078540115a70c8c
+https://sepolia-explorer.giwa.io/address/0xa7203c170dedb490e32c492cdbe9e968c57168aa
+https://sepolia-explorer.giwa.io/address/0x03822d12dddb59d28cf1197853c5ae85beb1d165
 ```
 
 **심사자가 지갑 없이 전부 확인할 수 있다.** 지원서에 이 한 줄을 적어두면 바로 눌러본다.
