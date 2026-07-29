@@ -487,13 +487,14 @@ button:disabled {
 
 .record-row {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    /* UID 칸을 1fr 로 두고 min-inline-size:0 을 주면 내용보다 좁아져 옆 칸을 침범한다.
+       UID 는 축약형이라 폭이 고정이므로 max-content 로 두고, 남는 폭은 detail 이 가진다. */
+    grid-template-columns: auto max-content minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--space-4);
 }
 
 .record-row__uid {
-    min-inline-size: 0;
     overflow-wrap: normal;
     white-space: nowrap;
 }

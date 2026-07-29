@@ -224,7 +224,7 @@ export async function readMetricDefinition(decisionSchema: Hex, metricId: Hex): 
  */
 const LOG_WINDOW = 90_000n;
 
-function fetchLogWindow(schema: Hex, attester: Address | undefined, from: bigint, to: bigint) {
+function fetchLogWindow(schema: Hex, attester: Address | undefined, from: bigint, to: bigint | "latest") {
     return withRetry(() => publicClient.getLogs({
         address: EAS_ADDRESS,
         event: ATTESTED_EVENT,
@@ -235,13 +235,15 @@ function fetchLogWindow(schema: Hex, attester: Address | undefined, from: bigint
 }
 
 async function getLogsChunked(schema: Hex, attester?: Address) {
-    const latest = await withRetry(() => publicClient.getBlockNumber());
+    // cacheTime: 0 — 캐시된 블록 번호를 쓰면 방금 채굴된 블록이 조회에서 빠진다.
+    const latest = await withRetry(() => publicClient.getBlockNumber({cacheTime: 0}));
     const out: Awaited<ReturnType<typeof fetchLogWindow>> = [];
     let from = DEPLOY_BLOCK > 0n ? DEPLOY_BLOCK : 0n;
     while (from <= latest) {
-        const to = from + LOG_WINDOW - 1n > latest ? latest : from + LOG_WINDOW - 1n;
-        out.push(...await fetchLogWindow(schema, attester, from, to));
-        from = to + 1n;
+        const end = from + LOG_WINDOW - 1n;
+        // 마지막 구간은 "latest" 로 닫는다. 위에서 읽은 번호와 지금 사이에 블록이 늘어날 수 있다.
+        out.push(...await fetchLogWindow(schema, attester, from, end >= latest ? "latest" : end));
+        from = end + 1n;
     }
     return out;
 }

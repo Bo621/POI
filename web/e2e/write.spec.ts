@@ -83,7 +83,10 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
     await expect(page.getByRole("img", {name: /상태: (대기|관측중)/})).toBeVisible();
 
     await page.goto("/#/me");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    // 연결 상태에서는 '연결' 버튼을 보여주지 않는다. 이미 연결돼 있으면 누를 것이 없다.
+    const connect = page.getByRole("button", {name: "연결", exact: true});
+    if (await connect.count()) await connect.click();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
     await expect(section(page, "전체").getByText(
         new RegExp(`^${uid!.slice(0, 10)}…${uid!.slice(-6)}$`, "i"),
     )).toBeVisible();
