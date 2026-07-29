@@ -95,6 +95,15 @@ node --experimental-strip-types verifier/src/reveal-cli.ts \
 
 `POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021`이 필요하다.
 
+## 공개 URL
+
+```
+https://poi-static-production.up.railway.app
+```
+
+지갑 없이 조회·검증이 됩니다. Railway 서비스 `poi-static`,
+Railpack SPA 모드(`RAILPACK_SPA_OUTPUT_DIR=web/dist`)로 저장소를 그대로 빌드합니다.
+
 ## 프론트 빌드
 
 ```bash

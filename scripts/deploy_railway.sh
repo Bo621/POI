@@ -68,4 +68,4 @@ railway up --service poi-web --detach
 echo
 echo "배포 시작됨. 확인:"
 echo "  railway status"
-echo "  curl -sI https://poi-web-production.up.railway.app/ | head -1"
+echo "  curl -sI https://poi-static-production.up.railway.app/ | head -1"

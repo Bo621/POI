@@ -24,8 +24,14 @@ GIWA Sepolia(`91342`)에 배포돼 있고, **이 문서의 모든 주장은 직�
 | 컨트랙트 | 리졸버 4종 — 익스플로러에서 소스 검증됨 |
 | 스키마 | EAS 스키마 4종 (note · decision · settlement · challenge) |
 | 지표 | 2종 등록, **정의 문서 해시로 고정(frozen)** |
-| 화면 | 커밋 → 결과 등록 → 이의 → 공개 검증 전 경로 |
+| 화면 | **공개 URL — 지갑 없이 조회·검증** [https://poi-static-production.up.railway.app](https://poi-static-production.up.railway.app) |
 | 오프체인 검증기 | `poi-verify` · `poi-reveal` CLI |
+
+```
+https://poi-static-production.up.railway.app
+https://poi-static-production.up.railway.app/#/d/0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe   ← 기한초과
+https://poi-static-production.up.railway.app/#/d/0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69   ← 등록완료 + 이의
+```
 
 주소·UID 전체: [`../DEPLOYMENT.md`](../DEPLOYMENT.md)
 

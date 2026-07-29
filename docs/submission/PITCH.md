@@ -165,7 +165,7 @@ GIWA 생태계에 **편입**된다.
 | 테스트 | **384개** (2026-07-29 한 자리 연속 실행) |
 
 ```
-https://poi-web-production.up.railway.app
+https://poi-static-production.up.railway.app
 ```
 
 ---
@@ -257,7 +257,7 @@ Phase 2의 실행 정합성 검증이 이 문제를 좁힌다.
 # 믿으라고 하지 않는다. 확인하라고 한다.
 
 ```
-https://poi-web-production.up.railway.app
+https://poi-static-production.up.railway.app
 https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
 ```
 
