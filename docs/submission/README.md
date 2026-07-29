@@ -56,8 +56,8 @@ https://poi-static-production.up.railway.app/#/d/0x3f845e794b96ba9df4383aaf5bd1b
 
 ```
                 커밋 1건      결정 커밋 36건/년
-GIWA            0.53원              19원
-이더리움 L1    5,040원         181,000원
+GIWA            1.21원              19원
+이더리움 L1    850원         181,000원
 ```
 
 고비용 체인에서 비용을 줄이려면 두 갈래뿐이고 둘 다 POI를 깎아냅니다.

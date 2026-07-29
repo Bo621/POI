@@ -97,7 +97,7 @@ https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e8
 # 여기부터 지갑이 필요하다
 
 테스트넷 지갑에 GIWA Sepolia 가스가 조금 필요하다 —
-[faucet.giwa.io](https://faucet.giwa.io/) 에서 받는다. 커밋 한 건이 0.53원 수준이다.
+[faucet.giwa.io](https://faucet.giwa.io/) 에서 받는다. 커밋 한 건이 1.21원 수준이다.
 
 ## S6 — 직접 결정을 커밋한다
 
