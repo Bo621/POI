@@ -139,8 +139,12 @@ a{color:var(--seal);text-decoration-thickness:1px;text-underline-offset:3px}
 @media(max-width:760px){
   .slide{padding:2rem 1.2rem 5.2rem}
   h2{max-width:none}
-  /* viewBox 단위라 값을 키우면 축소된 화면에서 상대적으로 커진다 */
-  .s-lab{font-size:17px}.s-txt{font-size:18px}.s-hot{font-size:18px}
+  /* viewBox 를 화면 폭에 맞춰 축소하면 18px 도 375px 화면에서 7px 가 된다.
+     축소 대신 최소 폭을 주고 figure 를 가로 스크롤시킨다 — 글자 크기가 유지된다. */
+  figure{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  svg{min-width:620px}
+  .s-lab{font-size:15px}.s-txt{font-size:16px}.s-hot{font-size:16px}
+  figcaption{position:sticky;left:0}
   td:first-child{white-space:normal}
   .bar{gap:.8rem;font-size:.62rem;padding:0 1.2rem}
   .bar span:nth-child(2){display:none}
@@ -270,7 +274,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <text class="s-lab" x="20" y="182" fill="var(--ink-faint)">추정치 — 가스 가격만 실측. gas 120,000 · ETH $3,000/1,400원 · L1 10 gwei 가정</text>
   </svg>
   </figure>
-  <p class="lede eave">비용을 줄이려 커밋을 묶으면 <strong>절감은 기본가스뿐이라 약 17%에 그친다.</strong> 그리고 묶는 순간 잃는 것이 있다 — 다음 장.</p>
+  <p class="lede eave">비용을 줄이려 커밋을 묶어도 <strong>절감은 기본가스뿐이라 약 17%에 그친다.</strong> 그리고 묶는 순간 <em>같은 배치 안의 결정 선후 관계를 잃는다</em> — EAS 배치는 모든 attestation 에 같은 timestamp 를 넣기 때문이다(I2).</p>
 </section>
 
 <!-- 7 ─────────────────────────────────────── -->
@@ -312,7 +316,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>도장 Verified Address</td><td>KYC 결속 온체인 신원</td></tr>
     <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
   </table></div>
-  <p class="lede eave">EAS 배치는 <strong>한 트랜잭션의 모든 attestation에 같은 timestamp를 넣는다.</strong> 그래서 여러 결정을 묶으면 I2(부모가 자식보다 엄격히 빨라야 한다)에 걸려 <em>같은 배치 안의 선후 관계가 끊긴다.</em></p>
+  <p class="lede eave">그래서 앞 장의 배치 문제가 생긴다 — EAS 배치는 한 트랜잭션의 모든 attestation 에 <strong>같은 timestamp</strong> 를 넣고, I2 는 부모가 자식보다 <strong>엄격히</strong> 빨라야 한다고 요구한다.</p>
 </section>
 
 <!-- 8 ─────────────────────────────────────── -->
