@@ -73,3 +73,27 @@ test("발행 경고는 nav 가 아니라 기록하기에 있다", async ({page})
     await page.goto("/#/verify");
     await expect(page.getByText(warning)).toHaveCount(0);
 });
+
+test("새로고침해도 연결이 유지된다", async ({page}) => {
+    // eth_accounts 는 프롬프트 없이 이미 승인된 계정을 돌려준다.
+    // 이걸 쓰지 않아서 새로고침할 때마다 '지갑 연결 안 됨' 으로 돌아갔다.
+    await injectWallet(page, accounts.A, rpcUrl);
+    await page.goto("/#/me");
+    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
+    await expect(page.getByRole("button", {name: "연결", exact: true})).toHaveCount(0);
+});
+
+test("연결을 해제하면 상태가 지워진다", async ({page}) => {
+    await injectWallet(page, accounts.A, rpcUrl);
+    await page.goto("/#/me");
+    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
+
+    await page.getByRole("button", {name: "연결 해제", exact: true}).click();
+    await expect(page.getByRole("navigation").getByText("지갑 연결 안 됨")).toBeVisible();
+    await expect(page.locator("main").getByText("지갑을 연결하면 내 기록을 불러옵니다.")).toBeVisible();
+});
