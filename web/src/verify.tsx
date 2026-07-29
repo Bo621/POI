@@ -15,7 +15,7 @@ export function Verify() {
     }
     return <main>
         <header className="doc-header"><h1>검증하기</h1><p className="doc-note">지갑이 필요 없습니다</p></header>
-        <section className="doc-section"><h2>① 기록 열기</h2><p className="doc-note">공개 대조는 결정 상세의 “공개”에서 합니다. UID를 넣으면 이동합니다.</p><form className="doc-form" onSubmit={open}>
+        <section className="doc-section"><h2>① 증서 조회</h2><p className="doc-note">공개 대조는 결정 상세의 “공개”에서 합니다. UID를 넣으면 이동합니다.</p><form className="doc-form" onSubmit={open}>
             <div className="field"><label htmlFor="verify-uid">decisionUID</label><input className="uid" id="verify-uid" value={uid} onChange={event => setUid(event.target.value)} /></div>
             <button className="btn" type="submit">열기</button>
         </form>{error && <p className="form-status" role="alert">{error}</p>}</section>

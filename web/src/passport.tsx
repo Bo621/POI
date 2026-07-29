@@ -1,10 +1,24 @@
 import {useEffect, useState} from "react";
 import type {Address} from "viem";
 import {loadRecords, type RecordRow} from "./records";
+import {routeToHash} from "./router";
 import {describeState} from "./status";
 import {RecordRowView} from "./recordRow";
 
 export type PassportRow = RecordRow;
+
+/**
+ * 발행자 주소 → 그 사람의 다른 판단으로 가는 길.
+ * 결정 하나만 보고 끝나면 Decision Graph가 아니다.
+ * 주소는 반드시 소문자로 — 이 저장소에서 대소문자 비교가 세 번 문제였다.
+ */
+export function AttesterLink({address}: {address: string}) {
+    return (
+        <a className="hex" href={routeToHash({name: "passport", address: address.toLowerCase() as Address})}>
+            {address}
+        </a>
+    );
+}
 
 export function sortByCommittedAtDesc(rows: PassportRow[]): PassportRow[] {
     return rows

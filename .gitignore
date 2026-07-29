@@ -39,3 +39,4 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 *.swp
+.railway-deploy/

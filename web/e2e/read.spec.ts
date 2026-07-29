@@ -119,3 +119,15 @@ test("Passport에 목록과 비순위 안내가 나온다", async ({page}) => {
     )).toBeVisible();
     await expect(passport.getByText(/순위나 성과 지표가 아닙니다/)).toBeVisible();
 });
+
+test("상세의 발행자를 누르면 그 지갑의 Passport로 간다", async ({page}) => {
+    const uid = requireSeed().fixtures.f1.decisionUID;
+    await page.goto(`/#/d/${uid}`);
+    // 결정 하나에서 그 사람의 다른 판단으로 가는 길이 Decision Graph의 요점이다.
+    // 체인이 돌려주는 attester는 체크섬 표기라 대소문자가 다르다. 이 저장소에서 네 번째다.
+    await page.locator("main")
+        .getByRole("link", {name: new RegExp(`^${accounts.A}$`, "i")})
+        .first().click();
+    await expect(page).toHaveURL(new RegExp(`#/passport/${accounts.A.toLowerCase()}$`, "i"));
+    await expect(page.locator("main").getByText(/순위나 성과 지표가 아닙니다/)).toBeVisible();
+});

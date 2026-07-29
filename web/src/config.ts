@@ -31,6 +31,8 @@ export const RESOLVERS = {
     challenge: import.meta.env.VITE_CHALLENGE_RESOLVER ?? "",
 };
 
+export const DEPLOY_BLOCK = BigInt(import.meta.env.VITE_DEPLOY_BLOCK ?? "0");
+
 export const DOJANG_SCHEMA_UID = import.meta.env.VITE_DOJANG_SCHEMA_UID ?? "";
 
 export function isLocalChain(): boolean {

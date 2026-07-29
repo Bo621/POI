@@ -262,6 +262,11 @@ export function Decision({address, verification, chainNow, skewSeconds, onPublis
                 <button className="btn" type="submit" disabled={!isDeployed() || chainNow === undefined}>salt 생성 및 백업</button>
             </form>
             {!address && <p className="notice notice--quiet">지갑을 연결해야 결정 기록을 발행할 수 있습니다.</p>}
+            {/* 발행 시점 경고다. 전역 nav 에 두면 조회만 하는 화면에서도 계속 보이고,
+                nav 높이를 키워 본문 제목을 가린다 — 실제로 그랬다. */}
+            {address && verification.verifiedAddressUID === ZERO_UID && (
+                <p className="notice notice--quiet">검증 지갑 스냅샷 UID를 찾지 못했습니다 — <code>verifiedAddressUID</code>가 0으로 기록됩니다.</p>
+            )}
             {chainNow === undefined && <p className="doc-note">체인 시각을 확인하는 중입니다.</p>}
             {skewNotice && <p className="notice--quiet">{skewNotice}</p>}
             {status && <p className="form-status" role="alert">{status}</p>}

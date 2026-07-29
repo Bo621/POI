@@ -1,4 +1,4 @@
-import {RESULT, deriveState, evidenceTier, formatGrade, REVEAL_STATE} from "@poi/core";
+import {OP, RESULT, deriveState, evidenceTier, formatGrade, REVEAL_STATE} from "@poi/core";
 import {useEffect, useRef, useState} from "react";
 import type {Address, Hex} from "viem";
 import {CHAIN, EAS_ADDRESS, RESOLVERS, SCHEMAS, SCHEMA_REGISTRY_ADDRESS} from "./config";
@@ -10,6 +10,7 @@ import {
     readSettlement,
     readSettlementState,
 } from "./read";
+import {AttesterLink} from "./passport";
 import {Reveal} from "./reveal.tsx";
 import {ZERO_UID} from "./wallet";
 import {ErrorBoundary} from "./errorBoundary";
@@ -27,7 +28,15 @@ const resultLabel = (result: number) => result === RESULT.OBSERVED ? "OBSERVED"
     : result === RESULT.NOT_OBSERVED ? "NOT_OBSERVED" : "INDETERMINATE";
 const short = (value: string) => `${value.slice(0, 10)}…${value.slice(-6)}`;
 const time = (value: bigint) => new Date(Number(value) * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC");
-const op = (value: number) => ["=", "≠", ">", "≥", "<", "≤"][value] ?? String(value);
+/**
+ * 기호는 core의 OP에서 **파생**시킨다. 배열에 손으로 늘어놓았더니 여섯 개가 전부
+ * 어긋나 있었고(op=1이 `>=`인데 화면엔 `≠`), 모든 결정의 조건이 잘못 표시됐다.
+ * 검증하는 사람이 읽는 값이므로 여기서 틀리면 제품 전체가 거짓말을 한다.
+ */
+const OP_SYMBOL: Record<number, string> = {
+    [OP.GT]: ">", [OP.GTE]: "≥", [OP.LT]: "<", [OP.LTE]: "≤", [OP.EQ]: "=", [OP.NEQ]: "≠",
+};
+export const op = (value: number) => OP_SYMBOL[value] ?? String(value);
 
 function CopyButton({text, children}: {text: string; children: string}) {
     const [copied, setCopied] = useState(false);
@@ -44,7 +53,7 @@ function SettlementBlock({record, address, previous = false, onSuccess}: {record
             <dt>관측값</dt><dd>{record.hasObservedValue ? record.observedValue.toString() : "없음"}</dd>
             <dt>출처</dt><dd>{record.source}</dd>
             <dt>관측 시각</dt><dd className="timestamp">{time(record.observedAt)}</dd>
-            <dt>발행자</dt><dd className="hex">{record.attester}</dd>
+            <dt>발행자</dt><dd><AttesterLink address={record.attester} /></dd>
         </dl>
         <ErrorBoundary label="이의"><Challenge settlementUID={record.uid} address={address} onSuccess={onSuccess} /></ErrorBoundary>
     </div>;
@@ -63,6 +72,19 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [metric, setMetric] = useState<{decimals: number; definitionHash: Hex}>();
     const [metricError, setMetricError] = useState("");
     const [refreshKey, setRefreshKey] = useState(0);
+
+    /**
+     * 발행은 영수증까지 기다리는데도 바로 다시 읽으면 옛 값이 온다 —
+     * 공개 RPC 는 노드가 여러 대라 쓰기 직후 읽기가 아직 반영되지 않는다.
+     * 실제로 정산이 온체인에 올랐는데 화면은 「등록대기」로 남았다.
+     * 그래서 한 번이 아니라 몇 번 더 읽는다.
+     */
+    const refreshSoon = () => {
+        setRefreshKey((value) => value + 1);
+        for (const delay of [2500, 6000, 12000]) {
+            setTimeout(() => setRefreshKey((value) => value + 1), delay);
+        }
+    };
     const loadedUID = useRef<Hex>();
 
     useEffect(() => {
@@ -143,7 +165,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         </section></ErrorBoundary>
         {state.hasRevokedSettlement && <p className="revocation-note">결과 등록 철회 이력 있음</p>}
         <section className="doc-section"><h2>커밋</h2><dl className="doc-fields">
-            <dt>발행자</dt><dd className="hex">{decision.attester} · 미검증 지갑</dd>
+            <dt>발행자</dt><dd><AttesterLink address={decision.attester} /> · 미검증 지갑</dd>
             <dt>커밋 시각</dt><dd className="timestamp">{time(decision.time)}</dd>
             <dt>검증 스냅샷</dt><dd className="hex">{decision.verifiedAddressUID}</dd>
         </dl></section>
@@ -156,13 +178,13 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         <ErrorBoundary label="결과 등록"><section className="doc-section"><h2>결과 등록</h2>
             <p className="doc-note">선언한 예상 결과가 실제로 어떻게 됐는지 온체인에 남깁니다.<br />
                 넣는 것은 관측값과 출처뿐이고, 맞았는지 여부는 컨트랙트가 계산합니다.</p>
-            {owner && <SettlementForm decisionUID={uid} address={address} onSuccess={() => setRefreshKey(value => value + 1)} />}
+            {owner && <SettlementForm decisionUID={uid} address={address} onSuccess={refreshSoon} />}
             {address && !owner && <p className="doc-note">결정 작성자만 결과를 등록할 수 있습니다.</p>}
             {!address && <><button className="btn-commit" type="button" disabled>결과 등록하기</button><p className="doc-note">지갑을 연결해야 결과를 등록할 수 있습니다.</p></>}
             {settlementError && <p className="form-status">확인 불가 <button className="btn" onClick={() => window.location.reload()}>다시 시도</button></p>}
-            {active ? <SettlementBlock record={active} address={address} onSuccess={() => setRefreshKey(value => value + 1)} /> : <p className="doc-note">활성 결과 등록이 없습니다.</p>}
+            {active ? <SettlementBlock record={active} address={address} onSuccess={refreshSoon} /> : <p className="doc-note">활성 결과 등록이 없습니다.</p>}
             {previous.length > 0 && <details><summary>이전 결과 등록 (철회됨)</summary>
-                {previous.map((record) => <SettlementBlock key={record.uid} record={record} address={address} previous onSuccess={() => setRefreshKey(value => value + 1)} />)}
+                {previous.map((record) => <SettlementBlock key={record.uid} record={record} address={address} previous onSuccess={refreshSoon} />)}
             </details>}
             <p className="notice--quiet">결과는 관측값으로부터 컨트랙트가 판정합니다. 직접 고를 수 없습니다.</p>
         </section></ErrorBoundary>
@@ -170,7 +192,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         <ErrorBoundary label="계보"><section className="doc-section"><h2>계보</h2><details><summary>계보</summary>
             <p className="notice--quiet">조회된 것이 전부라는 보장은 없습니다.</p>
             {dagError && <p className="form-status">확인 불가</p>}
-            {dag?.nodes.map(node => <dl className="doc-fields" key={node.uid}><dt>UID</dt><dd className="hex">{node.uid}</dd><dt>발행자</dt><dd className="hex">{node.attester}</dd></dl>)}
+            {dag?.nodes.map(node => <dl className="doc-fields" key={node.uid}><dt>UID</dt><dd className="hex">{node.uid}</dd><dt>발행자</dt><dd><AttesterLink address={node.attester} /></dd></dl>)}
         </details></section></ErrorBoundary>
         <ErrorBoundary label="검증 근거"><section className="doc-section"><details><summary>검증 근거</summary><dl className="doc-fields">
             <dt>체인</dt><dd>{CHAIN.name} · chainId {CHAIN.id}</dd>

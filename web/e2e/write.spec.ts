@@ -1,5 +1,6 @@
 import {expect, test, type Locator, type Page} from "@playwright/test";
 import {
+    ensureConnected,
     accounts,
     chainNow,
     injectWallet,
@@ -20,7 +21,7 @@ function section(page: Page, heading: string): Locator {
 async function connect(page: Page, account = accounts.A, hash = "#/record"): Promise<void> {
     await injectWallet(page, account, rpcUrl);
     await page.goto(`/${hash}`);
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
     await expect(page.getByRole("navigation").getByText(shortAddressRe(account))).toBeVisible();
 }
 
@@ -83,7 +84,8 @@ test("결정 커밋은 백업 확인 뒤 발행되고 상태 조회가 된다", 
     await expect(page.getByRole("img", {name: /상태: (대기|관측중)/})).toBeVisible();
 
     await page.goto("/#/me");
-    await page.getByRole("button", {name: "연결", exact: true}).click();
+    await ensureConnected(page);
+    await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible();
     await expect(section(page, "전체").getByText(
         new RegExp(`^${uid!.slice(0, 10)}…${uid!.slice(-6)}$`, "i"),
     )).toBeVisible();

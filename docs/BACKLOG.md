@@ -21,13 +21,13 @@
 | L0 | **P0** | 로컬 포크 개발 환경 (`anvil --fork-url`) | — | `[x]` chainId 91342 · EAS `1.4.1-beta.3` · Dojang `isVerified` · 10,000 ETH · `evm_increaseTime` 확인 |
 | O1 | **P0** | 배포 지갑 생성 + 파우셋 클레임 | — | `[x]` `0x77E8DFC4…C2dfaa` — **0.015 ETH** 확인 (2026-07-27 23:5x, nonce 0). 개인키는 `.env`에만, 커밋 금지 |
 | O2 | **P0** | 법률 검토 게이트 (B14) | — | `[ ]` 정산 상태·이의 공개 범위가 기획 A.6과 충돌하지 않음을 확인. **되돌릴 수 없는 온체인 공개 전** |
-| O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[ ]` 리졸버 4종 배포 → 스키마 4종 등록(settlement·challenge만 `revocable=true`) → `initialize` → 각 리졸버 `ready` |
-| O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[ ]` `windowStart=now, windowEnd=now+10m, graceSeconds=1h` 커밋. tx 해시와 `T_overdue` 기록 |
-| O5 | **P0** | `addMetric × 2` (등록 즉시 frozen) | O3, V3 | `[ ]` V3 완료 — `definitionHash`는 `docs/metrics/manifest.json`에 있다. 배포(O3) 후 실행만 남음 |
+| O3 | **P0** | 배포 스크립트 — §6.6 순서 1~6 | C2~C6 | `[x]` 리졸버 4종 + 스키마 4종 + initialize 완료. 주소·UID는 `docs/DEPLOYMENT.md` |
+| O4 | **P0** | **OVERDUE fixture 즉시 커밋** | O3 | `[x]` `0x68df5b76…b654` · **T_overdue = 1785256156 (2026-07-29 01:29:16 KST)** |
+| O5 | **P0** | `addMetric × 2` (등록 즉시 frozen) | O3, V3 | `[x]` 2종 등록·frozen 확인 (tx `0x1aa6aab0…` · `0x794c8136…`) |
 | O6 | P1 | 소유권 multisig 이전 (`Ownable2Step`) | O5 | `[ ]` `renounce` 하지 않음 — Phase 1 지표 추가 필요(B13) |
-| O7 | P1 | 데모용 fixture 세트 | O4 | `[ ]` SETTLED / 철회→정정 / 이의 있음 / OVERDUE 4종 |
+| O7 | P1 | 데모용 fixture 세트 | O4 | `[x]` 등록완료+이의 · 철회→정정 · 기한초과 3종. 이의자는 별도 지갑 |
 | O8 | **P0** | 데모 녹화 | G6, O7 | `[ ]` OVERDUE·이의·철회 이력이 **화면에 보임** |
-| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[~]` 엔드포인트 확인 — `https://sepolia-explorer.giwa.io/api` (chain 91342), `foundry.toml [etherscan]`에 반영. 배포 후 verify만 남음 |
+| O9 | P2 | 익스플로러 컨트랙트 검증 | O3 | `[x]` 4종 모두 `Pass - Verified` (sepolia-explorer.giwa.io) |
 
 ---
 
@@ -123,7 +123,7 @@ C8의 9종과 합쳐 `FOUNDRY_PROFILE=fork` 29/29). CT18은 온체인 항목이 
 | V1 | **P0** | verifier v1.0 골격 — decisionUID 입력 → 판정 출력 | `[x]` `verifier/`. E2·E4·E5·E9 전부 `@poi/core` 재사용(두 벌을 만들지 않는다). `VERIFIER_VERSION = "poi-verifier/1.0.0"` 고정. `ChainReader` 인터페이스 분리로 테스트는 네트워크 없이 14/14 |
 | V2 | **P0** | 온체인 정산과 대조 | `[x]` **업비트 1분봉 provider 2종 구현 완료.** 종료코드 0=일치 · 1=불일치 · 2=조회 실패 · **3=검증 못 함**(0으로 두면 '검증됨'과 구별 안 되고 1로 묶으면 '틀림'과 뭉개진다). 온체인 `definitionHash`·`decimals`·`kind`·`allowed`를 manifest와 대조 · 스냅샷 해시를 리포트에 포함 · `now`는 체인 시간. 45/45 |
 | V3 | **P0** | **metric 정의 문서** (§11.3) | `[x]` **2종** (사용자 결정 — 나머지 4종은 Phase 1). `BTC_PRICE_KRW_AT_END`(decimals 0) · `BTC_MAX_DRAWDOWN_IN_WINDOW`(decimals 1). 업비트 공개 1분봉·UTC·보간 없음·half-up·스냅샷 해시. 해시는 `cast keccak`로 생성해 `docs/metrics/manifest.json`에 고정, core 테스트가 문서 바이트로 재계산해 대조 |
-| V4 | P1 | reveal 검증 CLI | `[ ]` `(salt, payload)` → C 재계산. 타인 commitment 복사본은 실패(CT18) |
+| V4 | P1 | reveal 검증 CLI | `[x]` `(salt, payload)` → C 재계산. 타인 commitment 복사본은 실패(CT18) |
 
 ### V3 대상 지표 6종
 
