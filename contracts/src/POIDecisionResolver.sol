@@ -34,12 +34,16 @@ contract POIDecisionResolver is POIMetricRegistry {
     ///      이걸 검사하지 않으면 **자기가 자기에게 발급한 아무 attestation** 을
     ///      Verified Address 로 위장할 수 있다 — "커밋 시점에 검증 지갑이었다"가 거짓이 된다.
     /// @dev 신뢰 루트 변경은 조용히 일어나면 안 된다 — 감사가 불가능해진다.
-    event VerifiedAddressSourceChanged(
-        bytes32 previousSchema, address previousIssuer, bytes32 newSchema, address newIssuer
-    );
+    event VerifiedAddressSchemaChanged(bytes32 previousSchema, bytes32 newSchema);
+    event IssuerChanged(address indexed issuer, bytes32 previousLabel, bytes32 newLabel);
 
     bytes32 public verifiedSchemaUID;
-    address public verifiedIssuer;
+
+    /// @dev 허용 발급자 **집합**이다. 도장은 발급자를 여러 명 둔다
+    ///      (UPBIT KOREA · TESTNET FAUCET). 하나만 받으면 그 구조를 못 담는다.
+    ///      값은 라벨이다 — 0 이면 미허용. 어느 발급자가 붙었는지 화면에 표시하기 위해
+    ///      온체인에 이름을 남긴다. 「업비트 KYC 검증」과 「테스트넷 파우셋 검증」은 다르다.
+    mapping(address => bytes32) public issuerLabel;
 
     error MustBeIrrevocable();
     error MalformedPayload();
@@ -67,6 +71,7 @@ contract POIDecisionResolver is POIMetricRegistry {
     error VerifiedAddressNotConfigured();
     error VerifiedAddressWrongSchema();
     error VerifiedAddressWrongIssuer();
+    error ZeroIssuer();
     error OutcomeFieldsMustBeZero();
 
     constructor(IEAS eas) POIResolverBase(eas) {}
@@ -75,26 +80,34 @@ contract POIDecisionResolver is POIMetricRegistry {
     /// @param verifiedSchema Dojang Verified Address 스키마 UID. **0 이면 미설정**이고,
     ///        그 경우 `verifiedAddressUID != 0` 인 결정을 거부한다 — 아무거나 받는 것보다
     ///        받지 않는 것이 안전하다. Dojang 측 UID 를 확보하면 재초기화 없이 owner 가 설정한다.
-    /// @param issuer 허용 발급자 주소.
+    /// @param issuer 허용 발급자 하나. 0 이면 등록하지 않는다. 더 필요하면 `setIssuer`.
+    /// @param label 그 발급자의 이름 (예: "UPBIT KOREA").
     function initialize(
         bytes32 decisionSchemaUID,
         bytes32 noteSchema,
         bytes32 verifiedSchema,
-        address issuer
+        address issuer,
+        bytes32 label
     ) external {
         _requireNonZeroUID(noteSchema);
         noteSchemaUID = noteSchema;
         verifiedSchemaUID = verifiedSchema;
-        verifiedIssuer = issuer;
+        if (issuer != address(0)) issuerLabel[issuer] = label;
         _initializeBase(decisionSchemaUID);
     }
 
     /// @dev Dojang 스키마 UID 는 외부 확인이 늦어질 수 있어 초기화 후에도 설정할 수 있게 둔다.
     ///      owner 만 가능하고, 설정 전에는 검증 스냅샷을 아예 받지 않는다.
-    function setVerifiedAddressSource(bytes32 verifiedSchema, address issuer) external onlyOwner {
-        emit VerifiedAddressSourceChanged(verifiedSchemaUID, verifiedIssuer, verifiedSchema, issuer);
+    function setVerifiedAddressSchema(bytes32 verifiedSchema) external onlyOwner {
+        emit VerifiedAddressSchemaChanged(verifiedSchemaUID, verifiedSchema);
         verifiedSchemaUID = verifiedSchema;
-        verifiedIssuer = issuer;
+    }
+
+    /// @param label 사람이 읽는 이름. 0 을 넣으면 그 발급자를 뺀다.
+    function setIssuer(address issuer, bytes32 label) external onlyOwner {
+        if (issuer == address(0)) revert ZeroIssuer();
+        emit IssuerChanged(issuer, issuerLabel[issuer], label);
+        issuerLabel[issuer] = label;
     }
 
     function onAttest(Attestation calldata a, uint256) internal view override ready returns (bool) {
@@ -180,12 +193,12 @@ contract POIDecisionResolver is POIMetricRegistry {
 
         // 미설정이면 스냅샷을 받지 않는다. 검사할 수 없는 값을 통과시키면
         // "검증 지갑이었다"는 명제가 거짓이 된다.
-        if (verifiedSchemaUID == 0 || verifiedIssuer == address(0)) revert VerifiedAddressNotConfigured();
+        if (verifiedSchemaUID == 0) revert VerifiedAddressNotConfigured();
 
         Attestation memory v = _eas.getAttestation(verifiedUID);
         if (v.uid == 0 || v.recipient != attester) revert BadVerifiedUID();
         if (v.schema != verifiedSchemaUID) revert VerifiedAddressWrongSchema();
-        if (v.attester != verifiedIssuer) revert VerifiedAddressWrongIssuer();
+        if (issuerLabel[v.attester] == 0) revert VerifiedAddressWrongIssuer();
         if (v.revocationTime != 0) revert VerifiedAddressRevoked();
         if (v.expirationTime != 0 && v.expirationTime <= attestTime) revert VerifiedAddressExpired();
     }

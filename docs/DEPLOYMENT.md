@@ -25,10 +25,10 @@
 
 | 컨트랙트 | 주소 |
 |---|---|
-| `POINoteResolver` | `0x03822d12dddb59d28cf1197853c5ae85beb1d165` |
-| `POIDecisionResolver` | `0x2b379095a8b296e2c61f8153e06fc4cdef56af57` |
-| `POISettlementResolver` | `0x87c7a8b3970986e51a8b24e78078540115a70c8c` |
-| `POIChallengeResolver` | `0xa7203c170dedb490e32c492cdbe9e968c57168aa` |
+| `POINoteResolver` | `0x7eefdd7d89d434061cbdb22244d52e78c94e6008` |
+| `POIDecisionResolver` | `0x0f25917176a405bb9022e5b417e0d57348b30f89` |
+| `POISettlementResolver` | `0x167cf06df663c5ddde9f20a748e724b4fb6c14fa` |
+| `POIChallengeResolver` | `0xef4422c035bcce0599e4c951a24059abf707595f` |
 
 `POIDecisionResolver`가 `POIMetricRegistry`를 겸한다 — `addMetric`은 이 주소로 보낸다.
 
@@ -36,10 +36,10 @@
 
 | 스키마 | UID | revocable |
 |---|---|---|
-| `poi.note.v1` | `0x12817297a9c8381a81d2b22ff35ca98ce0ee4e21618e3e39fb638e161a475d11` | false |
-| `poi.decision.v1` | `0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151` | false |
-| `poi.settlement.v1` | `0xb9d802583bb9fecf0846389b40d584510cada0f685d6a25774a1a54f0fb857c4` | **true** |
-| `poi.challenge.v1` | `0x34405f11f0450d75d061fccb958fe5133a51c9a0851c7c4708dbe52925e0efff` | **true** |
+| `poi.note.v1` | `0x817dd70fe2cc9f2de98259ec25b181504b94be0448c54c5a329266fc4619efac` | false |
+| `poi.decision.v1` | `0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749` | false |
+| `poi.settlement.v1` | `0x54c112d4e35161c8b2547a52e450d3f69d4e2199021fbc0035e8e4aa7f23dd6e` | **true** |
+| `poi.challenge.v1` | `0x3557adc085b634167345fe0529a3aab5a5bb27ecddf9f9640acb17b43d90b141` | **true** |
 
 > ### ⚠️ UID는 **영수증에서만** 읽는다 — 배포 중 두 번 걸렸다
 >
@@ -91,7 +91,7 @@ curl -X POST "https://sepolia-explorer.giwa.io/api?module=contract&action=verify
 | Safe | `0x215253B830D51df7f8364fF6dA32140006E4DCE1` (Safe L2 v1.4.1) |
 | 소유자 | `0xA1Cb5CbC…F310` (배포) · `0x77E8DFC4…dfaa` |
 | 임계값 | **2 / 2** |
-| 대상 | `POIDecisionResolver` `0x2b379095…af57` — 실권한이 있는 유일한 컨트랙트 |
+| 대상 | `POIDecisionResolver` `0x0f259171…af57` — 실권한이 있는 유일한 컨트랙트 |
 
 `initialize` 가 일회성이라 note·settlement·challenge 리졸버의 owner 는 아무 권한이 없다.
 그래서 결정 리졸버 하나만 옮겼다.
@@ -124,7 +124,23 @@ pendingOwner 0x0000000000000000000000000000000000000000
 | | |
 |---|---|
 | `verifiedSchemaUID` | `0x072d75e18b2be4f89a13a7147240477481c4b526d5795802acba59046b426e08` (`bool isVerified`) |
-| `verifiedIssuer` | `0x09B170CA2A006081042992bCE7379B85a02149C6` (업비트 코리아) |
+| 발급자 (라벨) | `0x09B170CA…49C6` → **UPBIT KOREA** · `0x63CCe2b5…6121` → **TESTNET FAUCET** |
+
+발급자는 **집합**이다 — 도장이 발급자를 여러 명 두는 구조를 그대로 반영한다.
+라벨을 온체인에 남겨 화면에서 「업비트 KYC 검증」과 「테스트넷 파우셋 검증」을 구별한다.
+**뭉뚱그리면 화면이 사실보다 강한 말을 하게 된다.**
+
+### 검증 지갑으로 발행한 결정 — 온체인 증명
+
+`GIWAFaucetExtension.payAndIssueEAS()` 에 0.001 ETH 를 보내 배포 지갑이 검증을 받았고
+(UID `0xc1f5746c…4bb5`, 유효기간 30일), 그 스냅샷을 붙인 결정을 발행했다.
+
+```
+decision 0x3f592f21…6938   payload word 2 = 0xc1f5746c7b49993e98d470d93da24153fdfd84fe86f6cd53f65da02b85fd4bb5
+화면 표시 「도장 검증 — TESTNET FAUCET」
+```
+
+컨트랙트가 스키마와 발급자를 **둘 다 검증하고** 통과시킨 기록이다.
 
 ### 이 값을 어떻게 특정했나 — 서로 독립적인 세 경로
 
@@ -160,7 +176,7 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 
 | | 값 |
 |---|---|
-| decisionUID | `0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e` |
+| decisionUID | `0x3f592f21a7e5a733d3dd90caeb2f9ec35bffa335b69da7310749694283e16938` |
 | decisionCommitment | `0x46cf8091be32da5ca484417a89ab0bdf9bb41597554c0a519c269ca234f39db9` |
 | salt | `0x0f1e2d3c4b5a69788796a5b4c3d2e1f0` |
 | payload | `{"fixture":"O4","intent":"overdue-demo"}` |
@@ -175,7 +191,7 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 
 ```bash
 node --experimental-strip-types verifier/src/reveal-cli.ts \
-  0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e \
+  0x3f592f21a7e5a733d3dd90caeb2f9ec35bffa335b69da7310749694283e16938 \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
   --payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
   --rpc https://sepolia-rpc.giwa.io/
@@ -214,10 +230,10 @@ I4 가 소급 설정을 막는다. 데모 편의로 핵심 방어를 우회하�
 
 | | UID |
 |---|---|
-| **결정 — 등록완료 + 이의** | `0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8` |
+| **결정 — 등록완료 + 이의** | `0x5941a398a8338b99d053309cbf5e611486f30e649c9569cfa3a63d5060443888` |
 | └ 정산 | `0x7bd0d1ab80dfdfdafe666a60d4dca6ced77e8d0134780445dbeecd5641b82548` |
 | └ **이의 (지갑 B)** | `0x583bd2fe63d99c27e8b3d4030a007c617fdb9f4fc16d93b5b0ec094ac78c1bd1` |
-| **결정 — 철회 이력** | `0xaced96705a1806810bc469938071f692f6c7c249ce6ecacfc27e34a11149c49b` |
+| **결정 — 철회 이력** | `0xb1e4628344ade15e9779b4f0398f3d6ddf820b92094c4c84fe8304a68a683b21` |
 | └ S1 (철회됨) | `0x36b1e6685077f38b2f77a6a7bb0cb49c6456ce861160f246bd12ccef4d6691df` |
 | └ S2 (정정) | `0x9883b7ce2a66d935523f927109671e2a9215e57f6ed7dfb9a59e1c91e774b033` |
 

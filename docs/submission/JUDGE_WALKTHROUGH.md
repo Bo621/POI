@@ -32,9 +32,9 @@ nav 오른쪽에 `GIWA Sepolia · 91342` 가 보인다. **집계 숫자·비율�
 
 | 인장 | UID | 무엇을 보여주나 |
 |---|---|---|
-| 🔴 기한초과 | `0xc2b03f01…545ebe` | **미발행이 드러난다** |
-| 🔵 등록완료 | `0x4fd150e4…591a69` | 결과 등록 + **제3자 이의** |
-| 🔵 등록완료 | `0xaced9670…56ba21` | **결과 등록 철회 이력 있음** |
+| 🔴 기한초과 | `0x3f592f21…545ebe` | **미발행이 드러난다** |
+| 🔵 등록완료 | `0x5941a398…591a69` | 결과 등록 + **제3자 이의** |
+| 🔵 등록완료 | `0xb1e46283…56ba21` | **결과 등록 철회 이력 있음** |
 
 상세에서 확인할 것:
 
@@ -53,12 +53,12 @@ git clone https://github.com/Bo621/POI.git && cd POI && pnpm install
 
 export POI_RPC_URL=https://sepolia-rpc.giwa.io/
 export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
-export POI_SETTLEMENT_RESOLVER_ADDRESS=0x87c7a8b3970986e51a8b24e78078540115a70c8c
-export POI_METRIC_REGISTRY_ADDRESS=0x2b379095a8b296e2c61f8153e06fc4cdef56af57
-export POI_DECISION_SCHEMA_UID=0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151
+export POI_SETTLEMENT_RESOLVER_ADDRESS=0x167cf06df663c5ddde9f20a748e724b4fb6c14fa
+export POI_METRIC_REGISTRY_ADDRESS=0x0f25917176a405bb9022e5b417e0d57348b30f89
+export POI_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
 
 node --experimental-strip-types verifier/src/cli.ts \
-  0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8 --json
+  0x5941a398a8338b99d053309cbf5e611486f30e649c9569cfa3a63d5060443888 --json
 ```
 
 **기대**: `"verdict": "MATCH"` · 종료코드 `0`.
@@ -71,7 +71,7 @@ node --experimental-strip-types verifier/src/cli.ts \
 ## S4 — 기준이 고정돼 있는지 본다
 
 ```bash
-cast call 0x2b379095a8b296e2c61f8153e06fc4cdef56af57 \
+cast call 0x0f25917176a405bb9022e5b417e0d57348b30f89 \
   "metrics(bytes32)(bool,uint8,uint8,bytes32,bool)" \
   0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf \
   --rpc-url https://sepolia-rpc.giwa.io/
@@ -88,7 +88,7 @@ cast keccak "0x$(xxd -p -c 999999 < docs/metrics/BTC_PRICE_KRW_AT_END.md | tr -d
 ## S5 — 컨트랙트 소스를 본다
 
 ```
-https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
+https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89
 ```
 
 **기대**: `Pass - Verified`. 리졸버 4종 모두 검증돼 있다.

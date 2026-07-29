@@ -28,7 +28,7 @@ contract POIDecisionResolverTest is Test {
         vm.warp(NOW);
         eas = new MockEAS();
         r = new POIDecisionResolver(IEAS(address(eas)));
-        r.initialize(DECISION_SCHEMA, NOTE_SCHEMA, DOJANG_SCHEMA, DOJANG_ISSUER);
+        r.initialize(DECISION_SCHEMA, NOTE_SCHEMA, DOJANG_SCHEMA, DOJANG_ISSUER, bytes32("TEST ISSUER"));
         r.addMetric(
             METRIC,
             POIMetricRegistry.MetricSpec({
@@ -439,7 +439,7 @@ contract POIDecisionResolverTest is Test {
     ///      검사할 수 없는 값을 통과시키는 것보다 거부가 안전하다.
     function test_Attest_RevertsOnVerifiedUIDWhenSourceUnconfigured() public {
         POIDecisionResolver bare = new POIDecisionResolver(IEAS(address(eas)));
-        bare.initialize(DECISION_SCHEMA, NOTE_SCHEMA, bytes32(0), address(0));
+        bare.initialize(DECISION_SCHEMA, NOTE_SCHEMA, bytes32(0), address(0), bytes32(0));
         POICodec.DecisionData memory d = _decision();
         d.verifiedAddressUID = _storeVerified(keccak256("verified"), ALICE, 0, 0);
         vm.prank(address(eas));
@@ -447,10 +447,37 @@ contract POIDecisionResolverTest is Test {
         bare.attest(_attestation(d));
     }
 
-    function test_SetVerifiedAddressSource_RevertsForNonOwner() public {
+    function test_SetVerifiedAddressSchema_RevertsForNonOwner() public {
         vm.prank(ALICE);
         vm.expectRevert();
-        r.setVerifiedAddressSource(keccak256("attackerSchema"), ALICE);
+        r.setVerifiedAddressSchema(keccak256("attackerSchema"));
+    }
+
+    function test_SetIssuer_RevertsForNonOwner() public {
+        vm.prank(ALICE);
+        vm.expectRevert();
+        r.setIssuer(ALICE, bytes32("ATTACKER"));
+    }
+
+    /// @dev 발급자를 여러 명 둘 수 있어야 한다 — 도장이 그런 구조다.
+    function test_Attest_AcceptsSecondRegisteredIssuer() public {
+        address second = address(0xD1);
+        r.setIssuer(second, bytes32("TESTNET FAUCET"));
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerifiedWith(keccak256("bySecond"), DOJANG_SCHEMA, second);
+        assertTrue(_attest(_attestation(d)));
+        assertEq(r.issuerLabel(second), bytes32("TESTNET FAUCET"));
+    }
+
+    /// @dev 라벨을 0 으로 두면 그 발급자는 다시 거부된다.
+    function test_Attest_RevertsAfterIssuerRemoved() public {
+        address second = address(0xD2);
+        r.setIssuer(second, bytes32("TEMP"));
+        r.setIssuer(second, bytes32(0));
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerifiedWith(keccak256("removed"), DOJANG_SCHEMA, second);
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressWrongIssuer.selector);
+        _attest(_attestation(d));
     }
 
     function _storeVerifiedWith(bytes32 uid, bytes32 schema, address issuer) internal returns (bytes32) {
@@ -597,7 +624,7 @@ contract POIDecisionResolverTest is Test {
     function test_Initialize_RevertsOnZeroNoteSchema() public {
         POIDecisionResolver fresh = new POIDecisionResolver(IEAS(address(eas)));
         vm.expectRevert(POIResolverBase.ZeroSchemaUID.selector);
-        fresh.initialize(DECISION_SCHEMA, bytes32(0), DOJANG_SCHEMA, DOJANG_ISSUER);
+        fresh.initialize(DECISION_SCHEMA, bytes32(0), DOJANG_SCHEMA, DOJANG_ISSUER, bytes32("TEST"));
         assertFalse(fresh.initialized());
     }
 }

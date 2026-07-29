@@ -1,5 +1,6 @@
 import {
     decodeAbiParameters,
+    hexToString,
     parseAbi,
     parseAbiItem,
     type Address,
@@ -294,6 +295,28 @@ export async function readChallengeLogs(challengeSchema: Hex): Promise<Challenge
 export async function readDecisionLogs(decisionSchema: Hex, attester: Address) {
     const logs = await getLogsChunked(decisionSchema, attester);
     return Promise.all(logs.map((log) => readDecision(log.args.uid!)));
+}
+
+/**
+ * 결정에 붙은 검증 스냅샷이 **누가 발급한 것인지** 읽는다.
+ *
+ * 도장은 발급자를 여러 명 둔다(UPBIT KOREA · TESTNET FAUCET).
+ * 「업비트 KYC 검증」과 「테스트넷 파우셋 검증」은 **다르다** —
+ * 뭉뚱그리면 화면이 사실보다 강한 말을 하게 된다.
+ */
+export async function readVerificationLabel(verifiedUID: Hex): Promise<string | undefined> {
+    if (/^0x0+$/i.test(verifiedUID)) return undefined;
+    const attestation = await getAttestation(verifiedUID);
+    if (/^0x0+$/i.test(attestation.uid)) return undefined;
+    const resolver = await resolverFor(SCHEMAS.decision as Hex);
+    const label = await withRetry(() => publicClient.readContract({
+        address: resolver,
+        abi: parseAbi(["function issuerLabel(address issuer) view returns (bytes32)"]),
+        functionName: "issuerLabel",
+        args: [attestation.attester],
+    }));
+    const text = hexToString(label as Hex, {size: 32}).replace(/\0+$/, "");
+    return text.length > 0 ? text : undefined;
 }
 
 export async function readVerified(address: Address): Promise<boolean | "unknown"> {

@@ -165,7 +165,7 @@ GIWA 생태계에 **편입**된다.
 | 지표 | 2종 등록, 문서 해시로 **frozen** |
 | 화면 | **공개 URL — 지갑 없이 조회·검증** |
 | 검증기 | `poi-verify` · `poi-reveal` CLI |
-| 테스트 | **419개** (2026-07-29 한 자리 연속 실행) |
+| 테스트 | **422개** (2026-07-29 한 자리 연속 실행) |
 
 ```
 https://poi-static-production.up.railway.app
@@ -276,7 +276,7 @@ Phase 2의 실행 정합성 검증이 이 문제를 좁힌다.
 
 ```
 https://poi-static-production.up.railway.app
-https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
+https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89
 ```
 
 ---

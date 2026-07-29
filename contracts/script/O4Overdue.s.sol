@@ -55,6 +55,8 @@ contract O4Overdue is Script {
         d.windowStart = uint64(block.timestamp) + 300;
         d.windowEnd = d.windowStart + 600;
         d.graceSeconds = 1 hours;
+        // 도장 검증 스냅샷. 없으면 0 — 컨트랙트가 미검증 지갑으로 기록한다.
+        d.verifiedAddressUID = vm.envOr("POI_VERIFIED_ADDRESS_UID", bytes32(0));
 
         vm.startBroadcast();
         bytes32 uid = IEASAttest(eas).attest(

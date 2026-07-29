@@ -9,6 +9,7 @@ import {
     readMetricDefinition,
     readSettlement,
     readSettlementState,
+    readVerificationLabel,
 } from "./read";
 import {AttesterLink} from "./passport";
 import {Reveal} from "./reveal.tsx";
@@ -71,6 +72,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
     const [dagError, setDagError] = useState(false);
     const [metric, setMetric] = useState<{decimals: number; definitionHash: Hex}>();
     const [metricError, setMetricError] = useState("");
+    const [issuerLabel, setIssuerLabel] = useState<string | undefined>();
     const [refreshKey, setRefreshKey] = useState(0);
 
     /**
@@ -112,6 +114,10 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
                 if (!current) return;
                 setDecision(loadedDecision); setHeads(loadedSettlement); setActive(loadedSettlement.active);
                 setMetricError("");
+                setIssuerLabel(undefined);
+                void readVerificationLabel(loadedDecision.verifiedAddressUID)
+                    .then((label) => { if (current) setIssuerLabel(label); })
+                    .catch(() => { /* 라벨을 못 읽어도 나머지 화면은 정상이다 */ });
                 void readMetricDefinition(SCHEMAS.decision as Hex, loadedDecision.outcomeMetricId)
                     .then(setMetric)
                     .catch((cause: unknown) => setMetricError(cause instanceof Error ? cause.message : "지표 정의를 불러오지 못했습니다."));
@@ -165,7 +171,7 @@ export function DecisionDetail({uid, address}: {uid: Hex; address?: Address}) {
         </section></ErrorBoundary>
         {state.hasRevokedSettlement && <p className="revocation-note">결과 등록 철회 이력 있음</p>}
         <section className="doc-section"><h2>커밋</h2><dl className="doc-fields">
-            <dt>발행자</dt><dd><AttesterLink address={decision.attester} /> · 미검증 지갑</dd>
+            <dt>발행자</dt><dd><AttesterLink address={decision.attester} /> · {issuerLabel ? `도장 검증 — ${issuerLabel}` : "미검증 지갑"}</dd>
             <dt>커밋 시각</dt><dd className="timestamp">{time(decision.time)}</dd>
             <dt>검증 스냅샷</dt><dd className="hex">{decision.verifiedAddressUID}</dd>
         </dl></section>

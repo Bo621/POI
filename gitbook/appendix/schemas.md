@@ -4,10 +4,10 @@
 
 | 스키마 | UID | revocable |
 |---|---|---|
-| `poi.note.v1` | `0x12817297a9c8381a81d2b22ff35ca98ce0ee4e21618e3e39fb638e161a475d11` | false |
-| `poi.decision.v1` | `0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151` | false |
-| `poi.settlement.v1` | `0xb9d802583bb9fecf0846389b40d584510cada0f685d6a25774a1a54f0fb857c4` | true |
-| `poi.challenge.v1` | `0x34405f11f0450d75d061fccb958fe5133a51c9a0851c7c4708dbe52925e0efff` | true |
+| `poi.note.v1` | `0x817dd70fe2cc9f2de98259ec25b181504b94be0448c54c5a329266fc4619efac` | false |
+| `poi.decision.v1` | `0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749` | false |
+| `poi.settlement.v1` | `0x54c112d4e35161c8b2547a52e450d3f69d4e2199021fbc0035e8e4aa7f23dd6e` | true |
+| `poi.challenge.v1` | `0x3557adc085b634167345fe0529a3aab5a5bb27ecddf9f9640acb17b43d90b141` | true |
 
 결정과 노트는 철회 불가입니다. 정산과 이의는 관측 오류를 정정할 수 있도록
 철회 가능합니다.

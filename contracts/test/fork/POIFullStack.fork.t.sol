@@ -94,7 +94,7 @@ contract POIFullStackForkTest is EASForkBase {
         );
 
         note.initialize(noteUID);
-        decision.initialize(decisionUID, noteUID, bytes32(0), address(0));
+        decision.initialize(decisionUID, noteUID, bytes32(0), address(0), bytes32(0));
         settlement.initialize(settlementUID, decisionUID);
         challenge.initialize(challengeUID, settlementUID);
         decision.addMetric(
@@ -386,7 +386,8 @@ contract POIFullStackForkTest is EASForkBase {
     function test_Fork_CT20_ExpiredVerifiedAddress() public {
         bytes32 verifiedSchemaUID = _registerSchema("bytes32 proof", address(0), true);
         // 도장 출처를 설정해야 만료 검사까지 도달한다 — 미설정이면 그 전에 거부된다(B1).
-        decision.setVerifiedAddressSource(verifiedSchemaUID, ALICE);
+        decision.setVerifiedAddressSchema(verifiedSchemaUID);
+        decision.setIssuer(ALICE, bytes32("TEST"));
 
         vm.prank(ALICE);
         bytes32 verifiedUID = eas.attest(

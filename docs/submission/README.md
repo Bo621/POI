@@ -29,8 +29,8 @@ GIWA Sepolia(`91342`)에 배포돼 있고, **이 문서의 모든 주장은 직�
 
 ```
 https://poi-static-production.up.railway.app
-https://poi-static-production.up.railway.app/#/d/0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e   ← 기한초과
-https://poi-static-production.up.railway.app/#/d/0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8   ← 등록완료 + 이의
+https://poi-static-production.up.railway.app/#/d/0x3f592f21a7e5a733d3dd90caeb2f9ec35bffa335b69da7310749694283e16938   ← 기한초과
+https://poi-static-production.up.railway.app/#/d/0x5941a398a8338b99d053309cbf5e611486f30e649c9569cfa3a63d5060443888   ← 등록완료 + 이의
 ```
 
 주소·UID 전체: [`../DEPLOYMENT.md`](../DEPLOYMENT.md)

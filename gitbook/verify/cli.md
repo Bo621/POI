@@ -4,14 +4,14 @@
 git clone https://github.com/Bo621/POI.git && cd POI && pnpm install
 export POI_RPC_URL=https://sepolia-rpc.giwa.io/
 export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
-export POI_SETTLEMENT_RESOLVER_ADDRESS=0x87c7a8b3970986e51a8b24e78078540115a70c8c
-export POI_METRIC_REGISTRY_ADDRESS=0x2b379095a8b296e2c61f8153e06fc4cdef56af57
+export POI_SETTLEMENT_RESOLVER_ADDRESS=0x167cf06df663c5ddde9f20a748e724b4fb6c14fa
+export POI_METRIC_REGISTRY_ADDRESS=0x0f25917176a405bb9022e5b417e0d57348b30f89
 # 스키마를 확인해야 다른 스키마의 attestation 을 POI 결정으로 읽지 않는다
-export POI_DECISION_SCHEMA_UID=0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151
+export POI_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
 
 # 결과가 등록된 결정 — MATCH (종료코드 0)
 node --experimental-strip-types verifier/src/cli.ts \
-  0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8 --json
+  0x5941a398a8338b99d053309cbf5e611486f30e649c9569cfa3a63d5060443888 --json
 ```
 
 검증기는 온체인 정산을 읽고 업비트 공개 1분봉으로 관측값을 직접 다시 계산해
@@ -21,7 +21,7 @@ node --experimental-strip-types verifier/src/cli.ts \
 
 ```bash
 node --experimental-strip-types verifier/src/reveal-cli.ts \
-  0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e \
+  0x3f592f21a7e5a733d3dd90caeb2f9ec35bffa335b69da7310749694283e16938 \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
   > **`--payload` 는 JSON 이다.** 결정 본문이 문자열이면 큰따옴표까지 포함해야 한다.
 

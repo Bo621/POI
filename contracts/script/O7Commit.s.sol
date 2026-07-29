@@ -88,6 +88,8 @@ contract O7Commit is Script {
         d.windowStart = windowStart;
         d.windowEnd = windowEnd;
         d.graceSeconds = 1 hours;
+        // 도장 검증 스냅샷. 없으면 0 — 컨트랙트가 미검증 지갑으로 기록한다.
+        d.verifiedAddressUID = vm.envOr("POI_VERIFIED_ADDRESS_UID", bytes32(0));
 
         IEASAttest(eas).attest(
             IEASAttest.AttestationRequest({

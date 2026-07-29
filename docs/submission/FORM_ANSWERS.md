@@ -93,7 +93,7 @@ GIWA에서만 검증할 수 있는 가설이 있습니다. 커밋이 건당 1.21
 (461자 / 500)
 
 > **초안 1차에서 뺀 것.** 처음에는 개발 중 실제로 틀렸던 것들(조건 기호 6개 오류 등)을
-> 여기 적었다. 코덱스 리뷰 지적이 맞다 — 「419개 테스트가 팀 역량의 증거」라는 주장과
+> 여기 적었다. 코덱스 리뷰 지적이 맞다 — 「422개 테스트가 팀 역량의 증거」라는 주장과
 > **바로 뒤에서 충돌한다.** 한계 공개 자체는 옳지만 **마지막 메시지에 놓을 자리가 아니다.**
 > 그 회고는 `LIMITS.md`와 `TEST_RECORD.md`에 남아 있고, 문항 11과 피치덱 4·11장에서
 > 이미 충분히 공개된다.
@@ -117,7 +117,7 @@ GIWA에서만 검증할 수 있는 가설이 있습니다. 커밋이 건당 1.21
 
 > 1인 팀이라는 사실을 숨기지 말 것. **혼자 여기까지 만들었다는 것 자체가
 > 심사 기준 03(실현 가능성)·05(팀 역량)의 근거다.** 배포된 컨트랙트와
-> 419개 테스트가 그 증거다.
+> 422개 테스트가 그 증거다.
 
 ---
 
@@ -132,10 +132,10 @@ GIWA에서만 검증할 수 있는 가설이 있습니다. 커밋이 건당 1.21
 
 ```
 문항 9 — 전부 Pass - Verified
-https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
-https://sepolia-explorer.giwa.io/address/0x87c7a8b3970986e51a8b24e78078540115a70c8c
-https://sepolia-explorer.giwa.io/address/0xa7203c170dedb490e32c492cdbe9e968c57168aa
-https://sepolia-explorer.giwa.io/address/0x03822d12dddb59d28cf1197853c5ae85beb1d165
+https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89
+https://sepolia-explorer.giwa.io/address/0x167cf06df663c5ddde9f20a748e724b4fb6c14fa
+https://sepolia-explorer.giwa.io/address/0xef4422c035bcce0599e4c951a24059abf707595f
+https://sepolia-explorer.giwa.io/address/0x7eefdd7d89d434061cbdb22244d52e78c94e6008
 ```
 
 ---
@@ -144,7 +144,7 @@ https://sepolia-explorer.giwa.io/address/0x03822d12dddb59d28cf1197853c5ae85beb1d
 
 - [x] 「1.21원」은 **실측이다** — 실제 발행한 트랜잭션 영수증의 gas 사용량 424,275 ×
       실측 가스 가격 0.001 gwei + L1 데이터 수수료, 업비트 ETH 시세로 환산 ([COST.md](COST.md))
-- [x] 「419개 테스트」 — `TEST_RECORD.md`에 2026-07-29 한 자리 연속 실행 기록 있음
+- [x] 「422개 테스트」 — `TEST_RECORD.md`에 2026-07-29 한 자리 연속 실행 기록 있음
 - [ ] 없는 기능을 있다고 쓰지 않았는가 (ZK · 오라클 · 배지 · 실행 정합성)
 - [ ] 실사용자 수·활성도 수치를 만들어내지 않았는가
 - [ ] 백엔드 개발자가 「합류 예정」임을 확정으로 쓰지 않았는가

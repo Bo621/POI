@@ -80,10 +80,10 @@ https://vestat.gitbook.io/poi
 
 [9/12] 컨트랙트 (전부 Verified)
 ------------------------------------------------------------
-POINoteResolver        https://sepolia-explorer.giwa.io/address/0x03822d12dddb59d28cf1197853c5ae85beb1d165
-POIDecisionResolver    https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
-POISettlementResolver  https://sepolia-explorer.giwa.io/address/0x87c7a8b3970986e51a8b24e78078540115a70c8c
-POIChallengeResolver   https://sepolia-explorer.giwa.io/address/0xa7203c170dedb490e32c492cdbe9e968c57168aa
+POINoteResolver        https://sepolia-explorer.giwa.io/address/0x7eefdd7d89d434061cbdb22244d52e78c94e6008
+POIDecisionResolver    https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89
+POISettlementResolver  https://sepolia-explorer.giwa.io/address/0x167cf06df663c5ddde9f20a748e724b4fb6c14fa
+POIChallengeResolver   https://sepolia-explorer.giwa.io/address/0xef4422c035bcce0599e4c951a24059abf707595f
 
 [3/12] 팀 소개 · [7/12] 피치덱
 ------------------------------------------------------------

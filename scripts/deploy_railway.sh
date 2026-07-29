@@ -52,7 +52,7 @@ cat > "${STAGE}/package.json" <<'JSON'
 JSON
 
 # 올라가는 것이 정말 테스트넷 빌드인지 마지막으로 확인한다.
-if ! grep -rqi "0x2b379095a8b296e2c61f8153e06fc4cdef56af57" "${STAGE}/dist/assets/"*.js; then
+if ! grep -rqi "0x0f25917176a405bb9022e5b417e0d57348b30f89" "${STAGE}/dist/assets/"*.js; then
     echo "스테이징에 테스트넷 리졸버 주소가 없습니다." >&2
     exit 1
 fi

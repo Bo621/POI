@@ -34,6 +34,7 @@ export const RESOLVER_ERROR_MESSAGES: Record<string, string> = {
         "도장 검증 출처가 아직 설정되지 않았습니다. 지금은 검증 지갑 표시 없이 발행해 주세요.",
     VerifiedAddressWrongSchema: "도장 검증 기록이 아닙니다. 다른 스키마의 기록은 사용할 수 없습니다.",
     VerifiedAddressWrongIssuer: "도장이 발급한 검증 기록이 아닙니다.",
+    ZeroIssuer: "발급자 주소가 비어 있습니다.",
     SourceRequired: "관측 출처를 적어야 합니다. 출처가 없으면 제3자가 같은 관측을 재현할 수 없습니다.",
     VerifierVersionRequired: "검증기 버전을 적어야 합니다.",
     SourceTooLong: "관측 출처는 64바이트를 넘을 수 없습니다.",

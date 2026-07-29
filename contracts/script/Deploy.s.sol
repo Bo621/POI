@@ -15,8 +15,12 @@ contract Deploy is Script {
     /// 0 으로 두면 컨트랙트가 verifiedAddressUID != 0 인 결정을 거부한다 —
     /// 아무 attestation 이나 검증 스냅샷으로 받는 것보다 안전하다.
     /// 확보하면 owner 가 setVerifiedAddressSource 로 설정한다.
-    bytes32 internal constant DOJANG_SCHEMA_UID = bytes32(0);
-    address internal constant DOJANG_ISSUER = address(0);
+    /// 도장 Verified Address 스키마 (`bool isVerified`) — docs.giwa.io 확인.
+    bytes32 internal constant DOJANG_SCHEMA_UID =
+        0x072d75e18b2be4f89a13a7147240477481c4b526d5795802acba59046b426e08;
+    /// 도장 발급자 둘. **라벨을 온체인에 남긴다** — 「업비트 KYC」와 「테스트넷 파우셋」은 다르다.
+    address internal constant DOJANG_UPBIT = 0x09B170CA2A006081042992bCE7379B85a02149C6;
+    address internal constant DOJANG_FAUCET = 0x63CCe2b569A7bC35895ee24306c1512fefc06121;
 
     address internal constant DEFAULT_EAS = 0x4200000000000000000000000000000000000021;
     address internal constant DEFAULT_SCHEMA_REGISTRY = 0x4200000000000000000000000000000000000020;
@@ -85,7 +89,10 @@ contract Deploy is Script {
 
         note.initialize(d.noteSchemaUID);
         require(note.initialized(), "note not initialized");
-        decision.initialize(d.decisionSchemaUID, d.noteSchemaUID, DOJANG_SCHEMA_UID, DOJANG_ISSUER);
+        decision.initialize(
+            d.decisionSchemaUID, d.noteSchemaUID, DOJANG_SCHEMA_UID, DOJANG_UPBIT, bytes32("UPBIT KOREA")
+        );
+        decision.setIssuer(DOJANG_FAUCET, bytes32("TESTNET FAUCET"));
         require(decision.initialized(), "decision not initialized");
         settlement.initialize(d.settlementSchemaUID, d.decisionSchemaUID);
         require(settlement.initialized(), "settlement not initialized");
