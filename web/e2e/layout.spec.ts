@@ -119,3 +119,26 @@ test("새로고침 직후 '연결' 버튼이 다시 나타나지 않는다", asy
     await expect(page.getByRole("navigation").getByText(shortAddressRe(accounts.A))).toBeVisible({timeout: 3000});
     await expect(page.getByRole("button", {name: "연결", exact: true})).toHaveCount(0);
 });
+
+test("지갑 선택 UI 가 닫히면 nav 높이가 다시 줄어든다", async ({page}) => {
+    // --nav-height 를 nav 의 min-block-size 로도 쓰면서 그 값을 nav 실측으로 갱신했더니
+    // 되먹임이 생겨 한 번 커진 nav 가 영영 줄어들지 않았다.
+    // nav 는 고정 --nav-min 을 쓰고, 실측은 --nav-h 용도로만 쓴다.
+    await injectWallet(page, accounts.A, rpcUrl);
+    await page.goto("/#/");
+    const nav = page.locator(".site-nav");
+    const base = (await nav.boundingBox())!.height;
+
+    // 안내문을 넣어 nav 를 강제로 키운다 (지갑 선택 UI 와 같은 효과)
+    await page.evaluate(() => {
+        const el = document.createElement("p");
+        el.id = "grow";
+        el.style.flexBasis = "100%";
+        el.textContent = "높이를 키우는 줄".repeat(3);
+        document.querySelector(".site-nav")!.append(el);
+    });
+    await expect.poll(async () => (await nav.boundingBox())!.height).toBeGreaterThan(base);
+
+    await page.evaluate(() => document.getElementById("grow")?.remove());
+    await expect.poll(async () => (await nav.boundingBox())!.height).toBeLessThanOrEqual(base);
+});

@@ -16,6 +16,10 @@
     --space-6: 1.5rem;
     --space-9: clamp(2rem, 1.5rem + 2vw, 3.5rem);
     --space-12: clamp(3rem, 2rem + 4vw, 6rem);
+    /* nav 의 최소 높이(고정). nav 가 이 값을 참조하고,
+       실측값은 --nav-h 로 따로 둔다 — 같은 변수를 쓰면 되먹임이 생겨
+       한 번 커진 nav 가 다시 줄어들지 못한다. 실제로 그렇게 만들었다. */
+    --nav-min: 4.25rem;
     --nav-height: 4.25rem;
     /* 기본은 다크 — 기와 지붕 아래. --seal 이 정확히 #FF2200 로 GIWA 원색과 같다.
        링크를 여는 사람이 첫 화면에서 이 정렬을 본다. 라이트(한지 증서)는 아래 미디어쿼리. */
@@ -70,7 +74,7 @@ main {
     z-index: 10;
     inset-block-start: 0;
     inset-inline: 0;
-    min-block-size: var(--nav-height);
+    min-block-size: var(--nav-min);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -695,6 +699,8 @@ pre {
 
 @media (max-width: 34rem) {
     :root {
+        /* JS 실측 전의 기본값. ResizeObserver 가 --nav-height 를 덮어쓴다. */
+        --nav-min: 7.25rem;
         --nav-height: 7.25rem;
     }
 

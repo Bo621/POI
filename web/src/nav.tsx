@@ -22,6 +22,7 @@ export function Nav({route, wallet, onWalletChange}: {
         if (!el || typeof ResizeObserver === "undefined") return;
         const observer = new ResizeObserver(([entry]) => {
             const h = entry?.borderBoxSize?.[0]?.blockSize ?? el.getBoundingClientRect().height;
+            // nav 의 min-block-size 는 --nav-min(고정)을 쓴다. 여기에 쓰면 되먹임이 생긴다.
             document.documentElement.style.setProperty("--nav-height", `${Math.ceil(h)}px`);
         });
         observer.observe(el);
