@@ -39,6 +39,7 @@ https://poi-static-production.up.railway.app/#/d/0x061ac961bb031dfb9436478f92c89
 
 | 문서 | 무엇 |
 |---|---|
+| **[STATUS.md](STATUS.md)** | **제출 준비 현황 — 무엇이 끝났고 무엇이 남았는지** |
 | **[VERIFY.md](VERIFY.md)** | **심사자가 직접 재현하는 절차.** 이 제품의 주장은 전부 여기서 확인됩니다 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 컨트랙트가 실제로 강제하는 것 |
 | [DEMO.md](DEMO.md) | 화면에서 무엇을 보게 되는지 |
