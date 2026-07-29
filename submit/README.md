@@ -32,7 +32,8 @@ mkdir -p submit/$V
 # 3. 복사하고 체크섬
 cp docs/submission/pitch/POI_pitch.pdf  submit/$V/POI_pitchdeck_${V}.pdf
 cp docs/submission/POI_team.pdf         submit/$V/POI_team_${V}.pdf
-(cd submit/$V && shasum -a 256 * > SHA256SUMS.txt)
+# SHA256SUMS.txt 자신은 제외한다 — 포함하면 검사가 항상 실패한다
+(cd submit/$V && shasum -a 256 FORM_TEXT.txt *.pdf > SHA256SUMS.txt)
 ln -sfn $V submit/latest
 ```
 
