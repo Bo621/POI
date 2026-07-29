@@ -20,7 +20,7 @@
 | 7 | 피치덱 | ⏳ | [`pitch/index.html`](pitch/index.html) 완성 — **PDF 변환 후 Drive** |
 | 8 | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | 9 | 컨트랙트 링크 (Verified) | ✅ | 4종 전부 `Pass - Verified` |
-| 10 | 기술 문서 / 원페이저 | ⏳ | [`gitbook/`](../../gitbook/) 완성 — **GitBook 스페이스 연결** |
+| 10 | 기술 문서 / 원페이저 | ✅ | `https://vestat.gitbook.io/poi` |
 | 11 | 추가 지원 요청 (500자) | ✅ | 421자 |
 | 12 | GIWA 팀에 전할 말 (500자) | ✅ | 461자 |
 
@@ -29,8 +29,8 @@
 | | 무엇을 |
 |---|---|
 | **문항 3** | [TEAM.md](TEAM.md) → PDF 또는 Google Docs → 「링크가 있는 모든 사용자가 볼 수 있음」 |
-| **문항 7** | `pitch/index.html` 을 PDF 로 인쇄 → Drive 업로드 |
-| **문항 10** | GitBook 스페이스 생성 → GitHub `gitbook/` 동기화 → 공개 설정 |
+| **문항 7** | `pitch/index.html` 열고 <kbd>Cmd/Ctrl+P</kbd> → **PDF 로 저장** → Drive |
+
 
 > **1인 팀이라는 사실을 숨기지 말 것.** 혼자 여기까지 만들었다는 것 자체가
 > 심사 기준 03(실현 가능성)·05(팀 역량)의 근거다. 배포된 컨트랙트와 392개 테스트가 증거다.

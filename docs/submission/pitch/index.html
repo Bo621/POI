@@ -136,6 +136,40 @@ a{color:var(--seal);text-decoration-thickness:1px;text-underline-offset:3px}
 .pathbtn:hover{color:var(--ink)}
 .pathbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .bar .path{color:var(--seal)}
+
+/* ── 인쇄 / PDF ─────────────────────────────────
+   화면에서는 한 장씩 보이지만(.slide[data-on] 만 display),
+   인쇄할 때는 14장이 전부 각각 한 페이지가 되어야 한다.
+   이게 없으면 현재 보고 있는 슬라이드 하나만 인쇄된다. */
+@media print {
+  @page { size: 297mm 167mm; margin: 0; }   /* 16:9 가로 */
+  html, body { height: auto; overflow: visible; background: #0d0d0c; }
+  body { font-size: 11pt; }
+
+  .deck { height: auto; }
+  .slide,
+  .slide[data-on] {
+    display: flex !important;
+    position: relative;
+    inset: auto;
+    min-height: 167mm;
+    padding: 14mm 18mm;
+    overflow: visible;
+    animation: none;
+    break-after: page;
+    page-break-after: always;
+  }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  /* 5분 경로 토글이 켜져 있어도 인쇄에는 전부 나온다 */
+  body[data-path] .slide:not([data-key]) { display: flex !important; }
+
+  .bar, .nav, .prog { display: none !important; }
+  figure, table, pre, .cols { break-inside: avoid; page-break-inside: avoid; }
+  svg { max-width: 100%; }
+  a { text-decoration: none; }
+  a[href^="http"]::after { content: ""; }   /* URL 중복 출력 방지 */
+}
+
 @media(max-width:760px){
   .slide{padding:2rem 1.2rem 5.2rem}
   h2{max-width:none}
