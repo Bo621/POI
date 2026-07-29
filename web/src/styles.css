@@ -764,3 +764,23 @@ pre {
     font-family: var(--font-display);
     font-size: var(--text-sm);
 }
+
+/* 지갑을 둘 이상 설치하면 window.ethereum 을 한쪽이 가로챈다.
+   EIP-6963 으로 찾은 목록에서 직접 고르게 한다. */
+.wallet-choices {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    flex-basis: 100%;
+}
+
+.wallet-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.wallet-choice img {
+    border-radius: 2px;
+}

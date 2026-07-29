@@ -7,7 +7,8 @@ import {
     type Address,
     type Hex,
 } from "viem";
-import {publicClient, getWalletClient, withRetry} from "./chain";
+import {publicClient, getProvider, getWalletClient, setProvider, withRetry} from "./chain";
+import {forgetWallet, rememberWallet, resolveProvider, type WalletOption} from "./provider";
 import {
     DEPLOY_BLOCK,
     DOJANG_ADDRESS,
@@ -58,6 +59,7 @@ export function Wallet({state, onChange}: {
 }) {
     const [error, setError] = useState("");
     const [connecting, setConnecting] = useState(false);
+    const [choices, setChoices] = useState<WalletOption[]>();
 
     /** 주소가 정해진 뒤의 검증 스냅샷 조회. 연결·복원·계정 변경이 모두 이 경로를 탄다. */
     const load = useCallback(async (address: Address) => {
@@ -87,10 +89,15 @@ export function Wallet({state, onChange}: {
         onChange({address, verified, verifiedAddressUID});
     }, [onChange]);
 
-    async function connect() {
+    async function connectWith(option?: WalletOption) {
         setConnecting(true);
         setError("");
         try {
+            if (option) {
+                setProvider(option.provider);
+                rememberWallet(option.rdns);
+                setChoices(undefined);
+            }
             const [address] = await getWalletClient().requestAddresses();
             if (address) await load(address);
         } catch (cause) {
@@ -100,25 +107,34 @@ export function Wallet({state, onChange}: {
         }
     }
 
+    /** 지갑을 고르게 한다. 하나뿐이면 바로 연결한다. */
+    async function connect() {
+        setError("");
+        const resolved = await resolveProvider();
+        if (resolved.kind === "none") {
+            setError("브라우저 지갑을 찾을 수 없습니다. 지갑 확장 프로그램을 설치해 주세요.");
+            return;
+        }
+        if (resolved.kind === "choose") {
+            setChoices(resolved.options);
+            return;
+        }
+        if (resolved.kind === "ready") await connectWith(resolved.option);
+        else await connectWith();
+    }
+
     /** 앱 상태만 지운다. 지갑의 사이트 승인은 지갑에서 취소해야 한다. */
     function disconnect() {
         setError("");
+        forgetWallet();
         onChange({verified: false, verifiedAddressUID: ZERO_UID});
     }
 
     // 새로고침하면 연결이 풀려 매번 다시 눌러야 했다.
     // eth_accounts 는 프롬프트 없이 이미 승인된 계정을 돌려준다 — 그걸로 복원한다.
     useEffect(() => {
-        const provider = window.ethereum;
-        if (!provider) return;
         let active = true;
-
-        void provider.request({method: "eth_accounts"})
-            .then((accounts) => {
-                const [address] = accounts as Address[];
-                if (active && address && !state.address) void load(address);
-            })
-            .catch(() => {/* 복원 실패는 조용히 넘긴다 — 사용자가 직접 연결하면 된다 */});
+        let provider: ReturnType<typeof getProvider>;
 
         // 지갑에서 계정을 바꿨는데 앱이 모르면, 화면은 A 를 보여주고 서명은 B 가 한다.
         const onAccounts = (accounts: unknown) => {
@@ -127,12 +143,33 @@ export function Wallet({state, onChange}: {
             else void load(address);
         };
         const onChain = () => window.location.reload();
-        provider.on?.("accountsChanged", onAccounts);
-        provider.on?.("chainChanged", onChain);
+
+        // 지갑이 여럿이면 `window.ethereum` 은 한쪽이 가로챈다.
+        // 전에 고른 지갑이 있을 때만 조용히 복원한다 — 고르지 않았으면 묻지 않는다.
+        void (async () => {
+            const resolved = await resolveProvider();
+            if (!active) return;
+            if (resolved.kind === "ready") setProvider(resolved.option.provider);
+            else if (resolved.kind === "legacy") setProvider(resolved.provider);
+            else return;   // choose / none — 사용자가 '연결' 을 누를 때 정한다
+
+            provider = getProvider();
+            if (!provider) return;
+            try {
+                const accounts = await provider.request({method: "eth_accounts"}) as Address[];
+                if (active && accounts[0] && !state.address) await load(accounts[0]);
+            } catch {
+                // 복원 실패는 조용히 넘긴다 — 사용자가 직접 연결하면 된다
+            }
+            if (!active) return;
+            provider.on?.("accountsChanged", onAccounts);
+            provider.on?.("chainChanged", onChain);
+        })();
+
         return () => {
             active = false;
-            provider.removeListener?.("accountsChanged", onAccounts);
-            provider.removeListener?.("chainChanged", onChain);
+            provider?.removeListener?.("accountsChanged", onAccounts);
+            provider?.removeListener?.("chainChanged", onChain);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [load]);
@@ -162,6 +199,22 @@ export function Wallet({state, onChange}: {
                 : <button className="btn" type="button" onClick={connect} disabled={connecting}>
                     {connecting ? "연결 중…" : "연결"}
                 </button>}
+            {choices && <div className="wallet-choices" role="group" aria-label="지갑 선택">
+                <p className="notice--quiet">설치된 지갑이 여럿입니다. 쓸 지갑을 고르세요.</p>
+                {choices.map((option) => (
+                    <button
+                        key={option.rdns}
+                        className="btn-quiet wallet-choice"
+                        type="button"
+                        onClick={() => void connectWith(option)}
+                        disabled={connecting}
+                    >
+                        <img src={option.icon} alt="" width={18} height={18} />
+                        {option.name}
+                    </button>
+                ))}
+                <button className="btn-quiet" type="button" onClick={() => setChoices(undefined)}>취소</button>
+            </div>}
             {error && <p className="form-status" role="alert">{error}</p>}
         </div>
     );
