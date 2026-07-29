@@ -13,11 +13,11 @@
 
 | # | 문항 | 상태 | 제출물 |
 |---|---|---|---|
-| 3 | 팀 소개 (링크) | ⏳ | [TEAM.md](TEAM.md) 초안 완료 — **PDF/Docs 로 올리고 링크만** |
+| 3 | 팀 소개 (링크) | ⏳ | **[POI_team.pdf](POI_team.pdf) 생성 완료** (2쪽) — Drive 업로드 후 링크만 |
 | 4 | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · 460자 |
 | 5 | 트랙 선택 | ✅ | Track 03 |
 | 6 | 한 줄 요약 (50자) | ✅ | 36자 |
-| 7 | 피치덱 | ⏳ | [`pitch/index.html`](pitch/index.html) 완성 — **PDF 변환 후 Drive** |
+| 7 | 피치덱 | ⏳ | **[pitch/POI_pitch.pdf](pitch/POI_pitch.pdf) 생성 완료** (14쪽 16:9) — Drive 업로드만 |
 | 8 | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | 9 | 컨트랙트 링크 (Verified) | ✅ | 4종 전부 `Pass - Verified` |
 | 10 | 기술 문서 / 원페이저 | ✅ | `https://vestat.gitbook.io/poi` |
@@ -28,8 +28,12 @@
 
 | | 무엇을 |
 |---|---|
-| **문항 3** | [TEAM.md](TEAM.md) → PDF 또는 Google Docs → 「링크가 있는 모든 사용자가 볼 수 있음」 |
-| **문항 7** | `pitch/index.html` 열고 <kbd>Cmd/Ctrl+P</kbd> → **PDF 로 저장** → Drive |
+| **문항 3** | [POI_team.pdf](POI_team.pdf) 를 Drive 에 올리고 「링크가 있는 모든 사용자가 볼 수 있음」 |
+| **문항 7** | [pitch/POI_pitch.pdf](pitch/POI_pitch.pdf) 를 Drive 에 올리고 같은 공유 설정 |
+
+> **PDF 는 이미 만들어져 있다.** 브라우저 인쇄로 만들면 깨진다 —
+> 슬라이드가 한 번에 하나씩 보이는 구조라 인쇄 CSS 에서 우측 열이 한 글자씩 세로로 쌓인다.
+> 그래서 14 장을 16:9 로 캡처해 조립했다. 다시 만들 일이 있으면 그 방식을 쓸 것.
 
 
 > **1인 팀이라는 사실을 숨기지 말 것.** 혼자 여기까지 만들었다는 것 자체가
