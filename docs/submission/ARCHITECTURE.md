@@ -85,7 +85,7 @@ EAS는 `data`를 스키마에 대해 검증하지 않습니다. 잉여 워드나
 그래서 리졸버가 디코딩 결과를 **다시 인코딩해 원본과 바이트 단위로 대조**합니다.
 정규 인코딩은 유일하므로 이걸로 걸러집니다.
 
-## 지표 — 문서가 없으면 등록되지 않는다
+## 지표 — 정의를 등록 후 바꿀 수 없다
 
 ```solidity
 if (spec.definitionHash == 0) revert MetricDefinitionRequired();
