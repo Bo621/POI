@@ -195,8 +195,8 @@ export function Home({address}: {address?: Address}) {
             판단의 결과는 발행자가 아니라 컨트랙트가 산술로 판정합니다.</p>
 
         <section className="doc-section">
-            <h2>기록 열기</h2>
-            <p className="doc-note">지갑이 필요 없습니다.</p>
+            <h2>증서 조회</h2>
+            <p className="doc-note">누구의 기록이든 UID 로 열어 볼 수 있습니다. 지갑이 필요 없습니다.</p>
             <form className="doc-form" onSubmit={open}>
                 <label htmlFor="home-decision-uid">decisionUID</label>
                 <input id="home-decision-uid" className="hex" value={uid} onChange={(event) => setUid(event.target.value)} placeholder="0x…" />
@@ -204,13 +204,14 @@ export function Home({address}: {address?: Address}) {
             </form>
         </section>
 
-        <section className="doc-section"><h2>예시 증서</h2>
-            <LoadStateView state={examples} failureText="예시 증서를 불러오지 못했습니다." retry={() => setExamplesRetry(value => value + 1)}>
+        <section className="doc-section"><h2>둘러보기</h2>
+            <p className="doc-note">기한초과·결과 등록·철회 이력이 어떻게 보이는지 담은 예시입니다.</p>
+            <LoadStateView state={examples} failureText="예시를 불러오지 못했습니다." retry={() => setExamplesRetry(value => value + 1)}>
                 {(rows) => <SummaryList rows={rows} />}
             </LoadStateView>
         </section>
-        <section className="doc-section"><h2>최근 열어본 증서</h2>
-            <LoadStateView state={recentRows} failureText="최근 열어본 증서를 불러오지 못했습니다." retry={() => setRecentRetry(value => value + 1)}>
+        <section className="doc-section"><h2>최근 본 기록</h2>
+            <LoadStateView state={recentRows} failureText="최근 본 기록을 불러오지 못했습니다." retry={() => setRecentRetry(value => value + 1)}>
                 {(rows) => <ul className="record-list">{rows.map((row) => {
                 if (isFailedSummary(row)) return <li className="record-row record-row--failed" key={row.uid}>
                     {row.kind === "missing"
@@ -244,13 +245,15 @@ export function Home({address}: {address?: Address}) {
             <dt>지표 정의</dt><dd>{METRICS.map((metric) => `${metric.name} · definitionHash ${metric.definitionHash}`).join(" / ")}</dd>
         </dl></details></section>
 
-        {address && <><section className="doc-section"><h2>처리할 기록</h2><p className="hex">{address}</p>
-            <LoadStateView state={records} emptyText="표시할 기록이 없습니다." failureText="처리할 기록을 불러오지 못했습니다." retry={() => setRecordsRetry(value => value + 1)}>
+        {address && <><section className="doc-section"><h2>결과 등록이 필요한 기록</h2>
+            <p className="doc-note">관측 구간이 끝나 결과를 남겨야 하는 것들입니다. 유예를 넘기면 「기한초과」로 드러납니다.</p>
+            <p className="hex">{address}</p>
+            <LoadStateView state={records} emptyText="표시할 기록이 없습니다." failureText="결과 등록이 필요한 기록을 불러오지 못했습니다." retry={() => setRecordsRetry(value => value + 1)}>
                 {(rows) => needsAction(rows).length > 0 ? <WalletRows rows={needsAction(rows)} /> : <p className="doc-note">표시할 기록이 없습니다.</p>}
             </LoadStateView>
         </section>
-        <section className="doc-section"><h2>최근 커밋한 기록</h2>
-            <LoadStateView state={records} failureText="최근 커밋한 기록을 불러오지 못했습니다." retry={() => setRecordsRetry(value => value + 1)}>
+        <section className="doc-section"><h2>내가 남긴 기록</h2>
+            <LoadStateView state={records} failureText="내가 남긴 기록을 불러오지 못했습니다." retry={() => setRecordsRetry(value => value + 1)}>
                 {(rows) => <WalletRows rows={rows.slice(0, 5)} />}
             </LoadStateView>
             <p><a className="btn" href="#/me">내 기록 전체 →</a></p>
