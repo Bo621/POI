@@ -395,6 +395,27 @@ contract POIDecisionResolverTest is Test {
         assertTrue(_attest(_attestation(d)));
     }
 
+    // --- 정규 인코딩 (codex 3라운드) ------------------------------------------
+
+    /// @dev **길이를 유지한 채** parents offset 을 head 안으로 돌리면 컨트랙트가 검증한
+    ///      parents 와 정규 디코더가 읽는 parents 가 갈라진다. 길이 검사만으로는 못 막는다.
+    function test_Attest_RevertsOnSameLengthOffsetTampering() public {
+        POICodec.DecisionData memory d = _decision();
+        d.parents = new bytes32[](1);
+        d.parents[0] = keccak256("realParent");
+        d.hasExpectedOutcome = true;   // head 슬롯 7 = 1 → 길이 1 로 읽히게 만든다
+
+        Attestation memory a = _attestation(d);
+        bytes memory tampered = bytes.concat(a.data);   // 값 복사
+        assembly { mstore(add(tampered, 32), mul(7, 32)) }   // parents offset → 슬롯 7
+        assertEq(tampered.length, a.data.length, "length preserved");
+        a.data = tampered;
+
+        vm.prank(address(eas));
+        vm.expectRevert(POIDecisionResolver.MalformedPayload.selector);
+        r.attest(a);
+    }
+
     // --- B1 Dojang 출처 검증 ------------------------------------------------
 
     /// @dev 다른 스키마의 attestation 을 검증 스냅샷으로 위장할 수 없다.

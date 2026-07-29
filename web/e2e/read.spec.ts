@@ -20,6 +20,26 @@ test("배포 안내가 없고 F1은 등록완료다", async ({page}) => {
     await expect(page.locator("section.status-result dl").getByText("등록완료", {exact: true})).toBeVisible();
 });
 
+test("정산 UID를 결정으로 열면 POI 기록이 아니라고 거부한다", async ({page}) => {
+    // 실제 체인에 존재하지만 스키마가 다르다. 이 검사가 없으면
+    // **아무 attestation 이나 POI 결정처럼 보여준다** — 재배포 후 구 UID 로 실제로 겪었다.
+    await page.goto(`/#/d/${requireSeed().fixtures.f1.settlementUID}`);
+    await expect(page.getByText("결정 기록이 아닙니다", {exact: false})).toBeVisible();
+});
+
+test("최근 본 기록에 남은 다른 스키마 UID는 정상 기록으로 표시되지 않는다", async ({page}) => {
+    // 재배포로 스키마가 바뀌면 구 UID 가 localStorage 에 남는다. 조회가 스키마를
+    // 확인하지 않으면 **그 UID 가 멀쩡한 결정처럼 보인다** — 실제로 겪은 결함이다.
+    const wrong = requireSeed().fixtures.f1.settlementUID;
+    await page.addInitScript(([key, uid]) => {
+        localStorage.setItem(key as string, JSON.stringify([{uid, at: Date.now()}]));
+    }, ["poi.recent-decisions", wrong]);
+    await page.goto("/#/");
+    const row = page.locator(".record-row", {hasText: wrong.slice(0, 10)});
+    await expect(row).toBeVisible();
+    await expect(row.getByText("POI 기록이 아닙니다", {exact: false})).toBeVisible();
+});
+
 test("F4는 기한초과다", async ({page}) => {
     await loadStatus(page, requireSeed().fixtures.f4.decisionUID, "기한초과");
     await expect(page.locator("section.status-result dl").getByText("기한초과", {exact: true})).toBeVisible();

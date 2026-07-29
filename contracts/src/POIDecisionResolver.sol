@@ -105,9 +105,10 @@ contract POIDecisionResolver is POIMetricRegistry {
 
         POICodec.DecisionData memory d = POICodec.decodeDecision(a.data);
 
-        if (a.data.length != DECISION_HEAD_BYTES + PARENTS_LENGTH_BYTES + 32 * d.parents.length) {
-            revert MalformedPayload();
-        }
+        // 길이 검사만으로는 부족하다. **길이를 유지한 채 parents offset 을 head 안으로
+        // 돌리면** 컨트랙트가 검증한 parents 와 정규 디코더가 읽는 parents 가 갈라진다.
+        // 정산과 같은 방식으로 재인코딩해 원본과 대조한다.
+        _requireCanonicalPayload(a.data, d);
 
         // I1 — 결정과 트리거는 비어 있을 수 없다. 근거·이유는 선택이므로 검사하지 않는다.
         if (d.decisionCommitment == 0 || d.triggerCommitment == 0) revert EmptyCommitment();
@@ -152,6 +153,28 @@ contract POIDecisionResolver is POIMetricRegistry {
     /// @dev B4 — 커밋 시점의 검증 상태 스냅샷. **필수가 아니다**(미검증 지갑도 허용).
     ///      다만 넣었다면 실재하고 발행자 본인의 것이어야 한다. Dojang 검증은 30일 뒤
     ///      만료되므로, 만료된 스냅샷을 받으면 "커밋 시점에 검증됐다"는 B4 주장이 거짓이 된다.
+    /// @dev 디코딩 결과를 다시 인코딩해 원본 바이트와 대조한다.
+    ///      정규 인코딩은 유일하므로 offset·패딩 변조가 전부 걸린다.
+    function _requireCanonicalPayload(bytes calldata data, POICodec.DecisionData memory d) private pure {
+        bytes memory canonical = abi.encode(
+            d.parents,
+            d.promotedFromNote,
+            d.verifiedAddressUID,
+            d.decisionCommitment,
+            d.triggerCommitment,
+            d.evidenceCommitment,
+            d.reasonCommitment,
+            d.hasExpectedOutcome,
+            d.outcomeMetricId,
+            d.outcomeOp,
+            d.outcomeThreshold,
+            d.windowStart,
+            d.windowEnd,
+            d.graceSeconds
+        );
+        if (keccak256(data) != keccak256(canonical)) revert MalformedPayload();
+    }
+
     function _checkVerifiedAddress(bytes32 verifiedUID, address attester, uint64 attestTime) private view {
         if (verifiedUID == 0) return;
 
