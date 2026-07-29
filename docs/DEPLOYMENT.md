@@ -81,6 +81,39 @@ curl -X POST "https://sepolia-explorer.giwa.io/api?module=contract&action=verify
 확인: `GET /api/v2/smart-contracts/<addr>` 의 `is_verified` 가 `true` 이고
 `verified_twin_address_hash` 가 `null` 이어야 한다.
 
+## 소유권 (O6) — 2-of-2 multisig
+
+| | |
+|---|---|
+| Safe | `0x215253B830D51df7f8364fF6dA32140006E4DCE1` (Safe L2 v1.4.1) |
+| 소유자 | `0xA1Cb5CbC…F310` (배포) · `0x77E8DFC4…dfaa` |
+| 임계값 | **2 / 2** |
+| 대상 | `POIDecisionResolver` — 실권한이 있는 유일한 컨트랙트 |
+
+`initialize` 가 일회성이라 note·settlement·challenge 리졸버의 owner 는 아무 권한이 없다.
+그래서 결정 리졸버 하나만 옮겼다.
+
+절차 (Safe UI 가 GIWA 를 지원하지 않아 전부 cast 로 했다):
+
+```
+1. createProxyWithNonce  팩토리 0x4e1DCf7A… · 싱글턴 0x29fcB43b… (SafeL2)
+2. transferOwnership(Safe)          배포 지갑
+3. getTransactionHash(...)          safeTxHash 계산
+4. approveHash(safeTxHash) x2       각 소유자가 자기 지갑에서 (서명 대신 온체인 승인)
+5. execTransaction(... acceptOwnership())
+```
+
+> **서명은 소유자 주소 오름차순**이어야 한다. 순서가 틀리면 `GS026` 으로 되돌아간다.
+> 승인된 해시 방식의 서명 한 건은 `r=소유자주소(32B) ‖ s=0(32B) ‖ v=01` 이다.
+
+확인:
+
+```
+owner        0x215253B830D51df7f8364fF6dA32140006E4DCE1
+pendingOwner 0x0000000000000000000000000000000000000000
+배포 지갑 단독 addMetric → OwnableUnauthorizedAccount 로 revert
+```
+
 ## 지표 (O5)
 
 `POIDecisionResolver`에 등록. **등록 즉시 `frozen = true`** — 정의는 변경 불가.
