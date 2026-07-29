@@ -202,6 +202,24 @@ p {
    `/ ""`는 생성 콘텐츠의 **대체 텍스트를 비운다.** 이게 없으면 Chrome이 "// "를
    접근성 이름에 넣어 제목이 `// 커밋`이 되고, 스크린리더가 슬래시를 읽으며
    E2E의 exact heading 조회가 전부 깨진다(실제로 11개가 깨졌다). */
+/* h3 는 절의 하위다(이의는 결과 등록에 종속된다).
+   조항 표시를 슬래시 하나로 줄여 위계가 눈에 보이게 한다. */
+.doc-section > h3 {
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+}
+
+.doc-section > h3::before {
+    content: "/ " / "";
+    color: var(--seal);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    opacity: 0.7;
+}
+
 .doc-section > h2::before {
     content: "// " / "";
     color: var(--seal);
