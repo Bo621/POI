@@ -349,8 +349,9 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>EAS 프리디플로이</td><td>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
     <tr><td>도장 Verified Address</td><td>KYC 결속 온체인 신원</td></tr>
     <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
+    <tr><td>도장 Verified Balance</td><td>머클 증명 — 잔고를 밝히지 않고 보유를 증명 <span class="s-lab">(아직 쓰지 않음)</span></td></tr>
   </table></div>
-  <p class="lede eave">그래서 앞 장의 배치 문제가 생긴다 — EAS 배치는 한 트랜잭션의 모든 attestation 에 <strong>같은 timestamp</strong> 를 넣고, I2 는 부모가 자식보다 <strong>엄격히</strong> 빨라야 한다고 요구한다.</p>
+  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가(Verified Address)는 연동했고, 그때 무엇을 들고 있었는가는 Verified Balance 의 머클 증명으로 붙일 수 있다. POI 의 술어 <code>metricId·op·threshold</code> 와 <strong>같은 모양</strong>이라 보자기가 오면 스키마 변경 없이 ZK 로 바뀐다.</p>
 </section>
 
 <!-- 8 ─────────────────────────────────────── -->
