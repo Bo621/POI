@@ -275,7 +275,7 @@ Phase 2의 실행 정합성 검증이 이 문제를 좁힌다.
 
 ```
 https://poi-static-production.up.railway.app
-https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
+https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e879a
 ```
 
 ---

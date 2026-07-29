@@ -5,7 +5,7 @@
 ```bash
 export RPC=https://sepolia-rpc.giwa.io/
 export EAS=0x4200000000000000000000000000000000000021
-export DECISION_RESOLVER=0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
+export DECISION_RESOLVER=0xd4786313817f1bfd14fc6047fdce9db8382e879a
 cast code $DECISION_RESOLVER --rpc-url $RPC | head -c 20
 ```
 

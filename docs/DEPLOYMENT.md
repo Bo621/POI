@@ -1,6 +1,10 @@
 # 배포 기록 — GIWA Sepolia
 
-> **2026-07-29 배포.** 되돌릴 수 없다. 이 문서가 온체인 상태의 유일한 기록이다.
+> **2026-07-29 재배포.** 되돌릴 수 없다. 이 문서가 온체인 상태의 유일한 기록이다.
+>
+> 코덱스 심사가 찾은 검증 공백(도장 스키마·발급자 미확인, provenance 빈 문자열 허용)을
+> 컨트랙트에서 닫으면서 **주소와 스키마 UID 가 전부 바뀌었다.** 이전 배포의 값은 무효다.
+> 이전 fixture 도 구 스키마에 묶여 있어 새로 만들었다.
 
 ## 체인
 
@@ -18,10 +22,10 @@
 
 | 컨트랙트 | 주소 |
 |---|---|
-| `POINoteResolver` | `0x83d5c7ad0a024effe6a5d92640f93a19c5be77d0` |
-| `POIDecisionResolver` | `0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66` |
-| `POISettlementResolver` | `0xbc386addcd3cabbbb62dfcb521939fe4610029d1` |
-| `POIChallengeResolver` | `0x56809bb2aeea0f043fa40ea0ae09411c8af0e127` |
+| `POINoteResolver` | `0xa8bd89b229dcb07e90e84df18e0fae27fa965f0c` |
+| `POIDecisionResolver` | `0xd4786313817f1bfd14fc6047fdce9db8382e879a` |
+| `POISettlementResolver` | `0x2b21d233b51bc08d0e54458470c4bfef364baee6` |
+| `POIChallengeResolver` | `0x74e6165fa656d4ad89cad1bcc0af32598193f3e0` |
 
 `POIDecisionResolver`가 `POIMetricRegistry`를 겸한다 — `addMetric`은 이 주소로 보낸다.
 
@@ -29,10 +33,10 @@
 
 | 스키마 | UID | revocable |
 |---|---|---|
-| `poi.note.v1` | `0xbeb96f68b7232b3205fa8bfb65f3d7e260b013088b4db415578d3eafa8db836c` | false |
-| `poi.decision.v1` | `0x393daa0863ba418bd31c2026eae9a96305a57d513fa6a74b9a2120b4ce2469ea` | false |
-| `poi.settlement.v1` | `0x84f169dc66866931bb510e14f04c7d7f62df530dbde50e40a7d7f2eb3ee97c54` | **true** |
-| `poi.challenge.v1` | `0x68c45508ba2a133013581cfa70cdc736847f554224a1876ffd0feb5930ef6d43` | **true** |
+| `poi.note.v1` | `0x6fe68a0d4cc7b82ec548a7d0f438b496e6a7c93086a6481d9a836abb51539f6a` | false |
+| `poi.decision.v1` | `0xd129ba8915e7d92f61c544d557ddd9ddf6a40ae0defed80faebdb6955e4b3b34` | false |
+| `poi.settlement.v1` | `0x017887d2b08c27d4bc084f6c9cdca331e80601e4d0622f93ee56f9791fa80379` | **true** |
+| `poi.challenge.v1` | `0xe21648ef88b4be1e5eb7f86512d911970ea699a0dbb44a08fa9587ee30ab4cb6` | **true** |
 
 > ### ⚠️ UID는 **영수증에서만** 읽는다 — 배포 중 두 번 걸렸다
 >
@@ -72,7 +76,7 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 
 | | 값 |
 |---|---|
-| decisionUID | `0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe` |
+| decisionUID | `0x919d43269abba2b82fd463761dda85cd78d44f633224a86bd3ec293e39ffc30f` |
 | decisionCommitment | `0x46cf8091be32da5ca484417a89ab0bdf9bb41597554c0a519c269ca234f39db9` |
 | salt | `0x0f1e2d3c4b5a69788796a5b4c3d2e1f0` |
 | payload | `{"fixture":"O4","intent":"overdue-demo"}` |
@@ -87,7 +91,7 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 
 ```bash
 node --experimental-strip-types verifier/src/reveal-cli.ts \
-  0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe \
+  0x919d43269abba2b82fd463761dda85cd78d44f633224a86bd3ec293e39ffc30f \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
   --payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
   --rpc https://sepolia-rpc.giwa.io/
@@ -126,10 +130,10 @@ I4 가 소급 설정을 막는다. 데모 편의로 핵심 방어를 우회하�
 
 | | UID |
 |---|---|
-| **결정 — 등록완료 + 이의** | `0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69` |
+| **결정 — 등록완료 + 이의** | `0x3f845e794b96ba9df4383aaf5bd1b886730538e3aa9b5c8d5d91d8b4ec51ce0d` |
 | └ 정산 | `0xffb39d70a4d657cb31686b28d151f06dbf674399ececb044ebfe1b62980b4e32` |
 | └ **이의 (지갑 B)** | `0x3ab287c6b3a33f75fb5eccb1102928ce0dfc64eac4ed8cecfbc0b3d9927dc37e` |
-| **결정 — 철회 이력** | `0x8516ac866e93a933ea89bc6302dbad7709ea259e72af79549e9337993256ba21` |
+| **결정 — 철회 이력** | `0x22f65981071834acd8ec6efae7ca9f4874cb845e635f2e9453d8c17634fc6f7d` |
 | └ S1 (철회됨) | `0x1b8bd05c1ef57e1014416d24f57d278938bce8e56a22f26c54fa2fbc3f9012cf` |
 | └ S2 (정정) | `0x9bc914a5ac66c25abdeb3a02dc399a6efc9e3921559ae73c060cb2a666b98c24` |
 

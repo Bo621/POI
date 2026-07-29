@@ -61,15 +61,15 @@
 ```
 문항 8
 https://poi-static-production.up.railway.app
-  /#/d/0x06ccb34d…545ebe   기한초과
-  /#/d/0x061ac961…591a69   등록완료 + 제3자 이의
-  /#/d/0x8516ac86…56ba21   철회 이력 + 정정
+  /#/d/0x919d4326…ffc30f   기한초과
+  /#/d/0x3f845e79…51ce0d   등록완료 + 제3자 이의
+  /#/d/0x22f65981…fc6f7d   철회 이력 + 정정
 
 문항 9 — 전부 Pass - Verified
-https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
-https://sepolia-explorer.giwa.io/address/0xbc386addcd3cabbbb62dfcb521939fe4610029d1
-https://sepolia-explorer.giwa.io/address/0x56809bb2aeea0f043fa40ea0ae09411c8af0e127
-https://sepolia-explorer.giwa.io/address/0x83d5c7ad0a024effe6a5d92640f93a19c5be77d0
+https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e879a
+https://sepolia-explorer.giwa.io/address/0x2b21d233b51bc08d0e54458470c4bfef364baee6
+https://sepolia-explorer.giwa.io/address/0x74e6165fa656d4ad89cad1bcc0af32598193f3e0
+https://sepolia-explorer.giwa.io/address/0xa8bd89b229dcb07e90e84df18e0fae27fa965f0c
 ```
 
 **심사자가 지갑 없이 전부 확인할 수 있다.** 지원서에 이 한 줄을 적어두면 바로 눌러본다.

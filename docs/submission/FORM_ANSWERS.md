@@ -132,10 +132,10 @@ GIWA에서만 검증할 수 있는 가설이 있습니다. 커밋이 건당 0.53
 
 ```
 문항 9 — 전부 Pass - Verified
-https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
-https://sepolia-explorer.giwa.io/address/0xbc386addcd3cabbbb62dfcb521939fe4610029d1
-https://sepolia-explorer.giwa.io/address/0x56809bb2aeea0f043fa40ea0ae09411c8af0e127
-https://sepolia-explorer.giwa.io/address/0x83d5c7ad0a024effe6a5d92640f93a19c5be77d0
+https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e879a
+https://sepolia-explorer.giwa.io/address/0x2b21d233b51bc08d0e54458470c4bfef364baee6
+https://sepolia-explorer.giwa.io/address/0x74e6165fa656d4ad89cad1bcc0af32598193f3e0
+https://sepolia-explorer.giwa.io/address/0xa8bd89b229dcb07e90e84df18e0fae27fa965f0c
 ```
 
 ---

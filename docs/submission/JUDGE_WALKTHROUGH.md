@@ -32,9 +32,9 @@ nav 오른쪽에 `GIWA Sepolia · 91342` 가 보인다. **집계 숫자·비율�
 
 | 인장 | UID | 무엇을 보여주나 |
 |---|---|---|
-| 🔴 기한초과 | `0x06ccb34d…545ebe` | **미발행이 드러난다** |
-| 🔵 등록완료 | `0x061ac961…591a69` | 결과 등록 + **제3자 이의** |
-| 🔵 등록완료 | `0x8516ac86…56ba21` | **결과 등록 철회 이력 있음** |
+| 🔴 기한초과 | `0x919d4326…545ebe` | **미발행이 드러난다** |
+| 🔵 등록완료 | `0x3f845e79…591a69` | 결과 등록 + **제3자 이의** |
+| 🔵 등록완료 | `0x22f65981…56ba21` | **결과 등록 철회 이력 있음** |
 
 상세에서 확인할 것:
 
@@ -53,11 +53,11 @@ git clone https://github.com/Bo621/POI.git && cd POI && pnpm install
 
 export POI_RPC_URL=https://sepolia-rpc.giwa.io/
 export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
-export POI_SETTLEMENT_RESOLVER_ADDRESS=0xbc386addcd3cabbbb62dfcb521939fe4610029d1
-export POI_METRIC_REGISTRY_ADDRESS=0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
+export POI_SETTLEMENT_RESOLVER_ADDRESS=0x2b21d233b51bc08d0e54458470c4bfef364baee6
+export POI_METRIC_REGISTRY_ADDRESS=0xd4786313817f1bfd14fc6047fdce9db8382e879a
 
 node --experimental-strip-types verifier/src/cli.ts \
-  0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69 --json
+  0x3f845e794b96ba9df4383aaf5bd1b886730538e3aa9b5c8d5d91d8b4ec51ce0d --json
 ```
 
 **기대**: `"verdict": "MATCH"` · 종료코드 `0`.
@@ -70,7 +70,7 @@ node --experimental-strip-types verifier/src/cli.ts \
 ## S4 — 기준이 고정돼 있는지 본다
 
 ```bash
-cast call 0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66 \
+cast call 0xd4786313817f1bfd14fc6047fdce9db8382e879a \
   "metrics(bytes32)(bool,uint8,uint8,bytes32,bool)" \
   0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf \
   --rpc-url https://sepolia-rpc.giwa.io/
@@ -87,7 +87,7 @@ cast keccak "0x$(xxd -p -c 999999 < docs/metrics/BTC_PRICE_KRW_AT_END.md | tr -d
 ## S5 — 컨트랙트 소스를 본다
 
 ```
-https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
+https://sepolia-explorer.giwa.io/address/0xd4786313817f1bfd14fc6047fdce9db8382e879a
 ```
 
 **기대**: `Pass - Verified`. 리졸버 4종 모두 검증돼 있다.
