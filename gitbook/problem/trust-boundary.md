@@ -20,7 +20,9 @@ flowchart TB
     end
 ```
 
-> POI가 온체인에 남기는 것은 **commitment 하나**입니다. 그 시점에 그 commitment가
+> **결정 원문은 commitment 로만** 남습니다. (결정 attestation 에는 decision·trigger·
+> evidence·reason 네 commitment 와 관측 조건·구간 같은 평문 필드가 함께 기록됩니다 —
+> 숨겨지는 것은 원문이지 조건이 아닙니다.) 그 시점에 그 commitment가
 > 기록됐다는 것이 보장되고, **공개(Reveal) 이후에** 제공된 원문이 그 commitment의
 > 프리이미지임을 누구나 확인할 수 있습니다.
 >

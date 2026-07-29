@@ -44,3 +44,22 @@
 | windowEnd | `1785252556` — 00:29:16 KST |
 | graceSeconds | `3600` (1시간) |
 | **T_overdue** | **`1785256156` — 2026-07-29 01:29:16 KST** |
+
+## 데모 fixture (O7)
+
+관측 구간 `1785252583 ~ 1785253183` · 관측값 **92,602,000** (BTC/KRW, 업비트 1분봉)
+
+| | UID |
+|---|---|
+| 결정 — 등록완료 + 이의 | `0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69` |
+| └ 정산 | `0xffb39d70a4d657cb31686b28d151f06dbf674399ececb044ebfe1b62980b4e32` |
+| └ 이의 (별도 지갑) | `0x3ab287c6b3a33f75fb5eccb1102928ce0dfc64eac4ed8cecfbc0b3d9927dc37e` |
+| 결정 — 철회 이력 | `0x8516ac866e93a933ea89bc6302dbad7709ea259e72af79549e9337993256ba21` |
+| └ S1 (철회됨) | `0x1b8bd05c1ef57e1014416d24f57d278938bce8e56a22f26c54fa2fbc3f9012cf` |
+| └ S2 (정정) | `0x9bc914a5ac66c25abdeb3a02dc399a6efc9e3921559ae73c060cb2a666b98c24` |
+
+이의자 지갑 `0xca89C0F26C99B89F2638649D9b597cA264c7Af5c` 는 **정산자와 다른 주소**입니다.
+컨트랙트는 자기 정산에 대한 이의를 막지 않지만, 같은 주소면 제3자 이의로 읽히지 않습니다.
+
+> **출처는 [`docs/DEPLOYMENT.md`](https://github.com/Bo621/POI/blob/main/docs/DEPLOYMENT.md)
+> 하나뿐입니다.** 값이 다르면 그쪽이 옳습니다.

@@ -24,15 +24,20 @@ stateDiagram-v2
     AWAITING --> SETTLED: 유예 안에 결과 등록
     AWAITING --> OVERDUE: 유예 경과
     OVERDUE --> SETTLED_LATE: 기한 후 등록
-    SETTLED --> AWAITING: 정산 철회 (activeHead=0)
-    SETTLED_LATE --> OVERDUE: 정산 철회 (activeHead=0)
+    SETTLED --> AWAITING: 철회 · 유예 안
+    SETTLED --> OVERDUE: 철회 · 유예 경과
+    SETTLED_LATE --> OVERDUE: 철회
     AWAITING --> SETTLED: 정정 재발행 (supersedes)
+    OVERDUE --> SETTLED_LATE: 정정 재발행 (supersedes)
 
     note right of OVERDUE
         미발행이 드러나는 자리.
         숨기지 않는 것이 설계 의도다.
     end note
 ```
+
+> 활성 정산이 사라지면 상태는 **철회 시각이 아니라 현재 시각**으로 다시 계산됩니다 —
+> 유예(`windowEnd + graceSeconds`) 전이면 「등록대기」, 지났으면 「기한초과」입니다.
 
 | 상태 | 화면 문구 |
 |---|---|

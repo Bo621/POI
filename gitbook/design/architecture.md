@@ -19,7 +19,7 @@ flowchart TB
         R2["POIDecisionResolver<br/>+ MetricRegistry"]
         R3["POISettlementResolver"]
         R4["POIChallengeResolver"]
-        D["도장 DojangScroll<br/>Verified Address"]
+        D["도장 DojangScroll<br/>Verified Address attestation 발급"]
     end
     U["업비트 공개 API<br/>1분봉"]
 
@@ -28,11 +28,16 @@ flowchart TB
     W -->|"attest / revoke"| E
     W -->|"read"| E
     V -->|"read"| E
-    E --> SR
+    D -.->|"attestation 발급"| E
+    SR -.->|"배포 시 스키마 등록"| E
     E -->|"onAttest 훅"| R1 & R2 & R3 & R4
-    R2 -->|"isVerified"| D
+    R2 -->|"getAttestation<br/>(스냅샷 UID 조회)"| E
     V -->|"관측값 재계산"| U
 ```
+
+> **리졸버는 도장 컨트랙트를 직접 호출하지 않습니다.** 결정에 담긴 스냅샷 UID로
+> EAS attestation을 조회해 recipient가 본인인지, 철회·만료되지 않았는지만 검사합니다.
+> `SchemaRegistry`도 발행 경로가 아니라 배포 시 스키마를 등록하는 경로입니다.
 
 ## 왜 `core`가 한 벌인가
 
