@@ -13,11 +13,11 @@
 
 | # | 문항 | 상태 | 제출물 |
 |---|---|---|---|
-| 3 | 팀 소개 (링크) | ⏳ | [TEAM.md](TEAM.md) 초안 완료 — **PDF/Docs 로 올리고 링크만** |
+| 3 | 팀 소개 (링크) | ⏳ | **[POI_team.pdf](POI_team.pdf) 생성 완료** (2쪽) — Drive 업로드 후 링크만 |
 | 4 | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · 460자 |
 | 5 | 트랙 선택 | ✅ | Track 03 |
 | 6 | 한 줄 요약 (50자) | ✅ | 36자 |
-| 7 | 피치덱 | ⏳ | [`pitch/index.html`](pitch/index.html) 완성 — **PDF 변환 후 Drive** |
+| 7 | 피치덱 | ⏳ | **[pitch/POI_pitch.pdf](pitch/POI_pitch.pdf) 생성 완료** (14쪽 16:9) — Drive 업로드만 |
 | 8 | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | 9 | 컨트랙트 링크 (Verified) | ✅ | 4종 전부 `Pass - Verified` |
 | 10 | 기술 문서 / 원페이저 | ✅ | `https://vestat.gitbook.io/poi` |
@@ -28,12 +28,16 @@
 
 | | 무엇을 |
 |---|---|
-| **문항 3** | [TEAM.md](TEAM.md) → PDF 또는 Google Docs → 「링크가 있는 모든 사용자가 볼 수 있음」 |
-| **문항 7** | `pitch/index.html` 열고 <kbd>Cmd/Ctrl+P</kbd> → **PDF 로 저장** → Drive |
+| **문항 3** | [POI_team.pdf](POI_team.pdf) 를 Drive 에 올리고 「링크가 있는 모든 사용자가 볼 수 있음」 |
+| **문항 7** | [pitch/POI_pitch.pdf](pitch/POI_pitch.pdf) 를 Drive 에 올리고 같은 공유 설정 |
+
+> **PDF 는 이미 만들어져 있다.** 브라우저 인쇄로 만들면 깨진다 —
+> 슬라이드가 한 번에 하나씩 보이는 구조라 인쇄 CSS 에서 우측 열이 한 글자씩 세로로 쌓인다.
+> 그래서 14 장을 16:9 로 캡처해 조립했다. 다시 만들 일이 있으면 그 방식을 쓸 것.
 
 
 > **1인 팀이라는 사실을 숨기지 말 것.** 혼자 여기까지 만들었다는 것 자체가
-> 심사 기준 03(실현 가능성)·05(팀 역량)의 근거다. 배포된 컨트랙트와 392개 테스트가 증거다.
+> 심사 기준 03(실현 가능성)·05(팀 역량)의 근거다. 배포된 컨트랙트와 414개 테스트가 증거다.
 > 백엔드 「합류 예정」은 이름·확정 의사·시점이 없으면 적지 않는다.
 
 ## 심사 기준 대조
@@ -54,22 +58,22 @@
 | | 근거 |
 |---|---|
 | 01 실제 구현 수준 | 4상태 fixture 가 테스트넷에 살아 있음 |
-| 02 기술 완성도 | 불변식 온체인 강제 · 테스트 392개 ([TEST_RECORD.md](TEST_RECORD.md)) |
+| 02 기술 완성도 | 불변식 온체인 강제 · 테스트 414개 ([TEST_RECORD.md](TEST_RECORD.md)) |
 
 ## 확보된 링크
 
 ```
 문항 8
 https://poi-static-production.up.railway.app
-  /#/d/0x06ccb34d…545ebe   기한초과
-  /#/d/0x061ac961…591a69   등록완료 + 제3자 이의
-  /#/d/0x8516ac86…56ba21   철회 이력 + 정정
+  /#/d/0xc2b03f01…f22c5e   기한초과
+  /#/d/0x4fd150e4…abb3f8   등록완료 + 제3자 이의
+  /#/d/0xaced9670…49c49b   철회 이력 + 정정
 
 문항 9 — 전부 Pass - Verified
-https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
-https://sepolia-explorer.giwa.io/address/0xbc386addcd3cabbbb62dfcb521939fe4610029d1
-https://sepolia-explorer.giwa.io/address/0x56809bb2aeea0f043fa40ea0ae09411c8af0e127
-https://sepolia-explorer.giwa.io/address/0x83d5c7ad0a024effe6a5d92640f93a19c5be77d0
+https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57
+https://sepolia-explorer.giwa.io/address/0x87c7a8b3970986e51a8b24e78078540115a70c8c
+https://sepolia-explorer.giwa.io/address/0xa7203c170dedb490e32c492cdbe9e968c57168aa
+https://sepolia-explorer.giwa.io/address/0x03822d12dddb59d28cf1197853c5ae85beb1d165
 ```
 
 **심사자가 지갑 없이 전부 확인할 수 있다.** 지원서에 이 한 줄을 적어두면 바로 눌러본다.

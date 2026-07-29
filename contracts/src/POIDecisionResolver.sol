@@ -30,6 +30,17 @@ contract POIDecisionResolver is POIMetricRegistry {
     /// @notice 승격 원본 노트를 검증하기 위해 필요하다 (§5.1).
     bytes32 public noteSchemaUID;
 
+    /// @dev Dojang Verified Address 스키마와 허용 발급자.
+    ///      이걸 검사하지 않으면 **자기가 자기에게 발급한 아무 attestation** 을
+    ///      Verified Address 로 위장할 수 있다 — "커밋 시점에 검증 지갑이었다"가 거짓이 된다.
+    /// @dev 신뢰 루트 변경은 조용히 일어나면 안 된다 — 감사가 불가능해진다.
+    event VerifiedAddressSourceChanged(
+        bytes32 previousSchema, address previousIssuer, bytes32 newSchema, address newIssuer
+    );
+
+    bytes32 public verifiedSchemaUID;
+    address public verifiedIssuer;
+
     error MustBeIrrevocable();
     error MalformedPayload();
     error TooManyParents();
@@ -53,15 +64,37 @@ contract POIDecisionResolver is POIMetricRegistry {
     error WindowInvalid();
     error WindowTooLong();
     error GraceOutOfRange();
+    error VerifiedAddressNotConfigured();
+    error VerifiedAddressWrongSchema();
+    error VerifiedAddressWrongIssuer();
     error OutcomeFieldsMustBeZero();
 
     constructor(IEAS eas) POIResolverBase(eas) {}
 
     /// @dev 필요한 UID를 전부 받는 단일 진입점 — 부분 초기화가 불가능하도록.
-    function initialize(bytes32 decisionSchemaUID, bytes32 noteSchema) external {
+    /// @param verifiedSchema Dojang Verified Address 스키마 UID. **0 이면 미설정**이고,
+    ///        그 경우 `verifiedAddressUID != 0` 인 결정을 거부한다 — 아무거나 받는 것보다
+    ///        받지 않는 것이 안전하다. Dojang 측 UID 를 확보하면 재초기화 없이 owner 가 설정한다.
+    /// @param issuer 허용 발급자 주소.
+    function initialize(
+        bytes32 decisionSchemaUID,
+        bytes32 noteSchema,
+        bytes32 verifiedSchema,
+        address issuer
+    ) external {
         _requireNonZeroUID(noteSchema);
         noteSchemaUID = noteSchema;
+        verifiedSchemaUID = verifiedSchema;
+        verifiedIssuer = issuer;
         _initializeBase(decisionSchemaUID);
+    }
+
+    /// @dev Dojang 스키마 UID 는 외부 확인이 늦어질 수 있어 초기화 후에도 설정할 수 있게 둔다.
+    ///      owner 만 가능하고, 설정 전에는 검증 스냅샷을 아예 받지 않는다.
+    function setVerifiedAddressSource(bytes32 verifiedSchema, address issuer) external onlyOwner {
+        emit VerifiedAddressSourceChanged(verifiedSchemaUID, verifiedIssuer, verifiedSchema, issuer);
+        verifiedSchemaUID = verifiedSchema;
+        verifiedIssuer = issuer;
     }
 
     function onAttest(Attestation calldata a, uint256) internal view override ready returns (bool) {
@@ -72,9 +105,10 @@ contract POIDecisionResolver is POIMetricRegistry {
 
         POICodec.DecisionData memory d = POICodec.decodeDecision(a.data);
 
-        if (a.data.length != DECISION_HEAD_BYTES + PARENTS_LENGTH_BYTES + 32 * d.parents.length) {
-            revert MalformedPayload();
-        }
+        // 길이 검사만으로는 부족하다. **길이를 유지한 채 parents offset 을 head 안으로
+        // 돌리면** 컨트랙트가 검증한 parents 와 정규 디코더가 읽는 parents 가 갈라진다.
+        // 정산과 같은 방식으로 재인코딩해 원본과 대조한다.
+        _requireCanonicalPayload(a.data, d);
 
         // I1 — 결정과 트리거는 비어 있을 수 없다. 근거·이유는 선택이므로 검사하지 않는다.
         if (d.decisionCommitment == 0 || d.triggerCommitment == 0) revert EmptyCommitment();
@@ -119,11 +153,39 @@ contract POIDecisionResolver is POIMetricRegistry {
     /// @dev B4 — 커밋 시점의 검증 상태 스냅샷. **필수가 아니다**(미검증 지갑도 허용).
     ///      다만 넣었다면 실재하고 발행자 본인의 것이어야 한다. Dojang 검증은 30일 뒤
     ///      만료되므로, 만료된 스냅샷을 받으면 "커밋 시점에 검증됐다"는 B4 주장이 거짓이 된다.
+    /// @dev 디코딩 결과를 다시 인코딩해 원본 바이트와 대조한다.
+    ///      정규 인코딩은 유일하므로 offset·패딩 변조가 전부 걸린다.
+    function _requireCanonicalPayload(bytes calldata data, POICodec.DecisionData memory d) private pure {
+        bytes memory canonical = abi.encode(
+            d.parents,
+            d.promotedFromNote,
+            d.verifiedAddressUID,
+            d.decisionCommitment,
+            d.triggerCommitment,
+            d.evidenceCommitment,
+            d.reasonCommitment,
+            d.hasExpectedOutcome,
+            d.outcomeMetricId,
+            d.outcomeOp,
+            d.outcomeThreshold,
+            d.windowStart,
+            d.windowEnd,
+            d.graceSeconds
+        );
+        if (keccak256(data) != keccak256(canonical)) revert MalformedPayload();
+    }
+
     function _checkVerifiedAddress(bytes32 verifiedUID, address attester, uint64 attestTime) private view {
         if (verifiedUID == 0) return;
 
+        // 미설정이면 스냅샷을 받지 않는다. 검사할 수 없는 값을 통과시키면
+        // "검증 지갑이었다"는 명제가 거짓이 된다.
+        if (verifiedSchemaUID == 0 || verifiedIssuer == address(0)) revert VerifiedAddressNotConfigured();
+
         Attestation memory v = _eas.getAttestation(verifiedUID);
         if (v.uid == 0 || v.recipient != attester) revert BadVerifiedUID();
+        if (v.schema != verifiedSchemaUID) revert VerifiedAddressWrongSchema();
+        if (v.attester != verifiedIssuer) revert VerifiedAddressWrongIssuer();
         if (v.revocationTime != 0) revert VerifiedAddressRevoked();
         if (v.expirationTime != 0 && v.expirationTime <= attestTime) revert VerifiedAddressExpired();
     }

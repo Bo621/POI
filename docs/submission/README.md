@@ -29,8 +29,8 @@ GIWA Sepolia(`91342`)에 배포돼 있고, **이 문서의 모든 주장은 직�
 
 ```
 https://poi-static-production.up.railway.app
-https://poi-static-production.up.railway.app/#/d/0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe   ← 기한초과
-https://poi-static-production.up.railway.app/#/d/0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69   ← 등록완료 + 이의
+https://poi-static-production.up.railway.app/#/d/0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e   ← 기한초과
+https://poi-static-production.up.railway.app/#/d/0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8   ← 등록완료 + 이의
 ```
 
 주소·UID 전체: [`../DEPLOYMENT.md`](../DEPLOYMENT.md)
@@ -56,8 +56,8 @@ https://poi-static-production.up.railway.app/#/d/0x061ac961bb031dfb9436478f92c89
 
 ```
                 커밋 1건      결정 커밋 36건/년
-GIWA            0.53원              19원
-이더리움 L1    5,040원         181,000원
+GIWA            1.21원              19원
+이더리움 L1    850원         181,000원
 ```
 
 고비용 체인에서 비용을 줄이려면 두 갈래뿐이고 둘 다 POI를 깎아냅니다.

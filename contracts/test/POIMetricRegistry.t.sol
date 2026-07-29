@@ -60,6 +60,15 @@ contract POIMetricRegistryTest is Test {
     }
 
     /// @dev ★ B13 — decimals나 definitionHash를 바꾸면 과거 결정의 해석이 소급 변경된다.
+    /// @dev 봉인 후에는 소유자도 지표를 추가할 수 없다.
+    ///      Phase 1 에서는 **호출하지 않는다** — 지표를 더 등록해야 한다.
+    function test_SealRegistry_BlocksFurtherAdds() public {
+        reg.sealRegistry();
+        assertTrue(reg.registrySealed());
+        vm.expectRevert(POIMetricRegistry.RegistryIsSealed.selector);
+        reg.addMetric(VOL30, _spec());
+    }
+
     function test_AddMetric_RevertsOnReregistration() public {
         reg.addMetric(VOL30, _spec());
 

@@ -65,6 +65,25 @@ export class AttestationNotFoundError extends Error {
     }
 }
 
+/** 조회 경로의 스키마 가드. 세 리더가 모두 이걸 통과해야 한다. */
+export function assertSchema(actual: Hex, expected: Hex): void {
+    if (actual.toLowerCase() !== expected.toLowerCase()) throw new WrongSchemaError();
+}
+
+/**
+ * UID 는 존재하지만 POI 스키마가 아니다.
+ *
+ * 이 검사가 없으면 **아무 attestation 이나 POI 결정처럼 보여준다** —
+ * 재배포로 스키마가 바뀐 뒤 구 UID 가 정상 기록으로 표시되는 것을 실제로 겪었다.
+ * 컨트랙트는 `WrongSchema` 로 막는데 조회 쪽에 같은 검사가 없었다.
+ */
+export class WrongSchemaError extends Error {
+    constructor() {
+        super("이 UID 는 POI 기록이 아닙니다. 다른 스키마의 attestation 입니다.");
+        this.name = "WrongSchemaError";
+    }
+}
+
 export interface ChallengeLog {
     uid: Hex;
     attester: Address;
@@ -148,6 +167,7 @@ export async function readDecision(uid: Hex): Promise<DecisionFields & {
     if (attestation.uid.toLowerCase() !== uid.toLowerCase()) {
         throw new AttestationNotFoundError();
     }
+    assertSchema(attestation.schema, SCHEMAS.decision as Hex);
     const values = decodeAbiParameters(DECISION_PARAMETERS, attestation.data);
     const fields = Object.fromEntries(
         DECISION_PARAMETERS.map((parameter, index) => [parameter.name, values[index]]),
@@ -157,6 +177,10 @@ export async function readDecision(uid: Hex): Promise<DecisionFields & {
 
 export async function readSettlement(uid: Hex) {
     const attestation = await getAttestation(uid);
+    if (attestation.uid.toLowerCase() !== uid.toLowerCase()) {
+        throw new AttestationNotFoundError();
+    }
+    assertSchema(attestation.schema, SCHEMAS.settlement as Hex);
     const values = decodeAbiParameters(SETTLEMENT_PARAMETERS, attestation.data);
     return {
         uid,

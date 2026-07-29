@@ -106,6 +106,14 @@ export function Settlement({address, decisionUID, onSuccess}: {
                 readSettlementHeads(SCHEMAS.settlement as Hex, uid),
             ]);
             if (!address) throw new Error("먼저 지갑을 연결해 주세요.");
+            // 컨트랙트가 강제하는 provenance 규칙을 여기서 먼저 알린다 —
+            // 관측 실패(INDETERMINATE)에도 출처는 남아야 한다.
+            // 상한은 **바이트** 기준이라 한글은 글자당 3바이트다.
+            const bytes = (v: string) => new TextEncoder().encode(v).length;
+            if (bytes(source) === 0) throw new Error("관측 출처를 적어 주세요. 값을 얻지 못한 경우에도 어디를 조회했는지 남아야 합니다.");
+            if (bytes(verifierVersion) === 0) throw new Error("검증기 버전을 적어 주세요.");
+            if (bytes(source) > 64) throw new Error(`관측 출처는 64바이트까지입니다 (현재 ${bytes(source)}). 한글은 글자당 3바이트입니다.`);
+            if (bytes(verifierVersion) > 32) throw new Error(`검증기 버전은 32바이트까지입니다 (현재 ${bytes(verifierVersion)}).`);
             if (record.attester.toLowerCase() !== address.toLowerCase()) {
                 throw new Error("결정 작성자만 결과를 등록할 수 있습니다.");
             }
@@ -172,8 +180,8 @@ export function Settlement({address, decisionUID, onSuccess}: {
             <form className="doc-form" onSubmit={prepare}>
                 <label className="check-field" htmlFor="settlement-missing"><input id="settlement-missing" type="checkbox" checked={missing} onChange={(e) => setMissing(e.target.checked)} />관측값 없음</label>
                 {!missing && <div className="field"><label htmlFor="settlement-value">관측값</label><input id="settlement-value" value={observedValue} onChange={(e) => setObservedValue(e.target.value)} /></div>}
-                <div className="field"><label htmlFor="settlement-source">출처</label><input id="settlement-source" value={source} onChange={(e) => setSource(e.target.value)} /></div>
-                <div className="field"><label htmlFor="settlement-version">verifierVersion</label><input id="settlement-version" value={verifierVersion} onChange={(e) => setVerifierVersion(e.target.value)} /></div>
+                <div className="field"><label htmlFor="settlement-source">출처 <span className="hint">최대 64바이트 · 관측 실패 시에도 필수</span></label><input id="settlement-source" maxLength={64} value={source} onChange={(e) => setSource(e.target.value)} /></div>
+                <div className="field"><label htmlFor="settlement-version">verifierVersion <span className="hint">최대 32바이트</span></label><input id="settlement-version" maxLength={32} value={verifierVersion} onChange={(e) => setVerifierVersion(e.target.value)} /></div>
                 <button className="btn" type="submit" disabled={!isDeployed()}>결과 등록하기</button>
             </form>
             {prepared && <dl className="doc-fields"><dt>판정</dt><dd>{prepared.result === RESULT.OBSERVED ? "OBSERVED" : prepared.result === RESULT.NOT_OBSERVED ? "NOT_OBSERVED" : "INDETERMINATE"}</dd></dl>}

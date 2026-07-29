@@ -11,6 +11,8 @@ import {MockEAS} from "./mocks/MockEAS.sol";
 
 /// @notice C4 — `poi.decision.v1` 리졸버 (§5.2, §6.3). I1~I6, I12, I14.
 contract POIDecisionResolverTest is Test {
+    bytes32 internal constant DOJANG_SCHEMA = keccak256("dojang.verified");
+    address internal constant DOJANG_ISSUER = address(0xD0);
     MockEAS internal eas;
     POIDecisionResolver internal r;
 
@@ -26,7 +28,7 @@ contract POIDecisionResolverTest is Test {
         vm.warp(NOW);
         eas = new MockEAS();
         r = new POIDecisionResolver(IEAS(address(eas)));
-        r.initialize(DECISION_SCHEMA, NOTE_SCHEMA);
+        r.initialize(DECISION_SCHEMA, NOTE_SCHEMA, DOJANG_SCHEMA, DOJANG_ISSUER);
         r.addMetric(
             METRIC,
             POIMetricRegistry.MetricSpec({
@@ -393,6 +395,81 @@ contract POIDecisionResolverTest is Test {
         assertTrue(_attest(_attestation(d)));
     }
 
+    // --- 정규 인코딩 (codex 3라운드) ------------------------------------------
+
+    /// @dev **길이를 유지한 채** parents offset 을 head 안으로 돌리면 컨트랙트가 검증한
+    ///      parents 와 정규 디코더가 읽는 parents 가 갈라진다. 길이 검사만으로는 못 막는다.
+    function test_Attest_RevertsOnSameLengthOffsetTampering() public {
+        POICodec.DecisionData memory d = _decision();
+        d.parents = new bytes32[](1);
+        d.parents[0] = keccak256("realParent");
+        d.hasExpectedOutcome = true;   // head 슬롯 7 = 1 → 길이 1 로 읽히게 만든다
+
+        Attestation memory a = _attestation(d);
+        bytes memory tampered = bytes.concat(a.data);   // 값 복사
+        assembly { mstore(add(tampered, 32), mul(7, 32)) }   // parents offset → 슬롯 7
+        assertEq(tampered.length, a.data.length, "length preserved");
+        a.data = tampered;
+
+        vm.prank(address(eas));
+        vm.expectRevert(POIDecisionResolver.MalformedPayload.selector);
+        r.attest(a);
+    }
+
+    // --- B1 Dojang 출처 검증 ------------------------------------------------
+
+    /// @dev 다른 스키마의 attestation 을 검증 스냅샷으로 위장할 수 없다.
+    ///      이걸 막지 않으면 "커밋 시점에 검증 지갑이었다"가 거짓이 된다.
+    function test_Attest_RevertsOnVerifiedUIDOfWrongSchema() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerifiedWith(keccak256("selfie"), keccak256("some.other.schema"), DOJANG_ISSUER);
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressWrongSchema.selector);
+        _attest(_attestation(d));
+    }
+
+    /// @dev 스키마가 같아도 발급자가 도장이 아니면 자작 attestation 이다.
+    function test_Attest_RevertsOnVerifiedUIDOfWrongIssuer() public {
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerifiedWith(keccak256("selfIssued"), DOJANG_SCHEMA, ALICE);
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressWrongIssuer.selector);
+        _attest(_attestation(d));
+    }
+
+    /// @dev 출처를 모르는 상태에서는 스냅샷을 아예 받지 않는다 —
+    ///      검사할 수 없는 값을 통과시키는 것보다 거부가 안전하다.
+    function test_Attest_RevertsOnVerifiedUIDWhenSourceUnconfigured() public {
+        POIDecisionResolver bare = new POIDecisionResolver(IEAS(address(eas)));
+        bare.initialize(DECISION_SCHEMA, NOTE_SCHEMA, bytes32(0), address(0));
+        POICodec.DecisionData memory d = _decision();
+        d.verifiedAddressUID = _storeVerified(keccak256("verified"), ALICE, 0, 0);
+        vm.prank(address(eas));
+        vm.expectRevert(POIDecisionResolver.VerifiedAddressNotConfigured.selector);
+        bare.attest(_attestation(d));
+    }
+
+    function test_SetVerifiedAddressSource_RevertsForNonOwner() public {
+        vm.prank(ALICE);
+        vm.expectRevert();
+        r.setVerifiedAddressSource(keccak256("attackerSchema"), ALICE);
+    }
+
+    function _storeVerifiedWith(bytes32 uid, bytes32 schema, address issuer) internal returns (bytes32) {
+        Attestation memory v = Attestation({
+            uid: uid,
+            schema: schema,
+            time: NOW - 10 days,
+            expirationTime: 0,
+            revocationTime: 0,
+            refUID: bytes32(0),
+            recipient: ALICE,
+            attester: issuer,
+            revocable: true,
+            data: ""
+        });
+        eas.set(v);
+        return uid;
+    }
+
     // --- I4~I6 outcome ------------------------------------------------------
 
     /// @dev CT14 — 화이트리스트 밖 지표는 재현 절차가 없다.
@@ -520,7 +597,7 @@ contract POIDecisionResolverTest is Test {
     function test_Initialize_RevertsOnZeroNoteSchema() public {
         POIDecisionResolver fresh = new POIDecisionResolver(IEAS(address(eas)));
         vm.expectRevert(POIResolverBase.ZeroSchemaUID.selector);
-        fresh.initialize(DECISION_SCHEMA, bytes32(0));
+        fresh.initialize(DECISION_SCHEMA, bytes32(0), DOJANG_SCHEMA, DOJANG_ISSUER);
         assertFalse(fresh.initialized());
     }
 }

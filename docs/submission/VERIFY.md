@@ -7,7 +7,7 @@
 ```bash
 export RPC=https://sepolia-rpc.giwa.io/
 export EAS=0x4200000000000000000000000000000000000021
-export DECISION_RESOLVER=0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66
+export DECISION_RESOLVER=0x2b379095a8b296e2c61f8153e06fc4cdef56af57
 ```
 
 정확한 UID는 [`../DEPLOYMENT.md`](../DEPLOYMENT.md)에 있습니다.
@@ -21,7 +21,7 @@ cast code $DECISION_RESOLVER --rpc-url $RPC | head -c 20
 ```
 
 익스플로러에서 소스도 검증돼 있습니다 (`Pass - Verified`):
-`https://sepolia-explorer.giwa.io/address/0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66`
+`https://sepolia-explorer.giwa.io/address/0x2b379095a8b296e2c61f8153e06fc4cdef56af57`
 
 ## 2. 지표 정의가 문서에 고정돼 있고 바꿀 수 없다
 
@@ -76,12 +76,13 @@ if (s.result != expect) revert ResultMismatch();   // I17
 git clone https://github.com/Bo621/POI.git && cd POI && pnpm install
 export POI_RPC_URL=$RPC
 export POI_EAS_ADDRESS=$EAS
-export POI_SETTLEMENT_RESOLVER_ADDRESS=0xbc386addcd3cabbbb62dfcb521939fe4610029d1
+export POI_SETTLEMENT_RESOLVER_ADDRESS=0x87c7a8b3970986e51a8b24e78078540115a70c8c
 export POI_METRIC_REGISTRY_ADDRESS=$DECISION_RESOLVER
+export POI_DECISION_SCHEMA_UID=0x2038d08d688d9e4532de17c9ee9634ebbd3b5b853c654726fff94e50604d0151
 
 # 결과가 등록된 결정 — MATCH (종료코드 0)
 node --experimental-strip-types verifier/src/cli.ts \
-  0x061ac961bb031dfb9436478f92c898e64bb600871d0f461c394a00b0aa591a69 --json
+  0x4fd150e4f2b0891c89693e05b37691be5e9700e216f73247170c4bfb1fabb3f8 --json
 ```
 
 검증기는 온체인 정산을 읽고, **업비트 공개 1분봉으로 관측값을 직접 다시 계산해** 대조합니다.
@@ -103,7 +104,7 @@ node --experimental-strip-types verifier/src/cli.ts \
 
 ```bash
 node --experimental-strip-types verifier/src/reveal-cli.ts \
-  0x06ccb34d85d43a9bcde4c343c10b233e9d4a9a7aab2a2571f476205429545ebe \
+  0xc2b03f0192ded81e7d3e5d5a1d75bec0250ab5735bf1cee63aba6b601ff22c5e \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
   > **`--payload` 는 JSON 이다.** 결정 본문이 문자열이면 큰따옴표까지 포함해야 한다.
 

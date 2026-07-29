@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {readFile} from "node:fs/promises";
 import {isHex, type Hex} from "viem";
-import {requiredAddress} from "./env.ts";
+import {requiredAddress, requiredSchemaUID} from "./env.ts";
 import {createViemReader} from "./reader.ts";
 import {
     REVEAL,
@@ -72,6 +72,9 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     const reader = createViemReader({
         rpcUrl,
         easAddress: requiredAddress("POI_EAS_ADDRESS"),
+        // 스키마를 확인하지 않으면 다른 스키마의 attestation 을 결정으로 읽어
+        // commitment 가 「일치」한다고 보고할 수 있다.
+        decisionSchemaUID: requiredSchemaUID("POI_DECISION_SCHEMA_UID"),
     });
     const report = revealDecision({
         decision: await reader.getDecision(decisionUID),

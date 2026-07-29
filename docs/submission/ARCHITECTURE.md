@@ -85,7 +85,7 @@ EAS는 `data`를 스키마에 대해 검증하지 않습니다. 잉여 워드나
 그래서 리졸버가 디코딩 결과를 **다시 인코딩해 원본과 바이트 단위로 대조**합니다.
 정규 인코딩은 유일하므로 이걸로 걸러집니다.
 
-## 지표 — 문서가 없으면 등록되지 않는다
+## 지표 — 정의를 등록 후 바꿀 수 없다
 
 ```solidity
 if (spec.definitionHash == 0) revert MetricDefinitionRequired();
@@ -94,7 +94,12 @@ if (spec.definitionHash == 0) revert MetricDefinitionRequired();
 `definitionHash`는 계산식·출처·간격·UTC·결측치 정책·스냅샷 해시를 적은
 **문서 바이트의 keccak**입니다. 등록 즉시 `frozen = true`가 되어 정의를 바꿀 수 없습니다.
 
-지표는 append-only라 나중에 추가할 수 있지만, **문서 없는 지표는 컨트랙트가 거부합니다.**
+지표는 append-only라 나중에 추가할 수 있습니다.
+
+컨트랙트가 보장하는 것은 **문서의 존재가 아니라 불변성**입니다 — 컨트랙트는 32바이트 해시가
+실제 문서를 가리키는지 알 수 없습니다. 대신 한 번 등록된 `definitionHash` 는 **동결되어 바뀌지 않고**,
+제3자가 공개된 문서를 `cast keccak` 으로 직접 해싱해 온체인 값과 **대조**할 수 있습니다.
+화이트리스트에 없는 지표는 컨트랙트가 거부합니다.
 
 ## 코드 구성
 

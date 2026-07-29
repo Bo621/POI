@@ -52,7 +52,7 @@ cat > "${STAGE}/package.json" <<'JSON'
 JSON
 
 # 올라가는 것이 정말 테스트넷 빌드인지 마지막으로 확인한다.
-if ! grep -rqi "0x7f784bdba6fa0b5437d6809c28a00125c8ab1b66" "${STAGE}/dist/assets/"*.js; then
+if ! grep -rqi "0x2b379095a8b296e2c61f8153e06fc4cdef56af57" "${STAGE}/dist/assets/"*.js; then
     echo "스테이징에 테스트넷 리졸버 주소가 없습니다." >&2
     exit 1
 fi
@@ -63,7 +63,9 @@ fi
 
 echo "== 3. 업로드"
 cd "${STAGE}"
-railway up --service poi-web --detach
+# 서비스 이름이 틀리면 railway 는 업로드까지 성공하고 조용히 아무것도 배포하지 않는다.
+# 실제로 poi-web 으로 올려 한 시간을 날렸다 — 실서비스는 poi-static 하나뿐이다.
+railway up --service poi-static --detach
 
 echo
 echo "배포 시작됨. 확인:"

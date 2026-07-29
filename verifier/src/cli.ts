@@ -1,9 +1,23 @@
 #!/usr/bin/env node
+import {pathToFileURL} from "node:url";
 import {isHex, type Hex} from "viem";
-import {requiredAddress} from "./env.ts";
+import {requiredAddress, requiredSchemaUID} from "./env.ts";
 import {defaultProviders} from "./providers.ts";
 import {createViemReader} from "./reader.ts";
 import {VERDICT, verifyDecision} from "./verify.ts";
+
+/**
+ * 종료코드는 문서(gitbook/verify/exit-codes.md)가 정의한 계약이다.
+ * `NOT_REQUIRED`(예상 결과 미선언)는 **검증할 대상이 없는 것**이므로 3 이다 —
+ * 0 으로 두면 「검증됨」과 구별되지 않는다.
+ */
+export function exitCodeFor(verdict: string): number {
+    if (verdict === VERDICT.MISMATCH) return 1;
+    if (verdict === VERDICT.NO_OBSERVATION
+        || verdict === VERDICT.NO_SETTLEMENT
+        || verdict === VERDICT.NOT_REQUIRED) return 3;
+    return 0;
+}
 
 const USAGE = "사용법: poi-verify <decisionUID> [--rpc <url>] [--json] [--no-fetch]";
 
@@ -34,6 +48,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         easAddress: requiredAddress("POI_EAS_ADDRESS"),
         settlementResolverAddress: requiredAddress("POI_SETTLEMENT_RESOLVER_ADDRESS"),
         metricRegistryAddress: requiredAddress("POI_METRIC_REGISTRY_ADDRESS"),
+        decisionSchemaUID: requiredSchemaUID("POI_DECISION_SCHEMA_UID"),
     });
     const report = await verifyDecision({
         reader,
@@ -49,15 +64,16 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         console.log(`상태: ${report.state}`);
         for (const problem of report.problems) console.log(`문제: ${problem}`);
     }
-    if (report.verdict === VERDICT.MISMATCH) return 1;
-    if (report.verdict === VERDICT.NO_OBSERVATION || report.verdict === VERDICT.NO_SETTLEMENT) return 3;
-    return 0;
+    return exitCodeFor(report.verdict);
 }
 
-main().then(
-    (code) => process.exit(code),
-    (error: unknown) => {
-        console.error(error instanceof Error ? error.message : String(error));
-        process.exit(2);
-    },
-);
+// 직접 실행할 때만 돈다. import 하면 실행되던 탓에 테스트가 CLI 를 돌려버렸다.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+    main().then(
+        (code) => process.exit(code),
+        (error: unknown) => {
+            console.error(error instanceof Error ? error.message : String(error));
+            process.exit(2);
+        },
+    );
+}

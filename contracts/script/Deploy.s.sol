@@ -11,6 +11,13 @@ import {POISettlementResolver} from "../src/POISettlementResolver.sol";
 import {POIChallengeResolver} from "../src/POIChallengeResolver.sol";
 
 contract Deploy is Script {
+    /// Dojang Verified Address 스키마 UID 와 발급자. **아직 확인되지 않았다**(W1).
+    /// 0 으로 두면 컨트랙트가 verifiedAddressUID != 0 인 결정을 거부한다 —
+    /// 아무 attestation 이나 검증 스냅샷으로 받는 것보다 안전하다.
+    /// 확보하면 owner 가 setVerifiedAddressSource 로 설정한다.
+    bytes32 internal constant DOJANG_SCHEMA_UID = bytes32(0);
+    address internal constant DOJANG_ISSUER = address(0);
+
     address internal constant DEFAULT_EAS = 0x4200000000000000000000000000000000000021;
     address internal constant DEFAULT_SCHEMA_REGISTRY = 0x4200000000000000000000000000000000000020;
 
@@ -78,7 +85,7 @@ contract Deploy is Script {
 
         note.initialize(d.noteSchemaUID);
         require(note.initialized(), "note not initialized");
-        decision.initialize(d.decisionSchemaUID, d.noteSchemaUID);
+        decision.initialize(d.decisionSchemaUID, d.noteSchemaUID, DOJANG_SCHEMA_UID, DOJANG_ISSUER);
         require(decision.initialized(), "decision not initialized");
         settlement.initialize(d.settlementSchemaUID, d.decisionSchemaUID);
         require(settlement.initialized(), "settlement not initialized");

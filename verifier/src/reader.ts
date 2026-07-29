@@ -61,6 +61,8 @@ export interface ViemReaderConfig {
     rpcUrl: string;
     easAddress: Address;
     settlementResolverAddress?: Address;
+    /** POI 결정 스키마 UID. 설정하면 다른 스키마의 attestation 을 결정으로 읽지 않는다. */
+    decisionSchemaUID?: Hex;
     metricRegistryAddress?: Address;
 }
 
@@ -125,6 +127,12 @@ export function createViemReader(config: ViemReaderConfig): ChainReader {
         async getDecision(uid) {
             const attestation = await getAttestation(uid);
             if (/^0x0+$/i.test(attestation.uid)) return undefined;
+            // 스키마를 확인하지 않으면 **호환 payload 를 가진 아무 attestation 이나**
+            // POI 결정으로 읽어 MATCH 를 내준다. 컨트랙트는 WrongSchema 로 막는다.
+            if (config.decisionSchemaUID
+                && attestation.schema.toLowerCase() !== config.decisionSchemaUID.toLowerCase()) {
+                throw new Error("POI 결정 스키마가 아닙니다: " + attestation.schema);
+            }
             const decoded = decodeAbiParameters(DECISION_PARAMETERS, attestation.data);
             // viem은 uint32/uint64를 number로 주므로 인터페이스 경계에서 한 번만 변환한다.
             return {
