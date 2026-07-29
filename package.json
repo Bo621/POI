@@ -4,5 +4,8 @@
   "packageManager": "pnpm@11.9.0",
   "engines": {
     "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -C web build"
   }
 }
