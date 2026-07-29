@@ -15,7 +15,9 @@ import {
     DOJANG_SCHEMA_UID,
     EAS_ADDRESS,
     UPBIT_KOREA_ID,
+    DOJANG_ISSUER,
 } from "./config";
+import {getAttestation, getChainTime} from "./read";
 
 const ZERO_UID = `0x${"00".repeat(32)}` as Hex;
 const DOJANG_ABI = parseAbi([
@@ -34,6 +36,32 @@ export interface WalletState extends VerificationSnapshot {
     address?: Address;
 }
 
+export interface VerificationCandidate {
+    uid: Hex;
+    revocationTime: bigint;
+    expirationTime: bigint;
+    attester: string;
+}
+
+/**
+ * 유효한 검증 하나를 고른다. 없으면 undefined.
+ *
+ * 철회·만료·발급자 불일치를 전부 거른다 — 컨트랙트가 같은 조건으로 거부하므로,
+ * 여기서 거르지 않으면 사용자는 이유를 모른 채 발행에 실패한다.
+ */
+export function pickValidVerification(
+    candidates: VerificationCandidate[], now: bigint, issuer: string,
+): Hex | undefined {
+    for (let index = candidates.length - 1; index >= 0; index -= 1) {
+        const a = candidates[index]!;
+        if (a.revocationTime !== 0n) continue;
+        if (a.expirationTime !== 0n && a.expirationTime <= now) continue;
+        if (a.attester.toLowerCase() !== issuer.toLowerCase()) continue;
+        return a.uid;
+    }
+    return undefined;
+}
+
 async function findLatestVerificationUID(address: Address): Promise<Hex> {
     if (!/^0x[0-9a-fA-F]{64}$/.test(DOJANG_SCHEMA_UID)) return ZERO_UID;
     // 공개 RPC 는 getLogs 구간을 100,000 블록으로 제한한다. fromBlock: 0n 은 실패한다.
@@ -46,7 +74,22 @@ async function findLatestVerificationUID(address: Address): Promise<Hex> {
         fromBlock: from > 0n ? from : 0n,
         toBlock: latest,
     }));
-    return logs.at(-1)?.args.uid ?? ZERO_UID;
+    // **마지막 로그를 그대로 쓰면 안 된다.** 철회·만료된 검증을 붙이면 컨트랙트가
+    // VerifiedAddressRevoked / VerifiedAddressExpired 로 발행 자체를 거부한다.
+    // 도장 발급은 철회가 실제로 일어난다 — 온체인에서 확인했다.
+    const now = await getChainTime();
+    const candidates: VerificationCandidate[] = [];
+    for (const log of logs) {
+        const uid = log.args.uid;
+        if (!uid) continue;
+        try {
+            const a = await getAttestation(uid);
+            candidates.push({uid, revocationTime: a.revocationTime, expirationTime: a.expirationTime, attester: a.attester});
+        } catch {
+            // 조회 실패한 건은 후보에서 뺀다. 붙이지 않는 쪽이 안전하다.
+        }
+    }
+    return pickValidVerification(candidates, now, DOJANG_ISSUER) ?? ZERO_UID;
 }
 
 export function shortAddress(address: Address): string {

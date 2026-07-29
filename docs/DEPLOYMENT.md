@@ -117,6 +117,29 @@ pendingOwner 0x0000000000000000000000000000000000000000
 배포 지갑 단독 addMetric → OwnableUnauthorizedAccount 로 revert
 ```
 
+## 도장 연동 (O8)
+
+`POIDecisionResolver` 에 도장 Verified Address 출처를 등록했다 (Safe 2/2 로 실행).
+
+| | |
+|---|---|
+| `verifiedSchemaUID` | `0x072d75e18b2be4f89a13a7147240477481c4b526d5795802acba59046b426e08` (`bool isVerified`) |
+| `verifiedIssuer` | `0x09B170CA2A006081042992bCE7379B85a02149C6` (업비트 코리아) |
+
+### 이 값을 어떻게 특정했나 — 서로 독립적인 세 경로
+
+1. 도장의 `_dojangAttesterBook` → `getAttester(UPBIT_KOREA_ID)` 가 `0x09B170CA…49C6` 을 반환한다.
+   `UPBIT_KOREA_ID` 는 프론트가 이미 쓰던 값이다.
+2. EAS 로그를 스키마별로 세어 보면 `bool isVerified`(`0x072d75e1…`)가 32,282 건으로 압도적이고,
+   그중 위 발급자 건이 존재한다.
+3. 도장의 `getVerifiedAddressAttestationUid(recipient, UPBIT_KOREA_ID)` 가
+   **바로 그 UID 를 오류 payload 에 담아** 돌려준다(철회 상태라 revert).
+   도장이 이 스키마·발급자 조합을 Verified Address 기록으로 취급한다는 뜻이다.
+
+> **도장 발급은 철회가 실제로 일어난다.** 샘플로 확인한 두 건이 모두 철회 상태였다.
+> 그래서 프론트는 철회·만료·발급자 불일치를 걸러 **유효한 것만** 스냅샷으로 붙인다.
+> 걸러내지 않으면 컨트랙트가 `VerifiedAddressRevoked` 로 발행 자체를 거부한다.
+
 ## 지표 (O5)
 
 `POIDecisionResolver`에 등록. **등록 즉시 `frozen = true`** — 정의는 변경 불가.

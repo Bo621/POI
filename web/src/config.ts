@@ -13,6 +13,10 @@ export const SCHEMA_REGISTRY_ADDRESS =
     import.meta.env.VITE_SCHEMA_REGISTRY_ADDRESS ?? "0x4200000000000000000000000000000000000020";
 export const DOJANG_ADDRESS =
     import.meta.env.VITE_DOJANG_ADDRESS ?? "0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9";
+/** 도장 Verified Address 발급자(업비트 코리아). 컨트랙트의 verifiedIssuer 와 같아야 한다. */
+export const DOJANG_ISSUER =
+    import.meta.env.VITE_DOJANG_ISSUER ?? "0x09B170CA2A006081042992bCE7379B85a02149C6";
+
 export const UPBIT_KOREA_ID =
     "0xd99b42e778498aa3c9c1f6a012359130252780511687a35982e8e52735453034";
 

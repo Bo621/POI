@@ -13,9 +13,9 @@
 | contracts | **166 passed, 0 failed, 0 skipped** | `forge test` (8 suites) |
 | core | **62 pass, 0 fail** | `npm test` |
 | verifier | **59 pass, 0 fail** | `npm test` |
-| web | **90 passed** (17 files) | `npm test` |
+| web | **95 passed** (18 files) | `npm test` |
 | e2e | **37 passed** | `npm run test:e2e` (실제 체인 상대) |
-| **합계** | **414** | |
+| **합계** | **419** | |
 
 ## 이 수치가 뜻하는 것과 뜻하지 않는 것
 
