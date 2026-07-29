@@ -3,8 +3,11 @@ packages:
   - web
   - verifier
 
+# esbuild 는 설치 후 바이너리를 내려받는 postinstall 이 필요하다.
+# 여기가 "set this to true or false" 플레이스홀더로 남아 있어서
+# CI 에서 ERR_PNPM_IGNORED_BUILDS 로 pnpm install 이 실패했다.
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
 
 onlyBuiltDependencies:
   - esbuild

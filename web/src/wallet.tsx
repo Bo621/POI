@@ -9,6 +9,7 @@ import {
 } from "viem";
 import {publicClient, getWalletClient, withRetry} from "./chain";
 import {
+    DEPLOY_BLOCK,
     DOJANG_ADDRESS,
     DOJANG_SCHEMA_UID,
     EAS_ADDRESS,
@@ -34,12 +35,15 @@ export interface WalletState extends VerificationSnapshot {
 
 async function findLatestVerificationUID(address: Address): Promise<Hex> {
     if (!/^0x[0-9a-fA-F]{64}$/.test(DOJANG_SCHEMA_UID)) return ZERO_UID;
+    // 공개 RPC 는 getLogs 구간을 100,000 블록으로 제한한다. fromBlock: 0n 은 실패한다.
+    const latest = await withRetry(() => publicClient.getBlockNumber());
+    const from = DEPLOY_BLOCK > 0n && latest - DEPLOY_BLOCK < 90_000n ? DEPLOY_BLOCK : latest - 90_000n;
     const logs = await withRetry(() => publicClient.getLogs({
         address: EAS_ADDRESS,
         event: ATTESTED_EVENT,
         args: {recipient: address, schema: DOJANG_SCHEMA_UID as Hex},
-        fromBlock: 0n,
-        toBlock: "latest",
+        fromBlock: from > 0n ? from : 0n,
+        toBlock: latest,
     }));
     return logs.at(-1)?.args.uid ?? ZERO_UID;
 }
@@ -101,9 +105,9 @@ export function Wallet({state, onChange}: {
                     <a className="hex" href={`#/passport/${state.address.toLowerCase()}`}>{shortAddress(state.address)}</a> {badge}
                 </span>
                 : <span className="site-nav__wallet-empty">지갑 연결 안 됨</span>}
-            <button className="btn" type="button" onClick={connect} disabled={connecting}>
+            {!state.address && <button className="btn" type="button" onClick={connect} disabled={connecting}>
                 {connecting ? "연결 중…" : "연결"}
-            </button>
+            </button>}
             {state.address && state.verifiedAddressUID === ZERO_UID && (
                 <p className="notice notice--quiet">검증 지갑 스냅샷 UID를 찾지 못했습니다 (0으로 기록됩니다)</p>
             )}

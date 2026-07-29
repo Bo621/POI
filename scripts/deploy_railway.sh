@@ -19,6 +19,22 @@ echo "== 2. 스테이징"
 rm -rf "${STAGE}"
 mkdir -p "${STAGE}"
 cp -R "${ROOT_DIR}/web/dist" "${STAGE}/dist"
+# dev_up.sh 가 로컬 시드를 dist 에 남긴다. 테스트넷 배포에 딸려가면 홈이 그쪽으로 폴백할 수 있다.
+rm -f "${STAGE}/dist/seed.json"
+
+# 서비스에 최초 railway.json 의 빌드 명령(pnpm -C web build)이 저장돼 있고
+# NIXPACKS_* 환경변수로는 덮이지 않는다. 업로드에 설정 파일을 직접 넣어야 이긴다.
+cat > "${STAGE}/railway.json" <<'RJSON'
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": { "builder": "NIXPACKS", "buildCommand": "echo static-only" },
+  "deploy": {
+    "startCommand": "npx --yes serve dist --listen $PORT --single",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}
+RJSON
 
 # pnpm 잠금파일을 두지 않는다 — Nixpacks가 npm 경로를 타야 corepack을 건드리지 않는다.
 cat > "${STAGE}/package.json" <<'JSON'

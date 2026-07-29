@@ -7,6 +7,7 @@ import {
 } from "viem";
 import {publicClient, withRetry} from "./chain";
 import {
+    DEPLOY_BLOCK,
     DOJANG_ADDRESS,
     EAS_ADDRESS,
     SCHEMAS,
@@ -215,14 +216,38 @@ export async function readMetricDefinition(decisionSchema: Hex, metricId: Hex): 
     return {decimals: Number(metric[1]), definitionHash: metric[3]};
 }
 
-export async function readChallengeLogs(challengeSchema: Hex): Promise<ChallengeLog[]> {
-    const logs = await withRetry(() => publicClient.getLogs({
+/**
+ * 공개 RPC 는 `eth_getLogs` 구간을 제한한다 — GIWA Sepolia 는 100,000 블록이다.
+ * `fromBlock: 0n` 으로 두면 "query exceeds max block range" 로 실패한다.
+ * 체인이 하루 8만 블록쯤 늘어나므로 배포 블록을 시작점으로 잡아도 곧 다시 넘는다.
+ * 그래서 **구간을 나눠 조회**한다.
+ */
+const LOG_WINDOW = 90_000n;
+
+function fetchLogWindow(schema: Hex, attester: Address | undefined, from: bigint, to: bigint) {
+    return withRetry(() => publicClient.getLogs({
         address: EAS_ADDRESS,
         event: ATTESTED_EVENT,
-        args: {schema: challengeSchema},
-        fromBlock: 0n,
-        toBlock: "latest",
+        args: attester ? {attester, schema} : {schema},
+        fromBlock: from,
+        toBlock: to,
     }));
+}
+
+async function getLogsChunked(schema: Hex, attester?: Address) {
+    const latest = await withRetry(() => publicClient.getBlockNumber());
+    const out: Awaited<ReturnType<typeof fetchLogWindow>> = [];
+    let from = DEPLOY_BLOCK > 0n ? DEPLOY_BLOCK : 0n;
+    while (from <= latest) {
+        const to = from + LOG_WINDOW - 1n > latest ? latest : from + LOG_WINDOW - 1n;
+        out.push(...await fetchLogWindow(schema, attester, from, to));
+        from = to + 1n;
+    }
+    return out;
+}
+
+export async function readChallengeLogs(challengeSchema: Hex): Promise<ChallengeLog[]> {
+    const logs = await getLogsChunked(challengeSchema);
     return Promise.all(logs.map(async (log) => {
         const uid = log.args.uid!;
         const attestation = await getAttestation(uid);
@@ -241,13 +266,7 @@ export async function readChallengeLogs(challengeSchema: Hex): Promise<Challenge
 }
 
 export async function readDecisionLogs(decisionSchema: Hex, attester: Address) {
-    const logs = await withRetry(() => publicClient.getLogs({
-        address: EAS_ADDRESS,
-        event: ATTESTED_EVENT,
-        args: {attester, schema: decisionSchema},
-        fromBlock: 0n,
-        toBlock: "latest",
-    }));
+    const logs = await getLogsChunked(decisionSchema, attester);
     return Promise.all(logs.map((log) => readDecision(log.args.uid!)));
 }
 
