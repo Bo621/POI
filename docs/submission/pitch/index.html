@@ -290,7 +290,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <div class="step" data-n="STEP 03">
       <h4>컨트랙트가 판정한다</h4>
       <p>발행자는 관측값만 낸다. 맞았는지는 컨트랙트가 다시 계산해 대조하고, 어긋나면 <b>거래를 되돌린다.</b></p>
-      <div class="ex">결과 <b>맞음</b> — 발행자가<br>정할 수 없다 (I17)</div>
+      <div class="ex">결과 <b>맞음</b> — 발행자가<br>정할 수 없다</div>
     </div>
   </div>
   <p class="src"><b>이 예시는 지금 체인에 있는 실제 기록이다.</b> 결정 <code>0x5941a398…443888</code> · 정산 <code>0x9ae6d320…65fa52</code> — GIWA Sepolia 에서 지갑 없이 열어 볼 수 있다.</p>
@@ -389,7 +389,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <svg viewBox="0 0 900 250" role="img" aria-label="컨트랙트 강제, 소유자 제출, 미보장의 3층 구조">
     <rect x="20" y="14" width="860" height="72" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1.5"/>
     <text class="s-lab" x="40" y="40" fill="var(--seal)">컨트랙트가 강제 — 어기면 트랜잭션이 되돌아간다</text>
-    <text class="s-txt" x="40" y="66" font-size="13">관측 구간이 커밋 이후 (I4) · 정산 산술이 관측값과 일치 (I17) · 결정 간 선후 관계 (I2) · 지표 정의 frozen</text>
+    <text class="s-txt" x="40" y="66" font-size="13">관측 구간이 커밋 이후 (I4) · 정산 산술이 관측값과 일치 (I17) · 결정 간 선후 관계 (I2) · 지표 정의가 고정(frozen)</text>
 
     <rect x="20" y="96" width="860" height="62" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
     <text class="s-lab" x="40" y="122">소유자가 제출 — 제3자가 재현·이의 가능</text>
@@ -399,7 +399,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <text class="s-lab" x="40" y="194">보장하지 않음</text>
     <text class="s-txt" x="40" y="218" font-size="13" fill="var(--ink-faint)">관측값의 진실성 · 이유의 진실성 · 실제 거래와의 정합성 · 기록의 완전성</text>
   </svg>
-  <figcaption>원문은 <strong>네 개의 commitment</strong>(결정·트리거·근거·이유)로 남고, 관측 조건과 구간은 평문으로 남는다. 공개(Reveal) 이후에야 제공된 원문이 그 commitment의 프리이미지임을 확인할 수 있다 — 공개 전에는 “무언가가 고정됐다”까지, 공개 후에는 “이 내용이 그때 고정됐다”까지다.</figcaption>
+  <figcaption><b>I4·I17·I2 는 컨트랙트에 박힌 불변식 번호다 — 어기면 발행 자체가 실패한다(8쪽).</b><br><b>commitment</b> 는 원문을 숨긴 채 「이것을 그때 정했다」만 남기는 해시다. <b>frozen</b> 은 한 번 정하면 바꿀 수 없다는 뜻이다.<br>원문은 <strong>네 개의 commitment</strong>(결정·트리거·근거·이유)로 남고, 관측 조건과 구간은 평문으로 남는다. 나중에 <b>원문을 공개</b>하면 그것이 그 해시의 원본이 맞는지 누구나 대조할 수 있다 — 공개 전에는 “무언가가 고정됐다”까지, 공개 후에는 “이 내용이 그때 고정됐다”까지다.</figcaption>
   </figure>
 </section>
 
@@ -440,7 +440,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <text class="s-lab" x="20" y="182" fill="var(--ink-faint)">실측 — 영수증 gas 424,275 · GIWA 0.001 gwei · L1 0.734 gwei · 업비트 ETH 2,731,000원 (07-29 22:24 KST)</text>
   </svg>
   </figure>
-  <p class="lede eave">비용을 줄이려 커밋을 묶어도 <strong>절감은 기본가스뿐이라 약 17%에 그친다.</strong> 그리고 묶는 순간 <em>같은 배치 안의 결정 선후 관계를 잃는다</em> — EAS 배치는 모든 attestation 에 같은 timestamp 를 넣기 때문이다(I2).</p>
+  <p class="lede eave">비용을 줄이려 커밋을 묶어도 <strong>절감은 기본가스뿐이라 약 17%에 그친다.</strong> 그리고 묶는 순간 <em>같은 배치 안의 결정 선후 관계를 잃는다</em> — EAS<span class="quiet">(Ethereum Attestation Service — GIWA 에 기본 탑재된 증명 기록 표준)</span>는 한 배치에 담긴 기록에 <b>모두 같은 시각</b>을 넣기 때문이다.</p>
 </section>
 
 <!-- 7 ─────────────────────────────────────── -->
@@ -478,12 +478,12 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </svg>
   </figure>
   <div class="tblwrap">  <table>
-    <tr><td>EAS 프리디플로이</td><td>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
-    <tr><td>도장 Verified Address</td><td>「누가 말했는가」의 온체인 근거 <span class="quiet">— 연동 완료. 받아 본 것은 파우셋 발급분이고 KYC 경로는 미검증</span></td></tr>
+    <tr><td>EAS 프리디플로이</td><td><span class="quiet">Ethereum Attestation Service — 「누가 무엇을 언제 증명했다」를 기록하는 표준. GIWA 에 기본 탑재돼 있다.</span><br>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
+    <tr><td>도장 Verified Address</td><td><span class="quiet">도장 = GIWA 의 온체인 신원 인증. 「이 지갑은 검증됐다」를 발급자가 증명한다.</span><br>「누가 말했는가」의 온체인 근거 <span class="quiet">— 연동 완료. 받아 본 것은 파우셋 발급분이고 KYC 경로는 미검증</span></td></tr>
     <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
-    <tr><td>도장 Verified Balance</td><td>머클 증명 — 잔고를 밝히지 않고 보유를 증명 <span class="s-lab">(아직 쓰지 않음)</span></td></tr>
+    <tr><td>도장 Verified Balance</td><td><span class="quiet">머클 증명 = 전체를 공개하지 않고 「이 값이 그 안에 있다」만 증명하는 방식</span><br>잔고를 밝히지 않고 보유를 증명 <span class="s-lab">(아직 쓰지 않음)</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가(Verified Address)는 연동했고, 그때 무엇을 들고 있었는가는 Verified Balance 의 머클 증명으로 붙일 수 있다. POI 의 술어 <code>metricId·op·threshold</code> 와 <strong>같은 모양</strong>이라 보자기가 오면 스키마 변경 없이 ZK 로 바뀐다.</p>
+  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가(Verified Address)는 연동했고, 그때 무엇을 들고 있었는가는 Verified Balance 의 머클 증명으로 붙일 수 있다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, GIWA 의 영지식 기술 <strong>보자기</strong>가 공개되면 스키마를 바꾸지 않고 그대로 얹을 수 있다 — <span class="quiet">값을 밝히지 않고 「조건을 만족한다」만 증명하게 된다.</span></p>
 </section>
 
 <!-- 8 ─────────────────────────────────────── -->
@@ -545,7 +545,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       </div>
       <div class="mark" data-n="04">
         <h4>화면이 검증 명령을 준다</h4>
-        <p>같은 페이지 아래에 <b>poi-verify</b> 명령이 있다. 복사해 돌리면 <b>MATCH</b> 가 난다 — 우리 서버를 거치지 않는다.</p>
+        <p>같은 페이지 아래에 <b>poi-verify</b> 명령이 있다. 복사해 돌리면 <b>MATCH</b><span class="quiet">(온체인 값과 재계산이 일치)</span>가 난다 — 우리 서버를 거치지 않는다.</p>
         <figure class="shot-mini"><img src="shots/crop-verify.png" alt="오프체인 검증 절 — poi-verify 명령과 복사 버튼."></figure>
       </div>
     </div>
@@ -596,7 +596,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>목록에 명시한다</td><td>「조회된 것이 전부라는 보장은 없습니다」</td></tr>
     <tr><td>비교·랭킹을 만들지 않는다</td><td>선택 기록으로 순위를 만들면 거짓말이 된다</td></tr>
   </table></div>
-  <p class="lede eave"><strong>한 지갑 안에서의 선택적 기록은 남는다.</strong> 지금 구조로 못 푼다. Phase 2의 실행 정합성 검증이 이 문제를 좁힌다.</p>
+  <p class="lede eave"><strong>한 지갑 안에서의 선택적 기록은 남는다.</strong> 지금 구조로 못 푼다. <b>2단계</b>의 실행 정합성 검증이 이 문제를 좁힌다 (16쪽).</p>
 </section>
 
 <!-- 로드맵 ① 레이어 ───────────────────────────── -->
@@ -642,14 +642,14 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <h2>단계마다 <em>막고 있는 것</em>을 적는다</h2>
   <div class="tblwrap"><table>
     <tr><th>단계</th><th>열리는 것</th><th>막고 있는 것</th></tr>
-    <tr><td>Phase 1 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 크로스체인 해석</td><td class="no">없음 — 자체 구현</td></tr>
-    <tr><td>Phase 2 <span class="quiet">9월</span></td><td><span class="hot">실행 정합성</span> — 「말한 대로 했나」. 체결 내역과 결정을 대조한다</td><td class="hot">거래소 Open API 읽기 권한 <span class="quiet">(업비트 — GASOK 요청 항목 아님)</span></td></tr>
-    <tr><td>Phase 2 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">(문항 11 요청)</span></td></tr>
-    <tr><td>Phase 3 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">없음 — 자체 구현</td></tr>
-    <tr><td>Phase 4</td><td>ZK 술어 — 잔고·포지션을 밝히지 않고 조건 충족만 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(문항 11 요청)</span></td></tr>
+    <tr><td>1단계 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 크로스체인 해석</td><td class="no">없음 — 자체 구현</td></tr>
+    <tr><td>2단계 <span class="quiet">9월</span></td><td><span class="hot">실행 정합성</span> — 「말한 대로 했나」. 체결 내역과 결정을 대조한다</td><td class="hot">거래소 Open API 읽기 권한 <span class="quiet">(업비트에 요청할 것 — GASOK 소관 아님)</span></td></tr>
+    <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">(GASOK 에 요청 — 19쪽)</span></td></tr>
+    <tr><td>3단계 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">없음 — 자체 구현</td></tr>
+    <tr><td>4단계 <span class="quiet">이후</span></td><td>ZK 술어 — 잔고·포지션을 밝히지 않고 조건 충족만 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(GASOK 에 요청 — 19쪽)</span></td></tr>
   </table></div>
   <p class="lede eave">검증된 판단이 쌓이면 <strong>그 위에 제품이 올라간다.</strong> 배포된 컨트랙트를 <em>읽기만</em> 하면 되는 것들이다 — 새 온체인 구조가 필요 없다는 뜻이지, <strong>만들었다는 뜻이 아니다.</strong></p>
-  <p class="src"><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 잔고를 밝히지 않고 도장 Verified Balance 머클 증명으로 자격만 대는 <b>보유 증명 커뮤니티</b> · 리서치 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
+  <p class="src"><b>용어</b> — <b>up.id</b> GIWA 의 온체인 아이디 · <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>ZK 술어</b> 값을 밝히지 않고 「조건을 만족한다」만 증명하는 방식<br><br><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 잔고를 밝히지 않고 도장 Verified Balance 머클 증명으로 자격만 대는 <b>보유 증명 커뮤니티</b> · 리서치 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
 </section>
 
 <!-- 12 ────────────────────────────────────── -->
@@ -680,8 +680,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="lede"><strong>아직 검증되지 않은 가설이다.</strong></p>
   <div class="tblwrap">  <table>
     <tr><th></th><th>대가</th><th>시점</th></tr>
-    <tr><td>B2C 구독</td><td>저널·장기 리포트·외부 공유 프로필</td><td class="quiet">Phase 3</td></tr>
-    <tr><td>Verification Fee</td><td>제3자가 요청하는 정기 검증·갱신</td><td class="quiet">Phase 3</td></tr>
+    <tr><td>B2C 구독</td><td>저널·장기 리포트·외부 공유 프로필</td><td class="quiet">3단계</td></tr>
+    <tr><td>Verification Fee</td><td>제3자가 요청하는 정기 검증·갱신</td><td class="quiet">3단계</td></tr>
     <tr><td>B2B</td><td>리서치 기관의 발행물 신뢰도 부착</td><td class="quiet">미검증</td></tr>
   </table></div>
   <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 온체인 비용이 건당 1.21원이라 사용자 부담이 사실상 없고, 먼저 확인할 것은 <em>판단이 쌓이는가</em>다.</p>
