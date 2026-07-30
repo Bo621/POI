@@ -275,7 +275,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 <section class="slide" data-key>
   <div class="tag">// 01 <b>한 장으로 보는 POI</b></div>
   <h2>판단을 <em>결과가 나오기 전에</em> 잠근다</h2>
-  <p class="lede">투자 판단 하나를 온체인에 고정하고, 결과가 나온 뒤 <strong>발행자가 아니라 컨트랙트가</strong> 맞았는지 계산한다.</p>
+  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제한다. <span class="quiet">관측값 자체의 진실성은 보장하지 않는다 — 6쪽 신뢰 경계.</span></p>
   <div class="steps">
     <div class="step" data-n="STEP 01">
       <h4>판단을 적고 잠근다</h4>
@@ -289,7 +289,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     </div>
     <div class="step" data-n="STEP 03">
       <h4>컨트랙트가 판정한다</h4>
-      <p>발행자는 관측값만 낸다. 맞았는지는 컨트랙트가 다시 계산해 대조하고, 어긋나면 <b>거래를 되돌린다.</b></p>
+      <p>발행자에게 남는 자유는 <b>관측값 하나뿐</b>이다. 그 값으로 맞았는지를 컨트랙트가 다시 계산해 대조하고, 어긋나면 <b>거래를 되돌린다.</b></p>
       <div class="ex">결과 <b>맞음</b> — 발행자가<br>정할 수 없다</div>
     </div>
   </div>
@@ -316,9 +316,9 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="lede">제도권 리서치를 떠난 투자자가 유튜버·뉴스레터로 옮겨갔다. 그런데 <strong>거기서 한 말이 맞았는지 확인할 방법이 없다.</strong></p>
   <div class="stats">
     <div class="stat"><span class="n">6,300건</span><span class="k">유사투자자문 관련 민원<br>(2017.03~2025.08)</span><span class="s">금융감독원</span></div>
-    <div class="stat"><span class="n">16%</span><span class="k">그중 <b>미등록 투자자문</b><br>975건</span><span class="s">금융감독원</span></div>
-    <div class="stat"><span class="n">1.7%</span><span class="k">신고 포상률 — 신고해도<br>거의 잡히지 않는다</span><span class="s">머니투데이 2025.10</span></div>
-    <div class="stat"><span class="n">1,022만</span><span class="k">가상자산 투자자 수<br>보유 69.9조 원</span><span class="s">금융위 2026.02</span></div>
+    <div class="stat"><span class="n">975건</span><span class="k"><b>미등록 투자자문</b><br>분류 가능분 6,101건의 16%</span><span class="s">금융감독원</span></div>
+    <div class="stat"><span class="n">1.7%</span><span class="k">신고 <b>포상금 지급률</b><br>104건 · 7,610만원</span><span class="s">머니투데이 2025.10</span></div>
+    <div class="stat"><span class="n">1,022만</span><span class="k">가상자산 투자자 수<br>보유 69.9조 원 (2026.02)</span><span class="s">5대 거래소 제출자료</span></div>
   </div>
   <p class="lede" style="margin-top:1.4rem"><strong>규제는 이미 들어왔다. 전부 사후 단속이다.</strong> 2024.08 자본시장법 개정으로 양방향 유료 리딩방은 등록 투자자문업자만 운영할 수 있고, 2025.10 금감원은 해외주식 리딩방에 소비자경보 「주의」를 냈다. <em>사전에 판단을 고정시키는 장치는 어디에도 없다.</em></p>
   <p class="src"><b>출처</b> 금융감독원 유사투자자문 민원 집계 · 머니투데이 2025.10.27 「신고 포상률 1.7%」 · 금융위원회 가상자산 실태조사 · 금감원 2025.10.29 소비자경보</p>
