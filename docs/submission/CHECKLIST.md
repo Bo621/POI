@@ -15,11 +15,11 @@
 |---|---|---|---|
 | 1 | 팀명 | ✅ | **VESTAT** — 양식에 직접 입력 |
 | 2 | 대표자 | ✅ | **고보승** — 양식에 직접 입력 (연락처도 양식에만) |
-| 3 | 팀 소개 (링크) | ⏳ | **[POI_team.pdf](POI_team.pdf) 생성 완료** (2쪽) — Drive 업로드 후 링크만 |
+| 3 | 팀 소개 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1mp9PQBoUeo0JcV5rgB7uQe_BCVeGks-B/view?usp=sharing) · 2쪽 — 익명 접근·해시 대조 완료 |
 | 4 | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · 432자 |
 | 5 | 트랙 선택 | ✅ | Track 03 |
 | 6 | 한 줄 요약 (50자) | ✅ | 35자 |
-| 7 | 피치덱 | ⏳ | **[pitch/POI_pitch.pdf](pitch/POI_pitch.pdf) 생성 완료** (14쪽 16:9) — Drive 업로드만 |
+| 7 | 피치덱 | ✅ | [Drive](https://drive.google.com/file/d/13zzYUs5c6X5thrkLb0yPypyEr_OS2BS9/view?usp=sharing) · 20쪽 16:9 — 익명 접근·해시 대조 완료 |
 | 8 | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | 9 | 컨트랙트 링크 (Verified) | ✅ | 4종 전부 `Pass - Verified` |
 | 10 | 기술 문서 / 원페이저 | ✅ | `https://vestat.gitbook.io/poi` |

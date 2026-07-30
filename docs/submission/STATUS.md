@@ -8,8 +8,8 @@
 ## 한눈에
 
 ```
-지원서 12문항     10 / 12 완료      █████████████████░░░  83%
-  └ 남은 둘(문항 3·7)은 전부 "만들어 둔 것을 올리는" 작업이다 (Google 계정 필요)
+지원서 12문항     12 / 12 완료      ████████████████████ 100%
+  └ 전부 값이 확정됐다. 폼에 붙여넣기만 하면 된다
 
 제품 (백로그)      미완 2건 — 법률 검토(O2) · 데모 녹화
   └ 둘 다 제출을 막지 않는다. 비율은 적지 않는다 —
@@ -25,31 +25,23 @@
 | # | 문항 | 상태 | 제출물 / 남은 일 |
 |---|---|---|---|
 | 1–2 | 팀명 · 대표자 | ✅ | **VESTAT** · **고보승** — 양식에 직접 입력 |
-| **3** | 팀 소개 (링크) | 🟡 | [TEAM.md](TEAM.md) 작성 완료 → **PDF/Docs 업로드 + 링크** |
+| **3** | 팀 소개 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1mp9PQBoUeo0JcV5rgB7uQe_BCVeGks-B/view?usp=sharing) — 익명 접근 확인 |
 | **4** | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · **432자** |
 | **5** | 트랙 선택 | ✅ | Track 03 GIWA-NATIVE IDEAS |
 | **6** | 한 줄 요약 (50자) | ✅ | **35자** |
-| **7** | 피치덱 (링크) | 🟡 | [`pitch/index.html`](pitch/index.html) 14장 완성 → **PDF 변환 + Drive** |
+| **7** | 피치덱 (링크) | ✅ | [Drive](https://drive.google.com/file/d/13zzYUs5c6X5thrkLb0yPypyEr_OS2BS9/view?usp=sharing) — 20쪽 · 익명 접근 확인 |
 | **8** | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | **9** | 컨트랙트 (Verified) | ✅ | 리졸버 4종 `Pass - Verified` |
 | **10** | 기술 문서 (링크) | ✅ | `https://vestat.gitbook.io/poi` — 익명 접근 확인 |
 | **11** | 추가 지원 요청 (500자) | ✅ | **487자** |
 | **12** | GIWA 팀에 전할 말 (500자) | ✅ | **461자** |
 
-🟡 = **내용은 끝났고 업로드만 남음**
+**문항 12개 전부 값이 확정됐다.** 붙여넣을 원문: [`submit/latest/FORM_TEXT.txt`](../../submit/latest/FORM_TEXT.txt)
 
-### 남은 둘 — 각 10~20분
+### 남은 것 — 없음
 
-| | 무엇을 | 왜 제가 못 하나 |
-|---|---|---|
-| 문항 3 | `TEAM.md` → PDF/Google Docs → 「링크 있는 모든 사용자」 | Google 계정 |
-| 문항 7 | `pitch/index.html` 브라우저 인쇄 → PDF → Drive | Google 계정 |
-
-
-> **문항 7 인쇄**: 슬라이드를 열고 <kbd>Cmd/Ctrl+P</kbd> → **PDF 로 저장**.
-> 인쇄 CSS 를 넣어 **14장이 각각 한 페이지**로 나뉜다 (16:9 가로).
-> 설정에서 **「배경 그래픽」을 켜야** 다크 배경과 인주색이 나온다.
-> `p` 키로 5분 경로(8장)를 켜 두어도 인쇄에는 전부 나온다.
+문항 1~12 값이 전부 확정됐다. **폼에 붙여넣기만 하면 된다.**
+붙여넣을 원문: [`../../submit/latest/FORM_TEXT.txt`](../../submit/latest/FORM_TEXT.txt)
 
 ---
 
@@ -121,7 +113,7 @@
 [ ] 공개 URL 이 열리는가                  https://poi-static-production.up.railway.app
 [ ] 지갑 없이 예시 증서 4건이 보이는가 (기한초과·등록완료·철회이력·그래프)
 [ ] 익스플로러 4종이 Pass - Verified 인가
-[ ] 문항 3·7·10 링크가 「링크 있는 모든 사용자」로 공개돼 있는가   ← 가장 흔한 실수
+[x] 문항 3·7·10 링크 익명 접근 확인 — 로그인 없이 열리고 업로드본 해시가 로컬과 일치
 [ ] 문항 4·11·12 가 500자 이하인가        432 / 487 / 461
 [ ] 문항 6 이 50자 이하인가                35
 [ ] 트랙이 Track 03 인가
