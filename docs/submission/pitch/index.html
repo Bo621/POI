@@ -131,7 +131,15 @@ pre i{color:var(--seal);font-style:normal}
 .cover .claim{margin-top:clamp(1.6rem,3vw,2.6rem);font:400 clamp(1.05rem,2.1vw,1.7rem)/1.5 var(--body);max-width:26ch;color:var(--ink)}
 
 a{color:var(--seal);text-decoration-thickness:1px;text-underline-offset:3px}
-.tblwrap{overflow-x:auto;max-width:100%}
+.tblwrap{max-width:100%}
+/* 표가 많은 슬라이드만 밀도를 올린다 (p10 왜GIWA② · p11 경쟁) */
+.slide.dense table{font-size:.87em;margin-top:clamp(.9rem,1.8vw,1.4rem)}
+.slide.dense th,.slide.dense td{padding:.5em .75em}
+.slide.dense .lede{font-size:.98em;margin-top:clamp(.8rem,1.6vw,1.2rem)}
+.slide.dense h2{margin-bottom:.2rem}
+/* 가로 스크롤은 좁은 화면에서만 — 넓은 화면(1600px 캡처)에서 overflow 를 켜면
+   스크롤 컨테이너가 생겨 표가 세로로 잘린다. 실제로 p10·p11 이 잘려 있었다. */
+@media (max-width:900px){.tblwrap{overflow-x:auto}}
 .bar .n{color:var(--ink);margin-right:5.4rem;min-width:5ch;text-align:right}
 .pathbtn{margin-left:auto;border:1px solid var(--rule);background:transparent;color:var(--ink-faint);
   font:500 .68rem/1 var(--mono);letter-spacing:.1em;padding:.42rem .6rem;cursor:pointer;transition:color .18s,border-color .18s}
@@ -444,7 +452,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 
 <!-- 7 ─────────────────────────────────────── -->
-<section class="slide">
+<section class="slide dense">
   <div class="tag">// 09 <b>왜 GIWA인가 ②</b></div>
   <h2>새 신뢰 축을 세우지 않는다</h2>
   <figure>
@@ -478,16 +486,16 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </svg>
   </figure>
   <div class="tblwrap">  <table>
-    <tr><td>EAS 프리디플로이</td><td><span class="quiet">Ethereum Attestation Service — 「누가 무엇을 언제 증명했다」를 기록하는 표준. GIWA 에 기본 탑재돼 있다.</span><br>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
-    <tr><td>도장 Verified Address</td><td><span class="quiet">도장 = GIWA 의 온체인 신원 인증. 「이 지갑은 검증됐다」를 발급자가 증명한다.</span><br>「누가 말했는가」의 온체인 근거 <span class="quiet">— 연동 완료. 받아 본 것은 파우셋 발급분이고 KYC 경로는 미검증</span></td></tr>
+    <tr><td>EAS 프리디플로이</td><td><span class="quiet">Ethereum Attestation Service — 증명 기록 표준. GIWA 기본 탑재</span><br>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
+    <tr><td>도장 Verified Address</td><td><span class="quiet">도장 = GIWA 의 온체인 신원 인증</span><br>「누가 말했는가」의 근거 <span class="quiet">— 연동 완료. 받아 본 것은 파우셋 발급분, KYC 경로는 미검증</span></td></tr>
     <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
-    <tr><td>도장 Verified Balance</td><td><span class="quiet">머클 증명 = 전체를 공개하지 않고 「이 값이 그 안에 있다」만 증명하는 방식</span><br>잔고를 밝히지 않고 보유를 증명 <span class="s-lab">(아직 쓰지 않음)</span></td></tr>
+    <tr><td>도장 Verified Balance</td><td><span class="quiet">머클 증명 = 전체 공개 없이 「그 안에 있다」만 증명</span><br>잔고를 밝히지 않고 보유를 증명 <span class="s-lab">(아직 쓰지 않음)</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가(Verified Address)는 연동했고, 그때 무엇을 들고 있었는가는 Verified Balance 의 머클 증명으로 붙일 수 있다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, GIWA 의 영지식 기술 <strong>보자기</strong>가 공개되면 스키마를 바꾸지 않고 그대로 얹을 수 있다 — <span class="quiet">값을 밝히지 않고 「조건을 만족한다」만 증명하게 된다.</span></p>
+  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가는 연동했고, 그때 무엇을 들고 있었는가는 Verified Balance 로 붙일 수 있다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, GIWA 의 <strong>보자기</strong>가 공개되면 스키마를 바꾸지 않고 얹을 수 있다.</p>
 </section>
 
 <!-- 8 ─────────────────────────────────────── -->
-<section class="slide">
+<section class="slide dense">
   <div class="tag">// 10 <b>경쟁</b></div>
   <h2>진짜 대안은 “EAS로 직접 만드는 것”</h2>
   <div class="tblwrap">  <table>
@@ -500,9 +508,9 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>미발행 노출 · 이의</td><td class="no">✗</td><td class="no">✗</td><td>직접 설계해야</td><td class="yes">✓</td></tr>
     <tr><td>성과 랭킹</td><td class="yes">✓ 핵심</td><td class="yes">✓ 핵심</td><td class="no">자유</td><td class="hot">✗ 의도적 배제</td></tr>
   </table></div>
-  <p class="lede eave"><strong>카테고리는 이미 검증됐다.</strong> TipRanks 는 전문가 <strong>96,000명+</strong> 를 2009년부터 추적하고, 국내에도 <strong>인간지표</strong>가 경제 유튜버 <strong>19명·668건</strong>을 검증한다. <em>수요는 실재한다.</em></p>
-  <p class="lede">다만 둘 다 <strong>밖에서 관찰</strong>한다. 그래서 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없고</strong>, 서비스가 문을 닫으면 기록도 사라진다. 인간지표는 스스로 결과가 <em>「가상·재미」</em>라고 밝힌다.</p>
-  <p class="lede"><strong>EAS로 직접 만들면 이 전부를 구현할 수 있다. 불가능한 게 아니다.</strong> 차별점은 기술 장벽이 아니라 <em>어떤 불변식을 고르고 무엇을 금지했는가</em>다. 랭킹·점수·비교를 넣는 순간 사후 서사를 막는다는 목적 자체가 무너진다.</p>
+  <p class="lede eave"><strong>카테고리는 이미 검증됐다.</strong> TipRanks 는 전문가 96,000명+ 를 2009년부터, 국내 <strong>인간지표</strong>는 경제 유튜버 19명·668건을 검증한다. <em>수요는 실재한다.</em></p>
+  <p class="lede">다만 둘 다 <strong>밖에서 관찰</strong>한다. 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없다.</strong> 인간지표는 스스로 결과가 <em>「가상·재미」</em>라고 밝힌다.</p>
+  <p class="lede"><strong>EAS로 직접 만들면 이 전부를 구현할 수 있다.</strong> 차별점은 기술 장벽이 아니라 <em>어떤 불변식을 고르고 무엇을 금지했는가</em>다 — 랭킹을 넣는 순간 목적이 무너진다.</p>
 </section>
 
 <!-- 9 ─────────────────────────────────────── -->
