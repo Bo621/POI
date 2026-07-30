@@ -32,7 +32,7 @@ cast code $DECISION_RESOLVER --rpc-url $RPC | head -c 20
 # 온체인에 기록된 definitionHash
 cast call $DECISION_RESOLVER \
   "metrics(bytes32)(bool,uint8,uint8,bytes32,bool)" \
-  "0x83b04966e07f0f83592e71060b3356d7""16b4dff9f824bd76d0f9d149c54cafcf" --rpc-url $RPC
+  0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf --rpc-url $RPC
 
 # 저장소의 정의 문서 해시
 # 파일 **원본 바이트**의 해시다. `$(cat …)` 는 끝 개행을 지워 다른 값이 나온다.
@@ -60,8 +60,9 @@ if (d.windowStart < attestTime) revert WindowInPast();   // I4
 
 ## 4. 정산 결과를 발행자가 정할 수 없다
 
-발행자는 **관측값과 출처만** 제출합니다. 맞았는지 여부(`result`)는 컨트랙트가 다시 계산해
-대조하고, 어긋나면 트랜잭션을 실패시킵니다.
+발행자는 **관측값과 출처만** 제출합니다. 맞았는지 여부(`result`)는 컨트랙트가 그 관측값으로
+다시 계산해 대조하고, 어긋나면 트랜잭션을 실패시킵니다.
+**관측값 자체의 진실성은 보장하지 않습니다** — 제3자 재현과 이의로 다룹니다.
 
 ```solidity
 uint8 expect = _eval(d.outcomeOp, s.observedValue, d.outcomeThreshold) ? 0 : 1;
@@ -78,6 +79,7 @@ export POI_RPC_URL=$RPC
 export POI_EAS_ADDRESS=$EAS
 export POI_SETTLEMENT_RESOLVER_ADDRESS=0x167cf06df663c5ddde9f20a748e724b4fb6c14fa
 export POI_METRIC_REGISTRY_ADDRESS=$DECISION_RESOLVER
+export POI_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
 
 # 결과가 등록된 결정 — MATCH (종료코드 0)
 node --experimental-strip-types verifier/src/cli.ts \
