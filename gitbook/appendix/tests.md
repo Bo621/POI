@@ -13,7 +13,7 @@
 | verifier | **59 pass, 0 fail** | `npm test` |
 | web | **96 passed** (18 files) | `npm test` |
 | e2e | **37 passed** | `npm run test:e2e` (실제 체인 상대) |
-| **합계** | **423** | |
+| 합계 | **423** | |
 
 ## 이 수치가 뜻하는 것과 뜻하지 않는 것
 

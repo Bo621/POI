@@ -43,6 +43,7 @@
 * [로드맵](limits/roadmap.md)
 
 ## 부록
+* [용어집](appendix/glossary.md)
 * [스키마 정의](appendix/schemas.md)
 * [불변식 전체 목록](appendix/invariant-list.md)
 * [테스트 구성](appendix/tests.md)

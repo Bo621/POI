@@ -1,6 +1,10 @@
 # 스키마 정의
 
-> 출처: `docs/DEPLOYMENT.md`. 값이 다르면 그쪽이 옳습니다.
+> 출처: [`docs/DEPLOYMENT.md`](https://github.com/Bo621/POI/blob/main/docs/DEPLOYMENT.md).
+> 값이 다르면 그쪽이 옳습니다.
+>
+> `UID` 는 스키마 하나를 가리키는 고유 번호이고, `revocable` 은 그 스키마로 발행한
+> 기록을 나중에 철회할 수 있는지를 뜻합니다.
 
 | 스키마 | UID | revocable |
 |---|---|---|

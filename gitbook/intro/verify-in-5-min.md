@@ -2,7 +2,9 @@
 
 **POI의 주장은 "우리를 믿어라"가 아닙니다. 아래는 전부 직접 확인할 수 있습니다.**
 
-준비물은 `cast`(Foundry)와 Node 22+뿐입니다. 지갑도 가스도 필요 없습니다 — 전부 읽기입니다.
+준비물은 `cast`(Foundry)와 Node 22+ 뿐입니다. 지갑도 가스도 필요 없습니다. 전부 읽기만 합니다.
+
+> 모르는 말이 나오면 [용어집](../appendix/glossary.md)을 보세요.
 
 ```bash
 export RPC=https://sepolia-rpc.giwa.io/
@@ -33,14 +35,15 @@ cast code $DECISION_RESOLVER --rpc-url $RPC | head -c 20
 cast call $DECISION_RESOLVER \
   "metrics(bytes32)(bool,uint8,uint8,bytes32,bool)" \
   0x83b04966e07f0f83592e71060b3356d716b4dff9f824bd76d0f9d149c54cafcf --rpc-url $RPC
+  # 위 32바이트 값은 BTC_PRICE_KRW_AT_END 지표의 metricId 입니다
 
 # 저장소의 정의 문서 해시
 # 파일 **원본 바이트**의 해시다. `$(cat …)` 는 끝 개행을 지워 다른 값이 나온다.
 cast keccak "0x$(xxd -p -c 999999 < docs/metrics/BTC_PRICE_KRW_AT_END.md | tr -d '\n')"
 ```
 
-**두 값이 같습니다.** 그리고 마지막 필드가 `true` — `frozen`입니다.
-등록 이후 정의를 바꿀 수 없습니다. **문서가 없는 지표는 컨트랙트가 등록을 거부합니다.**
+두 값은 같고, 마지막 필드는 `true` 입니다. 지표 정의가 `frozen`, 즉 등록한 뒤로는
+바꿀 수 없는 상태라는 뜻입니다. 정의 문서가 없는 지표는 아예 등록되지 않습니다.
 
 > 이것이 "나중에 유리하게 기준을 바꾸는 것"을 막는 장치입니다.
 
@@ -54,9 +57,9 @@ if (d.windowStart < attestTime) revert WindowInPast();   // I4
 
 **직접 시도해 보실 수 있습니다.** 과거 구간으로 커밋을 시도하면 트랜잭션이 되돌아갑니다.
 
-> 개발 중 실제로 여기 걸렸습니다. 데모 fixture를 만들면서 `windowStart = now`로 두었더니
-> 시뮬레이션 시각이 채굴 블록보다 일러 `WindowInPast()`가 났습니다.
-> **우회하지 않고 새 구간을 열었습니다** — 이 불변식을 데모 편의로 뚫으면 제품이 사라집니다.
+> 개발 중 실제로 여기 걸렸습니다. 데모용 기록을 만들면서 `windowStart = now` 로 두었더니
+> 시뮬레이션 시각이 채굴된 블록보다 일러 `WindowInPast()` 가 났습니다.
+> 데모 편의로 이 검사를 우회하지 않고 관측 구간을 새로 열었습니다.
 
 ## 4. 정산 결과를 발행자가 정할 수 없다
 

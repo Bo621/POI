@@ -1,5 +1,8 @@
 # 신뢰 경계
 
+> `attestation` 은 온체인에 남는 기록 한 건, `commitment` 는 원문을 감춘 해시입니다.
+> 나머지는 [용어집](../appendix/glossary.md)에 있습니다.
+
 ```mermaid
 flowchart TB
     %% 세 범주는 순차 단계가 아니라 서로 다른 신뢰 수준이다
