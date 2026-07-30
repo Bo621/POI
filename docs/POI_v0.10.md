@@ -1,4 +1,4 @@
-# Proof of Investing
+# Proof of Insight
 
 **Decision Graph — GIWA 기반 투자 의사결정 검증 인프라 v0.10**
 
@@ -8,7 +8,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| 프로젝트명 | Proof of Investing (POI) |
+| 프로젝트명 | Proof of Insight (POI) |
 | 핵심 프리미티브 | Decision Graph |
 | **MVP 정의** | **투자 의사결정이 결과 이전에 존재했고 이후 변조되지 않았음을 증명하고, 선언된 조건을 재현 가능한 방식으로 정산한다** |
 | 최종 지향 | 결정과 실제 행동의 정합성 검증 (Phase 2 이후) |
@@ -436,7 +436,7 @@ MVP 범위에서 **사용자 자격증명 의존은 없다.** 단 GIWA Chain·EA
 ## 6. 제품 구조
 
 ```
-Proof of Investing
+Proof of Insight
 │
 ├─ 오프체인
 │  └─ JOURNAL_ENTRY            검증 대상 아님. DAG 밖
@@ -1095,4 +1095,4 @@ ENS Registry    미배포                                  ❌ §10.3
 
 ---
 
-*Proof of Investing v0.9 — 2026-07-27*
+*Proof of Insight v0.10 — 2026-07-27*

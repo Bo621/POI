@@ -1,4 +1,4 @@
-# Proof of Investing (POI)
+# Proof of Insight (POI)
 
 GIWA 기반 투자 의사결정 검증 인프라. 결정을 결과 이전에 고정하고, 선언한 조건을 재현 가능한 방식으로 정산한다.
 
@@ -10,6 +10,11 @@ GIWA 기반 투자 의사결정 검증 인프라. 결정을 결과 이전에 고
 | 기술 명세 (최신 v3.0) | [`docs/POI_TechSpec_v3.md`](docs/POI_TechSpec_v3.md) |
 
 이전 버전(v0.4~v0.9, TechSpec v2)은 이력 참고용으로 `docs/`에 함께 둔다.
+
+> **이전 문서는 옛 명칭 「Proof of Investing」을 그대로 둔다.** 그 이름으로 쓰인
+> 기록이라 지금 이름으로 덮으면 이력이 거짓이 된다. 현행 명칭은 **Proof of Insight** 다 —
+> 제품이 증명하는 것은 판단이 결과 이전에 고정됐다는 사실이지 **실제로 그렇게 거래했다는
+> 것이 아니다**(`docs/submission/LIMITS.md`, `gitbook/limits/status.md` 의 「실행 정합성 ❌」).
 
 ## 구조
 

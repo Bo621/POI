@@ -1,4 +1,4 @@
-# Proof of Investing — MVP 기술 명세 v3.0
+# Proof of Insight — MVP 기술 명세 v3.0
 
 **대상**: GASOK 2차 제출용 MVP (마감 2026-07-31)
 **기획서**: `POI_v0.10.md` — 본 명세가 요구하는 기획서 변경은 §13
