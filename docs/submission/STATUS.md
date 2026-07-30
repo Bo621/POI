@@ -25,11 +25,11 @@
 | # | 문항 | 상태 | 제출물 / 남은 일 |
 |---|---|---|---|
 | 1–2 | 팀명 · 대표자 | ✅ | **VESTAT** · **고보승** — 양식에 직접 입력 |
-| **3** | 팀 소개 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1mp9PQBoUeo0JcV5rgB7uQe_BCVeGks-B/view?usp=sharing) — 익명 접근 확인 |
+| **3** | 팀 소개 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1IfIR1RsV5XRjIbZR_hgvbl3AdrX5eiTo/view?usp=sharing) — 익명 접근 확인 |
 | **4** | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · **432자** |
 | **5** | 트랙 선택 | ✅ | Track 03 GIWA-NATIVE IDEAS |
 | **6** | 한 줄 요약 (50자) | ✅ | **35자** |
-| **7** | 피치덱 (링크) | ✅ | [Drive](https://drive.google.com/file/d/13zzYUs5c6X5thrkLb0yPypyEr_OS2BS9/view?usp=sharing) — 20쪽 · 익명 접근 확인 |
+| **7** | 피치덱 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1B4frC8A7YhaVSgfjj-KWfcpxfzYhC31l/view?usp=sharing) — 20쪽 · 익명 접근 확인 · **업로드본이 아직 v1.6 이라 교체 필요** |
 | **8** | 프로젝트 링크 | ✅ | `https://poi-static-production.up.railway.app` |
 | **9** | 컨트랙트 (Verified) | ✅ | 리졸버 4종 `Pass - Verified` |
 | **10** | 기술 문서 (링크) | ✅ | `https://vestat.gitbook.io/poi` — 익명 접근 확인 |
