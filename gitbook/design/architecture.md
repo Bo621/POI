@@ -36,7 +36,9 @@ flowchart TB
 ```
 
 > **리졸버는 도장 컨트랙트를 직접 호출하지 않습니다.** 결정에 담긴 스냅샷 UID로
-> EAS attestation을 조회해 recipient가 본인인지, 철회·만료되지 않았는지만 검사합니다.
+> EAS attestation을 조회해 **넷을** 검사합니다 — recipient 가 본인인지, 철회·만료되지
+> 않았는지, **스키마가 등록된 `verifiedSchemaUID` 인지, 발급자가 허용 집합에 있는지.**
+> 뒤의 둘이 없으면 아무 스키마의 아무 attestation 이나 「검증 지갑」으로 통과합니다.
 > `SchemaRegistry`도 발행 경로가 아니라 배포 시 스키마를 등록하는 경로입니다.
 
 ## 왜 `core`가 한 벌인가
