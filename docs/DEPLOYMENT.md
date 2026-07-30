@@ -91,7 +91,7 @@ curl -X POST "https://sepolia-explorer.giwa.io/api?module=contract&action=verify
 | Safe | `0x215253B830D51df7f8364fF6dA32140006E4DCE1` (Safe L2 v1.4.1) |
 | 소유자 | `0xA1Cb5CbC…F310` (배포) · `0x77E8DFC4…dfaa` |
 | 임계값 | **2 / 2** |
-| 대상 | `POIDecisionResolver` `0x0f259171…af57` — 실권한이 있는 유일한 컨트랙트 |
+| 대상 | `POIDecisionResolver` `0x0f259171…b30f89` — 실권한이 있는 유일한 컨트랙트 |
 
 `initialize` 가 일회성이라 note·settlement·challenge 리졸버의 owner 는 아무 권한이 없다.
 그래서 결정 리졸버 하나만 옮겼다.
@@ -201,16 +201,19 @@ tx: `0x1aa6aab0…df8b` · `0x794c8136…fb49`
 | decisionCommitment | `0x46cf8091be32da5ca484417a89ab0bdf9bb41597554c0a519c269ca234f39db9` |
 | salt | `0x0f1e2d3c4b5a69788796a5b4c3d2e1f0` |
 | payload | `{"fixture":"O4","intent":"overdue-demo"}` |
-| windowStart | `1785338205` — 2026-07-29 00:19:16 KST |
-| windowEnd | `1785338805` — 00:29:16 KST |
+| windowStart | `1785338205` — 2026-07-30 00:16:45 KST |
+| windowEnd | `1785338805` — 00:26:45 KST |
 | graceSeconds | `3600` (1시간) |
-| **T_overdue** | **`1785342405` — 2026-07-29 01:29:16 KST** |
+| **T_overdue** | **`1785342405` — 2026-07-30 01:26:45 KST** |
 
 `T_overdue` 이후 이 결정의 인장이 「기한초과」로 바뀐다. **그 전에는 녹화해도 소용없다.**
 
 공개 검증:
 
 ```bash
+export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
+export POI_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
+
 node --experimental-strip-types verifier/src/reveal-cli.ts \
   0x3f592f21a7e5a733d3dd90caeb2f9ec35bffa335b69da7310749694283e16938 \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
@@ -218,7 +221,8 @@ node --experimental-strip-types verifier/src/reveal-cli.ts \
   --rpc https://sepolia-rpc.giwa.io/
 ```
 
-`POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021`이 필요하다.
+**환경변수 둘 다 필수다.** `POI_DECISION_SCHEMA_UID` 를 빼면
+`POI_DECISION_SCHEMA_UID 환경 변수가 올바른 32바이트 UID 가 아니다` 로 즉시 멈춘다.
 
 ## 공개 URL
 
@@ -265,9 +269,12 @@ I4 가 소급 설정을 막는다. 데모 편의로 핵심 방어를 우회하�
 
 | | |
 |---|---|
-| **O6 소유권 이전** | `POIDecisionResolver`의 owner가 아직 배포 지갑이다. multisig로 옮겨야 한다. `renounce`는 하지 않는다 — Phase 1 지표 추가가 필요하다(B13) |
-| **O8 데모 녹화** | `T_overdue`(01:29:16) 경과 — 지금 가능 |
+| **데모 녹화** | `T_overdue`(2026-07-30 01:26:45 KST) 경과 — 지금 가능 |
 | **O2 법률 검토** | 열려 있다. 사용자가 정식 배포 때 보기로 판단 |
+
+> **O6 소유권 이전은 완료됐다** — 위 「소유권 (O6)」 절 참고.
+> `owner()` 가 Safe `0x215253B8…DCE1` 이고 `pendingOwner` 는 0 이다.
+> `renounce` 와 `sealRegistry` 는 하지 않는다 — Phase 1 지표 추가가 필요하다(B13).
 
 ## 되돌릴 수 없는 것
 

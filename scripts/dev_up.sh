@@ -244,6 +244,7 @@ WINDOW_END="$(( T0 + 2400 ))"
 GRACE_SECONDS=3600
 FINAL_TS="$(( WINDOW_END + GRACE_SECONDS + 300 ))"
 F5_WINDOW_START="$(( FINAL_TS + 7200 ))"
+F5_WINDOW_END="$(( FINAL_TS + 93600 ))"   # SeedFixtures.s.sol 의 f5 와 같은 식
 
 PRICE_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_PRICE_KRW_AT_END "${WINDOW_START}" "${WINDOW_END}")"
 DRAWDOWN_VALUE="$(cd "${ROOT_DIR}" && node --experimental-strip-types scripts/observe.ts BTC_MAX_DRAWDOWN_IN_WINDOW "${WINDOW_START}" "${WINDOW_END}")"
@@ -421,7 +422,7 @@ mkdir -p "${ROOT_DIR}/docs/fixtures"
     printf '    "f1": {"decisionUID": "%s", "settlementUID": "%s", "expectedState": "SETTLED"},\n' "${F1_UID}" "${F1_SETTLEMENT}"
     printf '    "f2": {"decisionUID": "%s", "revokedSettlementUID": "%s", "activeSettlementUID": "%s", "expectedState": "SETTLED", "hasRevokedSettlement": true},\n' "${F2_UID}" "${F2_S1}" "${F2_S2}"
     printf '    "f4": {"decisionUID": "%s", "expectedState": "OVERDUE"},\n' "${F4_UID}"
-    printf '    "f5": {"decisionUID": "%s", "expectedState": "PENDING"},\n' "${F5_UID}"
+    printf '    "f5": {"decisionUID": "%s", "expectedState": "PENDING", "window": {"start": "%s", "end": "%s", "graceSeconds": %s}},\n' "${F5_UID}" "${F5_WINDOW_START}" "${F5_WINDOW_END}" "${GRACE_SECONDS}"
     printf '    "f_copy": {"decisionUID": "%s", "decisionCommitment": "%s", "copiedFromDecisionUID": "%s", "expectation": "A의 salt/payload로 대조하면 attester가 B이므로 실패한다"}\n' "${F_COPY_UID}" "${F1_COMMITMENT}" "${F1_UID}"
     printf '  },\n'
     printf '  "challengeUID": "%s",\n' "${F1_CHALLENGE}"

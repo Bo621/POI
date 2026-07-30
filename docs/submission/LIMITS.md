@@ -49,7 +49,7 @@
 "조회된 것이 전부"라는 보장이 없습니다. 그래서 모든 목록에
 「조회된 것이 전부라는 보장은 없습니다」를 표시하고 **건수를 세지 않습니다.**
 
-**소유권이 2-of-2 multisig 로 이전됐습니다 (2026-07-29).**
+**소유권이 2-of-2 multisig 로 이전됐습니다 (2026-07-30).**
 `POIDecisionResolver` 의 owner 는 Safe `0x215253B8…DCE1` 이고,
 소유자는 배포 지갑과 별도 지갑 둘, 임계값 2 입니다. `pendingOwner` 는 0 입니다.
 배포 지갑 단독으로는 `addMetric` 이 `OwnableUnauthorizedAccount` 로 되돌아갑니다 — 확인했습니다.

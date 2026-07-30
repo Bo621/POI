@@ -59,7 +59,7 @@ attester를 읽기 전용으로 다룹니다.
 
 ## 운영 측 위험 — 지금 열려 있는 것
 
-**`POIDecisionResolver`의 owner는 2-of-2 Safe입니다** (`0x215253B8…DCE1`, 2026-07-29 이전 완료).
+**`POIDecisionResolver`의 owner는 2-of-2 Safe입니다** (`0x215253B8…DCE1`, 2026-07-30 이전 완료).
 배포 지갑 단독으로는 아무것도 못 합니다.
 
 owner가 할 수 있는 것 셋:
@@ -67,7 +67,8 @@ owner가 할 수 있는 것 셋:
 | | 무엇 | 제한 |
 |---|---|---|
 | `addMetric` | 새 지표 등록 | **이미 등록된 지표는 `frozen`이라 못 바꿉니다** |
-| `setVerifiedAddressSource` | 도장 신뢰 루트 변경 | 변경이 `VerifiedAddressSourceChanged` 이벤트로 드러납니다 |
+| `setVerifiedAddressSchema` | 도장 스키마 변경 | 변경이 `VerifiedAddressSchemaChanged` 이벤트로 드러납니다 |
+| `setIssuer` | 허용 발급자 추가·제거 | 변경이 `IssuerChanged` 이벤트로 드러납니다 |
 | `sealRegistry` | 지표 추가 영구 봉인 | 되돌릴 수 없습니다 |
 
 **과거 기록은 안전하고 미래 등록만 신뢰가 필요합니다** — 발행된 결정·정산은 owner도

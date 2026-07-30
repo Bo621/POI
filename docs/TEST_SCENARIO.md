@@ -8,11 +8,30 @@
 
 ## S0. 개발 환경과 시드
 
-`bash scripts/dev_up.sh`를 실행한다.
+```bash
+bash scripts/dev_up.sh          # anvil + 컨트랙트 + fixture. 웹 서버는 띄우지 않는다
+pnpm -C web dev                 # 별도 터미널. http://localhost:5173 에서 화면을 연다
+```
 
-- 기대 화면: 마지막 요약에 fixture UID가 나오고 `verifier: MATCH`가 두 줄 나온다.
+- 기대 화면: `dev_up.sh` 마지막 요약에 fixture UID가 나오고 `verifier: MATCH`가 두 줄 나온다.
+  그 다음 `pnpm -C web dev` 가 `Local: http://localhost:5173/` 를 출력한다.
 - 어긋나면: 출력에서 처음 실패한 phase와 anvil 로그를 확인한다. 관측값을 임의로
   대신 넣지 말고 시드를 다시 만든다.
+
+### MetaMask 준비 — S2 이후 전부 필요하다
+
+**로컬 전용 anvil 기본 계정이다. 실제 자산이 있는 지갑에 절대 넣지 말 것.**
+
+1. 네트워크 추가 — RPC `http://127.0.0.1:8545` · Chain ID `91342` · 통화 `ETH`
+2. 계정 가져오기 (개인키) — anvil 이 시작할 때 출력하는 기본 키다
+
+   | | 주소 | 개인키 (anvil 고정값) |
+   |---|---|---|
+   | A | `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` | `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80` |
+   | B | `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` | `0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d` |
+
+3. 계정 전환은 MetaMask 우상단에서 한다. **S9·S10 은 A 와 B 를 번갈아 쓴다.**
+   앱은 `accountsChanged` 를 구독하므로 전환하면 화면이 따라 바뀐다.
 
 ## S1. 홈 — 공개 진입점 (`#/`)
 
@@ -25,7 +44,7 @@
 
 ## S2. 홈 — 지갑 연결 (`#/`)
 
-`연결`을 눌러 anvil 기본 계정 A를 연결한다.
+`연결`을 눌러 S0 에서 가져온 계정 A를 연결한다.
 
 - 기대 화면: nav에 축약 주소와 `일반 지갑` 배지가 나타나고, 홈 아래에 `결과 등록이 필요한 기록`과
   `내가 남긴 기록`이 나타난다.
@@ -63,6 +82,28 @@ F4의 decisionUID로 이동한다.
 F5의 decisionUID를 연 뒤 `cast rpc evm_increaseTime <초>`와
 `cast rpc evm_mine`으로 체인 시각을 windowStart, windowEnd, windowEnd+grace
 경계까지 차례로 민다.
+
+경계값은 `seed.json` 의 `fixtures.f5.window` 에 있다.
+**이 필드는 `dev_up.sh` 가 시드를 만들 때 기록한다** — 옛 시드에는 없으니 S0 을 먼저 다시 실행한다.
+이동량은 이렇게 계산한다:
+
+```bash
+R=http://127.0.0.1:8545
+W=$(jq -r '.fixtures.f5.window' docs/fixtures/seed.json)
+WS=$(jq -r '.start'        <<<"$W")
+WE=$(jq -r '.end'          <<<"$W")
+G=$( jq -r '.graceSeconds' <<<"$W")
+
+bump() {   # 목표 시각까지 민다
+  now=$(cast block latest --rpc-url $R --field timestamp)
+  cast rpc --rpc-url $R evm_increaseTime $(( $1 - now + 1 )) >/dev/null
+  cast rpc --rpc-url $R evm_mine >/dev/null
+}
+
+bump $WS            # 대기   → 관측중
+bump $WE            # 관측중 → 등록대기
+bump $((WE + G))    # 등록대기 → 기한초과
+```
 
 - 기대 화면: 처음 `대기`이고, 경계를 지나며 `관측중` → `등록대기` →
   `기한초과`로 바뀐다.

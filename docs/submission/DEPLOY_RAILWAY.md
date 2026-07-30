@@ -7,8 +7,12 @@
 
 ## 1. Railway 프로젝트 연결
 
-Railway 대시보드에서 이 GitHub 저장소를 연결한다. `railway.json`이 루트에 있으므로
-빌드·실행 명령은 자동으로 잡힌다.
+Railway 대시보드에서 이 GitHub 저장소를 연결한다. **`railway.json` 은 두지 않는다** —
+Railpack SPA 모드를 서비스 변수로 지정한다:
+
+```
+RAILPACK_SPA_OUTPUT_DIR=web/dist
+```
 
 ```json
 build   pnpm install --frozen-lockfile && pnpm -C web build
@@ -63,7 +67,7 @@ VITE_CHALLENGE_SCHEMA_UID=0x3557adc085b634167345fe0529a3aab5a5bb27ecddf9f9640acb
 
 ```
 문항 8 프로젝트 링크   <배포URL>
-                       또는 <배포URL>/#/d/0x5941a398…1a69  (바로 결정 상세로)
+                       또는 <배포URL>/#/d/0x5941a398…443888  (바로 결정 상세로)
 ```
 
 **심사자가 지갑 없이도 볼 수 있다** — 조회와 검증은 지갑 연결을 요구하지 않는다.

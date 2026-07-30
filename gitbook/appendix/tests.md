@@ -1,18 +1,18 @@
 # 테스트 전수 실행 기록
 
-> **2026-07-29 01:37 KST, 한 자리에서 연속 실행한 결과다.**
+> **2026-07-30, 커밋 `283bf85` 이후 한 자리에서 연속 실행한 결과다.**
 >
-> 이 파일이 있는 이유: 앞서 각기 다른 시점에 돌린 숫자를 합쳐 "423개"라고 썼는데,
+> 이 파일이 있는 이유: 앞서 각기 다른 시점에 돌린 숫자를 합쳐 "384개"라고 썼는데,
 > 그건 근거가 아니다. 서로 다른 커밋에서 나온 수치를 더한 것이기 때문이다.
 > 지금은 같은 커밋에서 다섯 스위트를 연달아 돌린 결과다.
 
 | 스위트 | 결과 | 실행 |
 |---|---|---|
-| contracts | **165 passed, 0 failed, 0 skipped** | `forge test` (8 suites) |
+| contracts | **169 passed, 0 failed, 0 skipped** | `forge test` (8 suites) |
 | core | **62 pass, 0 fail** | `npm test` |
-| verifier | **58 pass, 0 fail** | `npm test` |
-| web | **87 passed** (16 files) | `npm test` |
-| e2e | **35 passed** | `npm run test:e2e` (실제 체인 상대) |
+| verifier | **59 pass, 0 fail** | `npm test` |
+| web | **96 passed** (18 files) | `npm test` |
+| e2e | **37 passed** | `npm run test:e2e` (실제 체인 상대) |
 | **합계** | **423** | |
 
 ## 이 수치가 뜻하는 것과 뜻하지 않는 것
@@ -40,12 +40,14 @@
 ## 재현
 
 ```bash
-cd contracts && forge test
-cd core      && npm test
-cd verifier  && npm test
-cd web       && npm test
-bash scripts/dev_up.sh && cd web && npm run test:e2e
+(cd contracts && forge test)
+(cd core      && npm test)
+(cd verifier  && npm test)
+(cd web       && npm test)
+bash scripts/dev_up.sh && (cd web && npm run test:e2e)
 ```
+
+각 줄을 괄호로 감싼 이유: `cd` 가 셸에 남으면 다음 줄이 `contracts/core` 를 찾아 실패한다.
 
 포크 테스트는 네트워크가 필요하다:
 

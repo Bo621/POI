@@ -1,6 +1,7 @@
 # 테스트 전수 실행 기록
 
-> **2026-07-30 01:0x KST, 커밋 `283bf85` 이후 에서 한 자리에 연속 실행한 결과다.**
+> **2026-07-30, 커밋 `283bf85` 이후 한 자리에서 연속 실행한 결과다.**
+> 2026-07-30 재확인: contracts 169 · core 62 · verifier 59 · web 96 — 아래 표와 같다.
 >
 > 원출력: `scripts/run_all_tests.sh` 를 다시 돌리면 같은 표가 나온다.
 >
@@ -42,12 +43,14 @@
 ## 재현
 
 ```bash
-cd contracts && forge test
-cd core      && npm test
-cd verifier  && npm test
-cd web       && npm test
-bash scripts/dev_up.sh && cd web && npm run test:e2e
+(cd contracts && forge test)
+(cd core      && npm test)
+(cd verifier  && npm test)
+(cd web       && npm test)
+bash scripts/dev_up.sh && (cd web && npm run test:e2e)
 ```
+
+각 줄을 괄호로 감싼 이유: `cd` 가 셸에 남으면 다음 줄이 `contracts/core` 를 찾아 실패한다.
 
 포크 테스트는 네트워크가 필요하다:
 

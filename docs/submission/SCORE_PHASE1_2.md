@@ -161,7 +161,7 @@ POI 의 술어 `metricId · op · threshold` 와 머클 증명, ZK 술어는 **�
 ### 08 기술 완성도 — 8
 
 **근거**
-- 불변식이 코드에 번호로 표시되고(I1~I19), 포크 테스트가 **실제 EAS 바이트코드** 상대로 돈다.
+- 불변식 I1~I19 중 15개가 코드에 번호 주석으로 표시되고, 포크 테스트가 **실제 EAS 바이트코드** 상대로 돈다.
 - commitment 테스트 벡터를 Solidity 와 TS 가 **같은 파일**(`core/vectors/commitment.v1.json`)에서
   읽어, 구현이 갈라지면 테스트가 먼저 깨진다.
 - 소유권이 **2-of-2 Safe** 에 있다(`owner = 0x215253B8…DCE1`, `pendingOwner = 0`).

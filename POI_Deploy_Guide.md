@@ -1,7 +1,7 @@
 # POI 공개 테스트넷 배포 준비
 
 **대상**: GIWA Sepolia (Chain ID 91342) · GASOK 제출 마감 2026-07-31
-**기준 문서**: `POI_TechSpec_v3.md`
+**기준 문서**: `docs/POI_TechSpec_v3.md`
 **조사일**: 2026-07-27 — 표기된 값은 전부 RPC·npm 실측
 
 ---
@@ -137,7 +137,7 @@ function register(string calldata schema, ISchemaResolver resolver, bool revocab
 | POIChallengeResolver 배포 | ~1,500,000 | 0.0000015 ETH |
 | 스키마 등록 × 4 | ~800,000 | 0.0000008 ETH |
 | `initialize()` × 4 | ~400,000 | 0.0000004 ETH |
-| `addMetric()` × 6 | ~720,000 | 0.0000007 ETH |
+| `addMetric()` × 2 | ~240,000 | 0.0000002 ETH |
 | fixture·데모 트랜잭션 여유 | ~1,000,000 | 0.000001 ETH |
 | **합계** | **~10,200,000** | **≈ 0.0000102 ETH ≈ 42원** |
 
@@ -247,7 +247,7 @@ cast wallet import deployer --interactive
 1. Resolver 4종 배포          (initialized = false → 모든 발행 revert)
 2. SchemaRegistry.register × 4
 3. resolver.initialize(스키마 UID들)   → initialized = true
-4. addMetric × 6
+4. addMetric × 2  (BTC_PRICE_KRW_AT_END · BTC_MAX_DRAWDOWN_IN_WINDOW)
 5. Ownable2Step으로 multisig 이전  (renounce 금지 — Phase 1에 지표 추가 필요)
 ```
 
@@ -442,7 +442,7 @@ fixture D  ─ 이의 시연용
 □ .gitignore에 .env broadcast/ cache/ out/
 □ revocable 플래그 4줄 재확인 (settlement·challenge만 true)
 □ initialize() 호출 후 initialized == true 확인
-□ addMetric 6종 + definitionHash 포함
+□ addMetric 2종 + definitionHash 포함
 □ Ownable2Step으로 소유권 이전 — renounce 금지
 □ DEPLOY_BLOCK 기록
 □ 익스플로러에서 소스 검증 완료 확인

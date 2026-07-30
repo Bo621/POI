@@ -42,7 +42,7 @@ https://poi-static-production.up.railway.app/#/d/0x5941a398a8338b99d053309cbf5e6
 | **[STATUS.md](STATUS.md)** | **제출 준비 현황 — 무엇이 끝났고 무엇이 남았는지** |
 | **[VERIFY.md](VERIFY.md)** | **심사자가 직접 재현하는 절차.** 이 제품의 주장은 전부 여기서 확인됩니다 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 컨트랙트가 실제로 강제하는 것 |
-| [DEMO.md](DEMO.md) | 화면에서 무엇을 보게 되는지 |
+| [JUDGE_WALKTHROUGH.md](JUDGE_WALKTHROUGH.md) | 화면에서 무엇을 보게 되는지 — 심사자 시나리오 S1~S12 |
 | [LIMITS.md](LIMITS.md) | **하지 못한 것과 그 이유** |
 
 더 깊이 보실 경우:
@@ -56,8 +56,8 @@ https://poi-static-production.up.railway.app/#/d/0x5941a398a8338b99d053309cbf5e6
 
 ```
                 커밋 1건      결정 커밋 36건/년
-GIWA            1.21원              19원
-이더리움 L1    850원         181,000원
+GIWA            1.21원              44원
+이더리움 L1    850원          30,600원
 ```
 
 고비용 체인에서 비용을 줄이려면 두 갈래뿐이고 둘 다 POI를 깎아냅니다.

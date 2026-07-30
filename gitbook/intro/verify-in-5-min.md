@@ -102,15 +102,20 @@ node --experimental-strip-types verifier/src/cli.ts \
 누구나 대조할 수 있습니다.
 
 ```bash
+export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
+export POI_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
+
 node --experimental-strip-types verifier/src/reveal-cli.ts \
   0x3f592f21a7e5a733d3dd90caeb2f9ec35bffa335b69da7310749694283e16938 \
   --salt 0x0f1e2d3c4b5a69788796a5b4c3d2e1f0 \
-  > **`--payload` 는 JSON 이다.** 결정 본문이 문자열이면 큰따옴표까지 포함해야 한다.
-
-```bash
---payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
-  --rpc $RPC
+  --payload <(printf '%s' '{"fixture":"O4","intent":"overdue-demo"}') \
+  --rpc https://sepolia-rpc.giwa.io/
 ```
+
+**기대**: `판정: MATCH`.
+
+> **`--payload` 는 JSON 입니다.** 결정 본문이 문자열이면 큰따옴표까지 포함해야 합니다.
+> 위 환경변수 둘은 **필수**입니다 — 없으면 즉시 멈춥니다.
 
 
 ## 7. 남의 커밋을 베껴도 자기 것이 되지 않는다 (CT18)
@@ -137,12 +142,14 @@ B가 A의 commitment를 그대로 복사해 커밋해도, A의 `(salt, payload)`
 ## 9. 테스트
 
 ```bash
-cd contracts && forge test              # 150
-cd core      && npm test                # 62
-cd verifier  && npm test                # 58
-cd web       && npm test                # 87
-cd web       && npm run test:e2e        # 27 (실제 체인 상대)
+(cd contracts && forge test)            # 169
+(cd core      && npm test)              # 62
+(cd verifier  && npm test)              # 59
+(cd web       && npm test)              # 96
+(cd web       && npm run test:e2e)      # 37 (실제 체인 상대)
 ```
+
+각 줄을 괄호로 감싼 이유: `cd` 가 셸에 남으면 다음 줄이 `contracts/core` 를 찾아 실패합니다.
 
 포크 테스트(`FOUNDRY_PROFILE=fork`)는 **실제 EAS 바이트코드**를 상대로 돕니다 —
 모의 객체가 아닙니다.
