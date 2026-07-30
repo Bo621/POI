@@ -9,6 +9,8 @@
 
 ## 문제와 증명 경계
 * [판단은 남지 않는다](problem/no-record.md)
+* [시장과 규제](problem/market.md)
+* [누가 쓰는가](problem/who.md)
 * [무엇이 증명되고 무엇이 안 되나](problem/what-is-proven.md)
 * [신뢰 경계](problem/trust-boundary.md)
 
