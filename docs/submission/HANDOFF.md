@@ -1,0 +1,181 @@
+# 인수인계 — 다른 세션에서 이어받을 때
+
+> **2026-07-30 기준. 마감 7/31.**
+> 이 문서만 읽고 이어받을 수 있게 적는다. 세션이 끊겨도 여기부터 보면 된다.
+
+---
+
+## 지금 상태 한 줄
+
+**제출 준비는 끝났다. 남은 것은 팀 소개 PDF 재업로드 하나뿐이고, 그것도 안 해도 제출은 된다.**
+
+---
+
+## 1. 지금 당장 해야 할 것
+
+### 유일하게 남은 작업 — 팀 소개 PDF 재업로드 (사람만 가능)
+
+```
+올릴 파일   submit/latest/POI_team_v2.1_2026-07-30.pdf   (2쪽)
+```
+
+`v2.1` 에서 팀 소개 문구를 고쳐 PDF 가 바뀌었다 (「그리핑·Sybil 이의·복사 공격」을
+풀어 씀, `(I17)` 제거, PnL→손익, AUM→운용자산).
+
+- Drive 의 기존 팀 소개 파일에 **「버전 관리 → 새 버전 업로드」** 를 쓰면 링크가 유지된다.
+  그러면 `FORM_TEXT.txt` 를 고칠 필요가 없다.
+- 새 파일로 올리면 링크가 바뀌므로 `submit/latest/FORM_TEXT.txt` 의
+  `[3/12] 팀 소개` 링크를 교체하고 새 버전으로 다시 얼려야 한다.
+
+> **안 올려도 된다.** 지금 Drive 에 있는 팀 소개(v2.0 내용)는 틀린 것이 없다.
+> 용어가 조금 불친절할 뿐이다.
+
+### 피치덱은 손대지 말 것
+
+`v2.1` 의 피치덱은 **v2.0 과 바이트가 완전히 같다** (`index.html` 이 안 바뀌었고,
+v2.0 파일을 그대로 승계했다). **이미 올라간 Drive 링크가 그대로 유효하다.**
+빌드 스크립트를 다시 돌리면 생성시각 때문에 해시만 달라지니, 이유 없이 돌리지 말 것.
+
+---
+
+## 2. 제출 값 — 전부 확정됨
+
+**붙여넣을 원문은 `submit/latest/FORM_TEXT.txt` 하나다.** 12문항이 전부 들어 있다.
+
+| 문항 | 값 |
+|---|---|
+| 1 팀명 | VESTAT |
+| 2 대표자 | 고보승 (연락처·생년월일은 **양식에만** 적는다. 저장소에 넣지 않는다) |
+| 3 팀 소개 | Drive 링크 — 위 재업로드 건 참고 |
+| 4 지원 동기 | 432자 |
+| 5 트랙 | Track 03 GIWA-NATIVE IDEAS |
+| 6 한 줄 요약 | 35자 |
+| 7 피치덱 | Drive 링크 (20쪽, 유효) |
+| 8 프로젝트 | `https://poi-static-production.up.railway.app` |
+| 9 컨트랙트 | 리졸버 4종 익스플로러 링크 |
+| 10 기술 문서 | `https://vestat.gitbook.io/poi` |
+| 11 추가 요청 | 487자 |
+| 12 GIWA 팀에 | 473자 |
+
+글자수는 전부 500자(문항 6은 50자) 한도 이내이고, 문서에 적힌 값과 실측이 일치한다.
+
+---
+
+## 3. 제출 직전 점검 — 이 명령들로 확인한다
+
+```bash
+cd /Users/bo/GIWA
+
+# 제출본 무결성
+(cd submit/latest && shasum -a 256 -c SHA256SUMS.txt)
+
+# 온체인 (Safe 소유권 · 지표 동결)
+export PATH=$PATH:$HOME/.foundry/bin
+cast call 0x0f25917176a405bb9022e5b417e0d57348b30f89 'owner()(address)' \
+  --rpc-url https://sepolia-rpc.giwa.io/          # → 0x215253B8…DCE1
+
+# 공개 링크 (전부 인증 없이 200 이어야 한다)
+curl -sIL https://poi-static-production.up.railway.app | head -1
+curl -sIL https://vestat.gitbook.io/poi | head -1
+
+# 심사자 시나리오 — 문서에 적힌 명령 그대로
+export POI_RPC_URL=https://sepolia-rpc.giwa.io/
+export POI_EAS_ADDRESS=0x4200000000000000000000000000000000000021
+export POI_SETTLEMENT_RESOLVER_ADDRESS=0x167cf06df663c5ddde9f20a748e724b4fb6c14fa
+export POI_METRIC_REGISTRY_ADDRESS=0x0f25917176a405bb9022e5b417e0d57348b30f89
+export POI_DECISION_SCHEMA_UID=0x88990bf8da2b83b2f68c5783dc1a4375f9f956185c6bafcbd97f7de6d5aa3749
+node --experimental-strip-types verifier/src/cli.ts \
+  0x5941a398a8338b99d053309cbf5e611486f30e649c9569cfa3a63d5060443888 --json   # → MATCH, exit 0
+```
+
+### Drive 링크는 **반드시 인증 없이** 검사할 것
+
+인증된 도구(브라우저 로그인·Drive MCP)로 열면 **본인에게만 보이는 파일도 열린다.**
+「링크가 있는 모든 사용자」 검증이 되지 않는다. 판정 기준은 하나다 —
+**쿠키 없이 바이트를 받았는가.**
+
+```bash
+curl -sL -A "Mozilla/5.0" "https://drive.google.com/uc?export=download&id=<FILE_ID>" \
+  -o /tmp/x.pdf -w '%{size_download}\n'
+shasum -a 256 /tmp/x.pdf        # 로컬 submit/latest/ 의 것과 대조
+```
+
+> 공개 파일 페이지에도 구글이 로그인 링크를 심어 둔다. HTML 에서 `ServiceLogin`
+> 문자열을 찾는 방식은 **오탐이 난다.** 실제로 한 번 틀렸다.
+
+---
+
+## 4. 작업 규칙 — 이 저장소에서 지켜 온 것
+
+1. **주장은 실행해서 확인한다.** 「~일 것이다」로 적지 않는다.
+   온체인은 `cast`, 명령은 직접 실행, PDF 는 렌더해서 눈으로 본다.
+2. **문서가 부정하는 것을 다른 문서가 주장하면 안 된다.**
+   이번 감사에서 걷어낸 것이 대부분 이 유형이다 (「Proof of Investing」,
+   「KYC 결속 온체인 신원」 등).
+3. **제출본(`submit/`)은 출력물이다.** 원본은 `docs/submission/*.md`.
+   `submit/` 안의 파일을 직접 고치지 않는다. 원본을 고치고 새 버전을 만든다.
+4. **검증 스크립트가 빈 값을 성공으로 처리하지 않게 한다.**
+   이번에 두 번 당했다 (urllib 403, GitBook CDN 파일명). 「없음」과 「확인 실패」는 다르다.
+5. **커밋 메시지에 무엇을 어떻게 확인했는지 적는다.** 나중 세션이 재검증할 근거가 된다.
+
+---
+
+## 5. 이번 세션에서 한 일 (요약)
+
+교차 감사 4라운드 + 문체·명료성 정비. 지적 60여 건 반영.
+
+| | |
+|---|---|
+| 심사자가 실행하면 실패하던 것 | `reveal-cli` 명령이 쪼개져 있던 것(3곳), 5분 검증 페이지의 첫 명령이 필수 env 누락으로 실패하던 것, 재현 블록의 `cd` 연쇄 |
+| 과장 | 「Proof of **Investing**」→ Insight, 「KYC 결속 온체인 신원」, 「commitment 하나」→ 넷, 「정산을 발행자가 주장하지 못하게」, 경력 10년 7개월 → 10년+ |
+| 사실 오류 | 「유료 리딩방이 불법」 → 「양방향 유료 리딩방은 등록 자문업자만」, 비용 19원 → 44원, OVERDUE epoch↔KST 하루 오차 |
+| 문서 간 모순 | 소유권 표기 3곳, GitBook 상태표가 실재하는 fixture 를 「없음」 표기, 테스트 수 392/407 vs 423 |
+| 피치덱 | 14 → 20장. 시장 근거·사용자 이야기·실제 화면 캡처 2장·로드맵 2장 추가. 한글 조판(`word-break:keep-all`) 수정 |
+| 백서 | 29 → 31개 문서. `problem/market.md`·`problem/who.md` 신설, 로드맵 373 → 2,695자, 스크린샷 6건, 용어집 신설 |
+| 문체 | 볼드 8.2 → 4.8/1천자 (백서). 선언조 문장을 사실 서술로 |
+
+감사 기록: [`AUDIT_2026-07-30.md`](AUDIT_2026-07-30.md)
+
+---
+
+## 6. 미해결로 남긴 것 — 의도적이다
+
+| | 왜 |
+|---|---|
+| **GitBook URL 슬러그가 `undefined-N`** (`/poi/undefined-2/security`) | SUMMARY 의 한글 `##` 섹션 제목을 GitBook 이 슬러그로 못 바꾼 탓. ASCII 인 `## GIWA` 만 정상이다. **27개 페이지 전부 본문이 뜨고 내부 링크도 정상**이라 동작 문제는 없다. GitBook UI 에서 섹션별로 고쳐야 한다 |
+| **`gitbook/giwa/cost.md` 의 「기한초과 결정」 gas 에 tx 미인용** | 나머지 3건은 영수증 tx 를 찾아 인용했다. 이 하나는 특정하지 못해 「tx 미인용」이라고 문서에 명시했다. 없는 해시를 지어내지 않았다 |
+| **`seed.json` 에 `f5.window` 없음** | `dev_up.sh` 가 이제 기록하지만 시드를 다시 돌려야 생긴다. `TEST_SCENARIO.md` 에 「S0 을 먼저 다시 실행한다」로 적어 두었다 |
+| **백서 문서마다 EAS·리졸버를 재정의하지 않음** | 코덱스가 제안했으나 받지 않았다. 10개 문서에 같은 설명을 반복하면 더 기계적으로 읽힌다. [용어집](../../gitbook/appendix/glossary.md)이 그 자리다 |
+| **덱 20장 중 눈으로 본 것은 일부** | 잘림은 계측으로 전수 확인했다(1600×900 캡처 기준 `scrollHeight ≤ clientHeight`). 톤 일관성은 미확인 |
+
+---
+
+## 7. 시간이 남으면 — 다음 후보
+
+1. **덱 20장 전부 이미지로 뽑아 눈으로 확인** — 새 컴포넌트(지표 블록·전후 대조·주석 열)가
+   기존 슬라이드와 톤이 맞는지. 잘림은 이미 확인됐으니 미학 문제만 남았다.
+2. **GitBook 섹션 슬러그 정리** — UI 작업. URL 이 흉한 것 외에 실해는 없다.
+3. **`docs/submission/` 의 나머지 문서 문체 정비** — 볼드 8.8/1천자로 백서(4.8)보다 높다.
+   다만 이 문서들은 심사자에게 직접 노출되지 않는다 (`TEAM.md` 제외, 이미 정비함).
+
+---
+
+## 8. 핵심 경로 지도
+
+```
+submit/latest/              제출본. FORM_TEXT.txt 하나만 폼에 붙여넣으면 된다
+docs/submission/            원본 문서. 여기를 고치고 submit/ 을 새로 얼린다
+  AUDIT_2026-07-30.md       4라운드 감사 기록
+  HANDOFF.md                이 문서
+  pitch/index.html          피치덱 실제 소스 (PITCH.md 는 마크다운 쌍둥이)
+  pitch/shots/              덱에 쓴 화면 캡처
+gitbook/                    백서 31개. 푸시하면 vestat.gitbook.io/poi 에 반영된다
+  appendix/glossary.md      용어집
+  assets/                   백서 스크린샷
+docs/DEPLOYMENT.md          온체인 주소·UID 의 유일한 원장. 값이 다르면 이쪽이 옳다
+scripts/build_submit_pdfs.sh  PDF 2종 생성 (브라우저 인쇄 쓰지 말 것 — 깨진다)
+```
+
+**PDF 재생성은 `bash scripts/build_submit_pdfs.sh` 로만 한다.** 피치덱은 슬라이드가
+한 번에 하나씩 보이는 구조라 브라우저 인쇄로 만들면 우측 열 글자가 세로로 쌓인다.
+이 스크립트는 20장을 1600×900 으로 캡처해 조립한다.
