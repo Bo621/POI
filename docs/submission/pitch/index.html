@@ -597,9 +597,62 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="lede eave"><strong>한 지갑 안에서의 선택적 기록은 남는다.</strong> 지금 구조로 못 푼다. Phase 2의 실행 정합성 검증이 이 문제를 좁힌다.</p>
 </section>
 
+<!-- 로드맵 ① 레이어 ───────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 15 <b>여기서 무엇이 열리나</b></div>
+  <h2>거래소를 붙이면 <em>마지막 칸이 닫힌다</em></h2>
+  <p class="lede">지금 검증되는 것은 <strong>“무엇을 말했나”</strong>까지다. 남은 칸은 <strong>“말한 대로 했나”</strong> — 앞서 <em>보장하지 않는다</em>고 적은 바로 그 칸이다.</p>
+  <figure>
+  <svg viewBox="0 0 900 250" role="img" aria-label="선언·관측은 지금 검증되고, 실행 칸은 거래소 연동으로 채워진다는 3단 도식">
+    <text class="s-lab" x="16" y="30">LAYER</text>
+    <text class="s-lab" x="470" y="30">지금</text>
+    <text class="s-lab" x="640" y="30">거래소를 붙이면</text>
+
+    <rect x="16" y="46" width="430" height="52" fill="none" class="s-seal"/>
+    <text class="s-txt" x="34" y="70">① 말한 것 — 결정 커밋</text>
+    <text class="s-lab" x="34" y="88">commitment · 관측 구간 선언 · I4</text>
+    <text class="s-hot" x="470" y="78">✔ 검증됨</text>
+    <text class="s-txt" x="640" y="78" font-size="12">그대로</text>
+
+    <rect x="16" y="110" width="430" height="52" fill="none" class="s-seal"/>
+    <text class="s-txt" x="34" y="134">② 본 것 — 관측·정산</text>
+    <text class="s-lab" x="34" y="152">지표 해시 frozen · I17 산술 강제</text>
+    <text class="s-hot" x="470" y="142">✔ 검증됨</text>
+    <text class="s-txt" x="640" y="142" font-size="12">오라클이 관측값을 독립 증명</text>
+
+    <rect x="16" y="174" width="430" height="52" fill="none" stroke="var(--rule)" stroke-width="1" stroke-dasharray="5 4"/>
+    <text class="s-txt" x="34" y="198" fill="var(--ink-faint)">③ 한 것 — 실제 체결</text>
+    <text class="s-lab" x="34" y="216">지금은 비어 있다</text>
+    <text class="s-txt" x="470" y="206" fill="var(--ink-faint)" font-size="12">✕ 보장 안 함</text>
+    <text class="s-hot" x="640" y="206" font-size="12">체결 내역 대조로 채워진다</text>
+
+    <path d="M604 200 L628 200" class="s-line" stroke="var(--seal)" stroke-width="2" marker-end=""/>
+    <path d="M622 195 L630 200 L622 205" fill="none" stroke="var(--seal)" stroke-width="2"/>
+  </svg>
+  <figcaption>③ 이 닫히면 <b>「좋은 판단만 골라 기록한다」</b>는 반론도 같이 좁혀진다 — 거래가 있었는데 결정이 없으면 그것도 드러나기 때문이다.</figcaption>
+  </figure>
+  <p class="src"><b>지금은 가설이다.</b> 개인 거래내역에 접근할 권한이 없다 — 지금 쓰는 것은 업비트 <b>공개 시세 API</b> 뿐이다. 거래소 Open API 읽기 권한이 열려야 성립한다.</p>
+</section>
+
+<!-- 로드맵 ② 단계 ───────────────────────────── -->
+<section class="slide">
+  <div class="tag">// 16 <b>무엇에 의존하나</b></div>
+  <h2>단계마다 <em>막고 있는 것</em>을 적는다</h2>
+  <div class="tblwrap"><table>
+    <tr><th>단계</th><th>열리는 것</th><th>막고 있는 것</th></tr>
+    <tr><td>Phase 1 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 크로스체인 해석</td><td class="no">없음 — 자체 구현</td></tr>
+    <tr><td>Phase 2 <span class="quiet">9월</span></td><td><span class="hot">실행 정합성</span> — 「말한 대로 했나」. 체결 내역과 결정을 대조한다</td><td class="hot">거래소 Open API 읽기 권한 <span class="quiet">(업비트 — GASOK 요청 항목 아님)</span></td></tr>
+    <tr><td>Phase 2 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">(문항 11 요청)</span></td></tr>
+    <tr><td>Phase 3 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">없음 — 자체 구현</td></tr>
+    <tr><td>Phase 4</td><td>ZK 술어 — 잔고·포지션을 밝히지 않고 조건 충족만 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(문항 11 요청)</span></td></tr>
+  </table></div>
+  <p class="lede eave">검증된 판단이 쌓이면 <strong>그 위에 제품이 올라간다.</strong> 배포된 컨트랙트를 <em>읽기만</em> 하면 되는 것들이다 — 새 온체인 구조가 필요 없다는 뜻이지, <strong>만들었다는 뜻이 아니다.</strong></p>
+  <p class="src"><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 잔고를 밝히지 않고 도장 Verified Balance 머클 증명으로 자격만 대는 <b>보유 증명 커뮤니티</b> · 리서치 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
+</section>
+
 <!-- 12 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 15 <b>첫 사용자</b></div>
+  <div class="tag">// 17 <b>첫 사용자</b></div>
   <h2>누가 왜 반복해서 커밋하는가</h2>
   <div class="cols">
     <div>
@@ -620,7 +673,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 13 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 16 <b>사업 가설</b></div>
+  <div class="tag">// 18 <b>사업 가설</b></div>
   <h2>누가 비용을 내는가</h2>
   <p class="lede"><strong>아직 검증되지 않은 가설이다.</strong></p>
   <div class="tblwrap">  <table>
@@ -634,7 +687,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 14 ────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">// 17 <b>팀 · 요청</b></div>
+  <div class="tag">// 19 <b>팀 · 요청</b></div>
   <h2>믿으라고 하지 않는다.<br>확인하라고 한다.</h2>
   <div class="cols">
     <div>
