@@ -61,7 +61,7 @@ body{
 
 h1{font:700 clamp(2.1rem,4.6vw,4rem)/1.12 var(--display);letter-spacing:-.02em}
 h2{font:700 clamp(1.55rem,3.1vw,2.7rem)/1.2 var(--display);letter-spacing:-.015em;max-width:26ch;text-wrap:balance}
-.lede{margin-top:clamp(1.1rem,2.2vw,1.8rem);max-width:52ch;color:var(--ink-soft);font-size:1.05em}
+.lede{margin-top:clamp(1.1rem,2.2vw,1.8rem);max-width:min(100%,60rem);color:var(--ink-soft);font-size:1.05em}
 .lede strong{color:var(--ink);font-weight:600}
 em{color:var(--seal);font-style:normal;font-weight:600}
 .quiet{color:var(--ink-faint);font-size:.85em;line-height:1.6}
@@ -82,7 +82,7 @@ td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
 
 /* ── 도표 ───────────────────────────────────── */
 figure{margin-top:clamp(1.3rem,2.6vw,2.2rem)}
-figcaption{margin-top:.9rem;color:var(--ink-faint);font-size:.82em;max-width:56ch}
+figcaption{margin-top:.9rem;color:var(--ink-faint);font-size:.82em;max-width:min(100%,56rem)}
 svg{width:100%;height:auto;max-width:min(100%,78rem);display:block}
 .s-lab{font:500 12px var(--mono);fill:var(--ink-faint);letter-spacing:.06em}
 .s-txt{font:400 13px var(--body);fill:var(--ink)}
@@ -351,7 +351,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <p>구독자에게 <strong>링크 하나</strong>를 준다. 제3자가 직접 대조하고, 틀렸다고 보면 <strong>이의를 온체인에 남긴다.</strong></p>
     </div>
   </div>
-  <p class="src"><b>왜 이게 가능한 문제인가</b> — 자본시장연구원은 투자의견이 “주관적 기준에 따른 정성적 정보라 <b>사후적인 검증이나 비교가 매우 어렵다</b>”고 지적한다. 검증을 어렵게 만드는 것은 데이터가 아니라 <b>판단이 결과 이후에 수정 가능하다는 구조</b>다.</p>
+  <p class="src"><b>왜 이게 가능한 문제인가</b> — 자본시장연구원은 투자의견이 “주관적 기준에 따른 정성적 정보라 <b>사후적인 검증이나 비교가 매우 어렵다</b>”고 지적한다. 검증을 어렵게 만드는 것은 데이터가 아니라 <b>판단을 결과 뒤에 고칠 수 있는 구조</b>다.</p>
 </section>
 
 <!-- 6 ─────────────────────────────────────── -->
@@ -647,7 +647,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 <!-- 로드맵 ② 단계 ───────────────────────────── -->
 <section class="slide">
   <div class="tag">// 16 <b>무엇에 의존하나</b></div>
-  <h2>단계마다 <em>막고 있는 것</em>을 적는다</h2>
+  <h2><em>우리 힘으로 안 되는 것</em>을 먼저 적는다</h2>
   <div class="tblwrap"><table>
     <tr><th>단계</th><th>열리는 것</th><th>막고 있는 것</th></tr>
     <tr><td>1단계 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 크로스체인 해석</td><td class="no">없음 — 자체 구현</td></tr>
@@ -657,7 +657,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>4단계 <span class="quiet">이후</span></td><td>ZK 술어 — 술어를 숨긴 채 사전 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(GASOK 에 요청 — 20쪽)</span></td></tr>
   </table></div>
   <p class="lede eave">검증된 판단이 쌓이면 <strong>그 위에 제품이 올라간다.</strong> 배포된 컨트랙트를 <em>읽기만</em> 하면 되는 것들이다 — 새 온체인 구조가 필요 없다는 뜻이지, <strong>만들었다는 뜻이 아니다.</strong></p>
-  <p class="src"><b>용어</b> — <b>up.id</b> GIWA 의 온체인 아이디 · <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>ZK 술어</b> 값을 밝히지 않고 「조건을 만족한다」만 증명하는 방식<br><br><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 검증된 보유량으로 자격을 가르는 <b>보유 증명 커뮤니티</b> · 리서치 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
+  <p class="src"><b>용어</b> — <b>up.id</b> GIWA 의 온체인 아이디 · <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>ZK 술어</b> 값을 밝히지 않고 「조건을 만족한다」만 증명하는 방식<br><br><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 검증된 보유량으로 자격을 가르는 <b>보유 증명 커뮤니티</b> · 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
 </section>
 
 <!-- 로드맵 ─────────────────────────────────── -->
@@ -704,7 +704,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <path d="M727 70 L727 186" class="s-line" stroke="var(--gold)" stroke-dasharray="3 5"/>
     <text class="s-lab" x="719" y="200" text-anchor="end" fill="var(--gold)">게이트 — 아래 수치를 넘어야 올린다</text>
   </svg>
-  <figcaption>미달이면 <b>올리지 않고 이유를 공개한다.</b> 등록률이 낮다는 것은 미발행 노출이 사용자에게 이득이 아니라 위협으로 작동한다는 뜻이고, 그러면 설계를 다시 봐야 한다.</figcaption>
+  <figcaption><b>GASOK 일정에 맞춘 것이다</b> — Phase 3 Productize(8–9월) · <b>데모데이 KBW 10월</b> · Phase 4 Growth(KPI). 미달이면 <b>올리지 않고 이유를 공개한다.</b> 등록률이 낮다는 것은 미발행 노출이 사용자에게 이득이 아니라 위협으로 작동한다는 뜻이다.</figcaption>
   </figure>
   <div class="stats">
     <div class="stat"><span class="n">5종</span><span class="k">지표를 정의 문서 해시로 <b>frozen</b> 등록</span><span class="s">1단계 · 현재 2종</span></div>
@@ -728,7 +728,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <div>
       <h3>왜 이 순서인가</h3>
       <p><strong>판단을 파는 쪽이 먼저다.</strong> 이들에게는 검증이 비용이 아니라 <strong>무기</strong>다 — 아무나 할 수 없는 주장을 할 수 있게 된다.</p>
-      <p class="quiet">읽는 쪽은 그 다음이다. 검증된 판단이 쌓여야 고를 것이 생긴다. 공급이 먼저 서야 수요가 붙는 시장이다.</p>
+      <p class="quiet">읽는 쪽은 그 다음이다. 검증된 판단이 쌓여야 고를 것이 생긴다. 공급이 먼저 서는 시장이다.</p>
       <p class="quiet">기관은 마지막이다. 조회 API(3단계)가 있어야 발행물에 붙는다.</p>
     </div>
   </div>
