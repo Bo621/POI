@@ -515,8 +515,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 9 ─────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">// 11 <b>지금 살아 있는 것</b></div>
-  <h2>테스트넷에서 전 경로가 돈다</h2>
+  <div class="tag">// 11 <b>MVP 현황</b></div>
+  <h2>어디까지 만들어져 있나</h2>
   <div class="tblwrap">  <table>
     <tr><td>컨트랙트</td><td>리졸버 4종 — <span class="yes">익스플로러 Verified</span></td></tr>
     <tr><td>스키마</td><td>EAS 4종 등록·초기화</td></tr>
@@ -593,23 +593,10 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="src"><b>철회 이력도 남습니다</b> — 정산을 철회하고 정정하면 「이전 결과 등록(철회됨)」이 펼쳐진다. 결정 <code>0xb1e46283…683b21</code></p>
 </section>
 
-<!-- 11 ────────────────────────────────────── -->
-<section class="slide">
-  <div class="tag">// 14 <b>가장 큰 반론</b></div>
-  <h2>“좋은 판단만 골라 기록하면?”</h2>
-  <p class="lede"><strong>맞다. 완전성은 보장되지 않는다.</strong> 조회된 것이 전부라는 보장도 없다.</p>
-  <div class="tblwrap">  <table>
-    <tr><td>미발행을 드러낸다</td><td>선언하고 안 올리면 「기한초과」로 남는다</td></tr>
-    <tr><td>건수를 세지 않는다</td><td>지갑 생성 비용이 0이라 개수는 언제든 부풀릴 수 있다</td></tr>
-    <tr><td>목록에 명시한다</td><td>「조회된 것이 전부라는 보장은 없습니다」</td></tr>
-    <tr><td>비교·랭킹을 만들지 않는다</td><td>선택 기록으로 순위를 만들면 거짓말이 된다</td></tr>
-  </table></div>
-  <p class="lede eave"><strong>한 지갑 안에서의 선택적 기록은 남는다.</strong> 지금 구조로 못 푼다. <b>2단계</b>의 실행 정합성 검증이 이 문제를 좁힌다 (15쪽).</p>
-</section>
 
 <!-- 로드맵 ① 레이어 ───────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 15 <b>여기서 무엇이 열리나</b></div>
+  <div class="tag">// 14 <b>여기서 무엇이 열리나</b></div>
   <h2>거래소를 붙이면 <em>마지막 칸이 닫힌다</em></h2>
   <p class="lede">지금 검증되는 것은 <strong>“무엇을 말했나”</strong>까지다. 남은 칸은 <strong>“말한 대로 했나”</strong> — 앞서 <em>보장하지 않는다</em>고 적은 바로 그 칸이다.</p>
   <figure>
@@ -646,7 +633,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 로드맵 ─────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 16 <b>로드맵</b></div>
+  <div class="tag">// 15 <b>로드맵</b></div>
   <h2>5개월 일정</h2>
   <figure>
   <svg viewBox="0 0 900 224" role="img" aria-label="0단계부터 5단계까지의 5개월 일정과 출시 판단 기준">
@@ -693,27 +680,35 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 로드맵 ② 단계 ───────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 17 <b>외부 협조</b></div>
+  <div class="tag">// 16 <b>외부 협조</b></div>
   <h2>직접 만들 것과 <em>요청할 것</em></h2>
   <div class="tblwrap"><table>
     <tr><th>단계</th><th>해야 할 일</th><th>필요한 외부 협조</th></tr>
     <tr><td>1단계 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 를 다른 체인에서도 읽기</td><td class="no">자체 개발</td></tr>
     <tr><td>2단계 <span class="quiet">9월</span></td><td><span class="hot">체결 내역과 결정을 대조</span> — 「말한 대로 했나」</td><td class="hot">업비트 Open API 읽기 권한 <span class="quiet">— 업비트에 별도 신청</span></td></tr>
-    <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">— GASOK 요청 (20쪽)</span></td></tr>
+    <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">— GASOK 요청 (아래)</span></td></tr>
     <tr><td>3단계 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">자체 개발</td></tr>
-    <tr><td>4단계 <span class="quiet">이후</span></td><td>조건을 숨긴 채 미리 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">— GASOK 요청 (20쪽)</span></td></tr>
+    <tr><td>4단계 <span class="quiet">이후</span></td><td>조건을 숨긴 채 미리 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">— GASOK 요청 (아래)</span></td></tr>
   </table></div>
-  <div class="tblwrap"><table>
-    <tr><th colspan="2">대응</th></tr>
-    <tr><td>업비트 Open API</td><td>8월 중 별도 신청</td></tr>
-    <tr><td>Upbit Oracle · 보자기 문서</td><td>GASOK 에 <b>요청 예정</b> <span class="quiet">(20쪽)</span></td></tr>
-  </table></div>
+  <div class="cols">
+    <div>
+      <h3>GASOK 에 요청하는 것 — 둘</h3>
+      <p><em>① GIWA 월렛 탑재 규격</em></p>
+      <p class="quiet">판단의 재료가 지갑에 있다. 누가 말했는지(Verified Address)는 이미 연동했다. 임베드 방식, 라우팅 제약, 서명 UX, 딥링크 규격을 알려주시면 맞춘다. <b>규격 없이 만들면 추측이 코드가 된다.</b></p>
+    </div>
+    <div>
+      <h3>&nbsp;</h3>
+      <p><em>② 보자기 개발자 문서</em></p>
+      <p class="quiet">두나무는 <b>2026-02-27 하나금융 해외송금 PoC</b> 에서 보자기로 송금인·수취인을 가렸다. <b>기술은 이미 실증됐고 문서만 없다</b> — <code>/giwa-ecosystem/bojagi</code> 404.</p>
+      <p class="quiet"><b>업비트 Open API</b> 는 8월 중 별도 신청한다. 그 다음이 도장 스냅샷 주기, 그 다음이 Upbit Oracle 이다.</p>
+    </div>
+  </div>
   <p class="src"><b>용어</b> — <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>up.id</b> GIWA 의 온체인 아이디</p>
 </section>
 
 <!-- 12 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 18 <b>타겟 · 시장</b></div>
+  <div class="tag">// 17 <b>타겟 · 시장</b></div>
   <h2>누구를 위해 만들었나</h2>
   <div class="cols">
     <div>
@@ -737,7 +732,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 13 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 19 <b>목표 비즈니스 모델</b></div>
+  <div class="tag">// 18 <b>목표 비즈니스 모델</b></div>
   <h2>증명을 <em>확인하는 쪽</em>이 낸다</h2>
   <figure>
   <svg viewBox="0 0 900 114" role="img" aria-label="판단을 남기는 쪽은 무료, 확인하는 쪽이 지불하는 구조">
@@ -761,39 +756,28 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>B2C 구독</td><td><span class="quiet">판단을 읽는 쪽</span><br>저널 · 장기 리포트 · 외부 공유 프로필 <span class="s-lab">3단계</span></td></tr>
     <tr><td>검증 수수료</td><td><span class="quiet">제3자가 요청</span><br>정기 재검증 · 갱신 · 이의 대응 <span class="s-lab">3단계</span></td></tr>
     <tr><td>B2B 조회 API</td><td><span class="quiet">리서치 기관 · 운용사</span><br>발행물에 검증 링크를 붙인다. 건당 과금 <span class="s-lab">3단계</span></td></tr>
-    <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증한다. <b>개인정보를 직접 보관하지 않아도 된다</b> <span class="s-lab">확장 · 20쪽</span></td></tr>
+    <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증한다. <b>개인정보를 직접 보관하지 않아도 된다</b> <span class="s-lab">확장 · 19쪽</span></td></tr>
   </table></div>
   <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 판단이 쌓이는 속도를 보고 정한다.</p>
 </section>
 
 <!-- 14 ────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">// 20 <b>확장 · 요청</b></div>
+  <div class="tag">// 19 <b>확장</b></div>
   <h2>확장성이 더 <em>열려 있다</em></h2>
-  <div class="cols">
-    <div>
-      <h3>왜 확장이 되는가</h3>
-      <p>POI 가 하는 일은 <em>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인한다」</em> 이다.</p>
-      <p class="quiet">지금 고정하는 내용은 <b>투자 판단</b> 하나다. 그런데 컨트랙트는 <b>그 내용이 무엇인지 보지 않는다</b> — 해시와 구간, 산술만 검사한다. <b>고정할 내용만 바꾸면 다른 것도 증명된다.</b></p>
-      <div class="tblwrap"><table>
-        <tr><td>투자 성과</td><td>원금과 거래내역을 공개하지 않고 <b>「12개월 이상 투자했고 수익률이 X% 이상이다」</b>만 증명한다 <span class="quiet">— 거래소 체결 내역을 연동하면 된다</span></td></tr>
-        <tr><td>자금 보유</td><td>잔액을 밝히지 않고 <b>「적격 자금 N원 이상 보유」</b>만 증명한다 <span class="quiet">— 도장 Verified Balance 는 잔고 값이 공개되므로</span> <span class="s-lab">보자기 활용</span></td></tr>
-        <tr><td>투자자 자격</td><td>자산 규모를 밝히지 않고 <b>「이 상품의 투자자 요건을 충족한다」</b>만 증명한다 <span class="quiet">— 발행사가 서류를 안 받아도 된다</span> <span class="s-lab">토큰증권 2027-02-04 시행</span></td></tr>
-      </table></div>
-      <p class="quiet">POI 는 스테이블코인을 발행하지 않는다. 은행·증권사가 발행한 것에 <b>증명을 붙이는 쪽</b>으로 남는다.</p>
-    </div>
-    <div>
-      <h3>GASOK에 요청하는 것 — 둘</h3>
-      <p><em>① GIWA 월렛 탑재 규격.</em></p>
-      <p class="quiet">판단의 재료가 지갑에 있다. 누가 말했는지(Verified Address)는 이미 연동했다. 임베드 방식, 라우팅 제약, 서명 UX, 딥링크 규격을 알려주시면 맞춘다. <b>규격 없이 만들면 추측이 코드가 된다.</b></p>
-      <p><em>② 보자기 개발자 문서.</em></p>
-      <p class="quiet">두나무는 <b>2026-02-27 하나금융 해외송금 PoC</b> 에서 보자기로 송금인·수취인을 가렸다. <b>기술은 이미 실증됐고 문서만 없다</b> — <code>/giwa-ecosystem/bojagi</code> 404. 위 세 줄이 전부 여기에 걸려 있다.</p>
-      <p class="quiet">그 다음이 도장 스냅샷 주기, 그 다음이 Upbit Oracle 이다.</p>
-    </div>
-  </div>
-  <p class="lede eave">아래 두 링크는 <strong>지갑 없이 지금 열린다.</strong> 이 덱의 주장은 전부 여기서 직접 확인할 수 있다.</p>
-  <pre><a href="https://poi-static-production.up.railway.app" target="_blank" rel="noopener"><b>https://poi-static-production.up.railway.app</b></a>
-<a href="https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89" target="_blank" rel="noopener">sepolia-explorer.giwa.io/address/0x0f259171…b30f89</a></pre>
+  <p class="lede">POI 가 하는 일은 <strong>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인한다」</strong> 이다. 컨트랙트는 <strong>고정된 내용이 무엇인지 보지 않는다</strong> — 해시와 구간, 산술만 검사한다. 그래서 <strong>고정할 내용만 바꾸면 다른 것도 같은 방식으로 증명된다.</strong></p>
+  <div class="tblwrap"><table>
+    <tr><th>무엇을</th><th>어떻게</th><th>무엇이 필요한가</th></tr>
+    <tr><td>투자 판단</td><td>「이 판단을 그때 했다」 <span class="quiet">— 지금 하는 것</span></td><td class="no">완료</td></tr>
+    <tr><td>투자 성과</td><td>원금과 거래내역을 공개하지 않고 <b>「12개월 이상 투자했고 수익률이 X% 이상이다」</b>만 증명</td><td>거래소 체결 내역 연동</td></tr>
+    <tr><td>자금 보유</td><td>잔액을 밝히지 않고 <b>「적격 자금 N원 이상 보유」</b>만 증명 <span class="quiet">— 도장 Verified Balance 는 잔고 값이 공개된다</span></td><td class="hot">보자기 활용</td></tr>
+    <tr><td>투자자 자격</td><td>자산 규모를 밝히지 않고 <b>「이 상품의 투자자 요건을 충족한다」</b>만 증명 <span class="quiet">— 발행사가 서류를 안 받아도 된다</span></td><td class="hot">보자기 · 토큰증권 2027-02-04 시행</td></tr>
+  </table></div>
+  <p class="lede eave">POI 는 스테이블코인을 발행하지 않는다. 은행·증권사가 발행한 것에 <strong>증명을 붙이는 쪽</strong>으로 남는다.</p>
+  <div class="tblwrap"><table>
+    <tr><td>MVP</td><td><a href="https://poi-static-production.up.railway.app" target="_blank" rel="noopener">poi-static-production.up.railway.app</a> <span class="quiet">— 지갑 없이 조회·검증</span></td></tr>
+    <tr><td>컨트랙트</td><td><a href="https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89" target="_blank" rel="noopener">sepolia-explorer.giwa.io/address/0x0f259171…b30f89</a> <span class="quiet">— 익스플로러 소스 검증됨</span></td></tr>
+  </table></div>
 </section>
 
 </main>
