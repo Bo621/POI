@@ -647,7 +647,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 <!-- 로드맵 ─────────────────────────────────── -->
 <section class="slide">
   <div class="tag">// 16 <b>로드맵</b></div>
-  <h2>5개월 일정과 <em>출시 판단 기준</em></h2>
+  <h2>5개월 일정</h2>
   <figure>
   <svg viewBox="0 0 900 224" role="img" aria-label="0단계부터 5단계까지의 5개월 일정과 출시 판단 기준">
     <text class="s-lab" x="40" y="24">2026</text>
@@ -685,18 +685,10 @@ body[data-path] .slide:not([data-key]){display:none!important}
        <text class="s-txt" x="793" y="139" text-anchor="middle" font-size="12">공개 메인넷</text>
        <text class="s-lab" x="793" y="157" text-anchor="middle">출시 판단</text></g>
 
-    <path d="M727 70 L727 186" class="s-line" stroke="var(--gold)" stroke-dasharray="3 5"/>
-    <text class="s-lab" x="719" y="200" text-anchor="end" fill="var(--gold)">출시 기준 — 아래 수치를 넘어야 올린다</text>
   </svg>
-  <figcaption><b>GASOK 일정 참조</b> — Phase 3 Productize(8–9월) · <b>데모데이 KBW 10월</b> · Phase 4 Growth(KPI)<br>
-  <b>기준 미달 시</b> — 출시 보류 · 사유 공개. 등록률 미달 = 미발행 노출이 이득이 아니라 위협으로 작동 → 설계 재검토</figcaption>
+  <figcaption><b>GASOK 일정 참조</b> — Phase 3 Productize(8–9월) · <b>데모데이 KBW 10월</b> · Phase 4 Growth<br>
+  출시 여부를 판단할 지표는 <b>Phase 4 에서 실사용 데이터를 보고 정한다.</b> 지금 숫자를 못 박지 않는다.</figcaption>
   </figure>
-  <div class="stats">
-    <div class="stat"><span class="n">5종</span><span class="k">지표를 정의 문서 해시로 <b>frozen</b> 등록</span><span class="s">1단계 · 현재 2종</span></div>
-    <div class="stat"><span class="n">30건</span><span class="k">사용자 10명이 각 3건 이상, <b>30일 안에</b></span><span class="s">4단계</span></div>
-    <div class="stat"><span class="n">15건</span><span class="k">그중 구간 종료 후 <b>결과가 등록되는가</b></span><span class="s">출시 기준</span></div>
-    <div class="stat"><span class="n">1회</span><span class="k">외부 보안 감사 <b>수령·조치 완료</b></span><span class="s">출시 기준</span></div>
-  </div>
 </section>
 
 <!-- 로드맵 ② 단계 ───────────────────────────── -->
@@ -713,9 +705,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <div class="tblwrap"><table>
     <tr><th colspan="2">대응</th></tr>
-    <tr><td>업비트 Open API</td><td>8월 중 별도 신청. <b>GASOK 소관이 아니라 요청 목록에서 뺐다</b></td></tr>
-    <tr><td>Upbit Oracle · 보자기 문서</td><td>GASOK 에 요청한다 <span class="quiet">(20쪽)</span></td></tr>
-    <tr><td>셋 다 지연될 경우</td><td><b>1·3단계는 자체 개발이라 일정대로 간다</b> — 로드맵 전체가 멈추지 않는다</td></tr>
+    <tr><td>업비트 Open API</td><td>8월 중 별도 신청</td></tr>
+    <tr><td>Upbit Oracle · 보자기 문서</td><td>GASOK 에 <b>요청 예정</b> <span class="quiet">(20쪽)</span></td></tr>
   </table></div>
   <p class="src"><b>용어</b> — <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>up.id</b> GIWA 의 온체인 아이디</p>
 </section>
@@ -772,24 +763,24 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>B2B 조회 API</td><td><span class="quiet">리서치 기관 · 운용사</span><br>발행물에 검증 링크를 붙인다. 건당 과금 <span class="s-lab">3단계</span></td></tr>
     <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증한다. <b>개인정보를 직접 보관하지 않아도 된다</b> <span class="s-lab">확장 · 20쪽</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 그 기준은 <b>16쪽 출시 기준</b>에 수치로 적어 두었다.</p>
+  <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 판단이 쌓이는 속도를 보고 정한다.</p>
 </section>
 
 <!-- 14 ────────────────────────────────────── -->
 <section class="slide" data-key>
   <div class="tag">// 20 <b>확장 · 요청</b></div>
-  <h2>같은 구조로 더 증명할 수 있다</h2>
+  <h2>확장성이 더 <em>열려 있다</em></h2>
   <div class="cols">
     <div>
-      <h3>지금 증명하는 명제는 하나다</h3>
-      <p><em>「이 판단이 언제 있었고 무엇을 말했는가」</em></p>
-      <p class="quiet">고정하고 나중에 확인하는 구조는 <b>명제를 가리지 않는다.</b></p>
+      <h3>왜 확장이 되는가</h3>
+      <p>POI 가 하는 일은 <em>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인한다」</em> 이다.</p>
+      <p class="quiet">지금 고정하는 내용은 <b>투자 판단</b> 하나다. 그런데 컨트랙트는 <b>그 내용이 무엇인지 보지 않는다</b> — 해시와 구간, 산술만 검사한다. <b>고정할 내용만 바꾸면 다른 것도 증명된다.</b></p>
       <div class="tblwrap"><table>
-        <tr><td>성과 증명</td><td>원금·거래내역 없이 「12개월 이상 · 수익률 X% 이상」 <span class="s-lab">2단계의 다음 칸</span></td></tr>
-        <tr><td>자금 보유</td><td>잔액 없이 「적격 자금 N원 이상」 <span class="s-lab">ZK 필요</span></td></tr>
-        <tr><td>적격투자자</td><td>자산 규모 없이 「이 상품의 요건 충족」 <span class="s-lab">토큰증권 2027-02-04 시행</span></td></tr>
+        <tr><td>투자 성과</td><td>원금과 거래내역을 공개하지 않고 <b>「12개월 이상 투자했고 수익률이 X% 이상이다」</b>만 증명한다 <span class="quiet">— 거래소 체결 내역을 연동하면 된다</span></td></tr>
+        <tr><td>자금 보유</td><td>잔액을 밝히지 않고 <b>「적격 자금 N원 이상 보유」</b>만 증명한다 <span class="quiet">— 도장 Verified Balance 는 잔고 값이 공개되므로</span> <span class="s-lab">보자기 활용</span></td></tr>
+        <tr><td>투자자 자격</td><td>자산 규모를 밝히지 않고 <b>「이 상품의 투자자 요건을 충족한다」</b>만 증명한다 <span class="quiet">— 발행사가 서류를 안 받아도 된다</span> <span class="s-lab">토큰증권 2027-02-04 시행</span></td></tr>
       </table></div>
-      <p class="quiet">POI 는 스테이블코인을 발행하지 않는다. 은행·증권사가 발행한 것에 <b>증명을 붙이는 쪽</b>으로 남는다 — 규제상으로도, 지금 하는 일로도.</p>
+      <p class="quiet">POI 는 스테이블코인을 발행하지 않는다. 은행·증권사가 발행한 것에 <b>증명을 붙이는 쪽</b>으로 남는다.</p>
     </div>
     <div>
       <h3>GASOK에 요청하는 것 — 둘</h3>
@@ -800,7 +791,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <p class="quiet">그 다음이 도장 스냅샷 주기, 그 다음이 Upbit Oracle 이다.</p>
     </div>
   </div>
-  <p class="lede eave"><strong>믿으라고 하지 않는다. 확인하라고 한다.</strong> 아래 두 링크로 지갑 없이 지금 확인된다.</p>
+  <p class="lede eave">아래 두 링크는 <strong>지갑 없이 지금 열린다.</strong> 이 덱의 주장은 전부 여기서 직접 확인할 수 있다.</p>
   <pre><a href="https://poi-static-production.up.railway.app" target="_blank" rel="noopener"><b>https://poi-static-production.up.railway.app</b></a>
 <a href="https://sepolia-explorer.giwa.io/address/0x0f25917176a405bb9022e5b417e0d57348b30f89" target="_blank" rel="noopener">sepolia-explorer.giwa.io/address/0x0f259171…b30f89</a></pre>
 </section>
