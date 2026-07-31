@@ -13,8 +13,8 @@
 
 | # | 문항 | 상태 | 제출물 |
 |---|---|---|---|
-| 1 | 팀명 | ✅ | **VESTAT** — 양식에 직접 입력 |
-| 2 | 대표자 | ✅ | **고보승** — 양식에 직접 입력 (연락처도 양식에만) |
+| 1 | 팀 이름 | ✅ | **VESTAT** |
+| 2 | 팀 이메일 | ✅ | `bo@vestat.io` — 폼 문항은 대표자가 아니라 이메일이다 |
 | 3 | 팀 소개 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1zj_O--O6fufC3i7lTys3rX69sJugXiLe/view?usp=sharing) · 2쪽 — 익명 접근·해시 대조 완료 |
 | 4 | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · 432자 |
 | 5 | 트랙 선택 | ✅ | Track 03 |

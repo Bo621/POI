@@ -24,7 +24,8 @@
 
 | # | 문항 | 상태 | 제출물 / 남은 일 |
 |---|---|---|---|
-| 1–2 | 팀명 · 대표자 | ✅ | **VESTAT** · **고보승** — 양식에 직접 입력 |
+| 1 | 팀 이름 | ✅ | **VESTAT** |
+| 2 | 팀 이메일 | ✅ | `bo@vestat.io` — 제출 전 확인 |
 | **3** | 팀 소개 (링크) | ✅ | [Drive](https://drive.google.com/file/d/1zj_O--O6fufC3i7lTys3rX69sJugXiLe/view?usp=sharing) — 익명 접근 확인 |
 | **4** | 지원 동기 (500자) | ✅ | [FORM_ANSWERS.md](FORM_ANSWERS.md) · **432자** |
 | **5** | 트랙 선택 | ✅ | Track 03 GIWA-NATIVE IDEAS |
