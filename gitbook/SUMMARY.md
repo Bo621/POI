@@ -42,6 +42,7 @@
 * [배포 상태표](limits/status.md)
 * [하지 못한 것](limits/not-yet.md)
 * [로드맵](limits/roadmap.md)
+* [확장 경로](limits/expansion.md)
 
 ## 부록
 * [용어집](appendix/glossary.md)
