@@ -2,9 +2,25 @@
 
 **투자 판단을 결과가 나오기 전에 고정하고, 누구나 나중에 검증한다.**
 
-> 모르는 말이 나오면 [용어집](appendix/glossary.md)에 한 줄씩 풀어 두었습니다.
-
 GASOK 2차 제출 · **GIWA-Native** 트랙 · 2026-07
+
+## 10분에 훑는 경로
+
+처음 오셨다면 이 순서를 권합니다.
+
+| | 문서 | 무엇에 답하나 |
+|---|---|---|
+| 1 | [무엇을 하는 제품인가](intro/what.md) · [판단은 남지 않는다](problem/no-record.md) | 무슨 문제인가 |
+| 2 | [시장과 규제](problem/market.md) | 그 문제가 실재하는가 |
+| 3 | [누가 쓰는가](problem/who.md) | 누가 왜 쓰는가 |
+| 4 | [신뢰 경계](problem/trust-boundary.md) · [무엇이 증명되나](problem/what-is-proven.md) | **무엇을 보장하고 무엇을 안 하는가** |
+| 5 | [배포 상태표](limits/status.md) · [화면](usage/screens.md) | 지금 실제로 되는 것 |
+| 6 | [5분 만에 직접 확인하기](intro/verify-in-5-min.md) | 직접 재현해 보기 |
+| 7 | [비용](giwa/cost.md) · [다른 체인은 왜 아닌가](giwa/why-not-elsewhere.md) | 왜 GIWA 인가 |
+| 8 | [로드맵](limits/roadmap.md) · [팀](team.md) | 앞으로 5개월과 누가 하는가 |
+| 9 | [하지 못한 것](limits/not-yet.md) | 안 되는 것 |
+
+모르는 말이 나오면 [용어집](appendix/glossary.md)에 한 줄씩 풀어 두었습니다.
 
 ## 한 문단
 

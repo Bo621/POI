@@ -4,6 +4,7 @@
 
 ## 시작하기
 * [무엇을 하는 제품인가](intro/what.md)
+* [팀](team.md)
 * [5분 만에 직접 확인하기](intro/verify-in-5-min.md)
 * [배포된 주소와 UID](intro/deployed.md)
 
