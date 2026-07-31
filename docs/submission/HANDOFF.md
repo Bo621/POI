@@ -14,7 +14,7 @@
 ## 1. 지금 당장 해야 할 것
 
 **없다.** 문항 1~12 값이 확정됐고 Drive 업로드본도 로컬 PDF 와 해시가 일치한다
-(팀 소개 `86cbc8ad…` 2쪽). **피치덱은 20쪽으로 교체해야 한다** — 해시는 `submit/latest/SHA256SUMS.txt` 참조.
+(팀 소개 `86cbc8ad…` 2쪽). **Drive 교체 완료** — 2026-07-31 쿠키 없이 받아 2/2 해시 일치를 확인했다.
 
 ```
 붙여넣을 원문   submit/latest/FORM_TEXT.txt
@@ -49,7 +49,7 @@ Production Phase 선발 시 코드베이스 접근 권한을 요청하며, 데�
 | 4 지원 동기 | 432자 |
 | 5 트랙 | Track 03 GIWA-NATIVE IDEAS |
 | 6 한 줄 요약 | 35자 |
-| 7 피치덱 | Drive 링크 (20쪽) — **교체 대기** |
+| 7 피치덱 | Drive 링크 (20쪽) — 해시 대조 완료 |
 | 8 프로젝트 | `https://poi-static-production.up.railway.app` |
 | 9 컨트랙트 | 리졸버 4종 익스플로러 링크 |
 | 10 기술 문서 | `https://vestat.gitbook.io/poi` |
