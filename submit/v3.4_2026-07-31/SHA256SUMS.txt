@@ -1,0 +1,3 @@
+10fcba5d90fbb49fe0157a162ece2fbfb56fbab1e99a56d10923baa92dd1402f  FORM_TEXT.txt
+b6a7f2dd12549276afb034a9e7c4a0a76bbed5d1714d8ab6735009d27aaf99f5  POI_pitchdeck_v3.4_2026-07-31.pdf
+86cbc8ad66e56c7f8834edccbbef102ef0e825f37646e15e84e666dfe600163d  POI_team_v3.4_2026-07-31.pdf
