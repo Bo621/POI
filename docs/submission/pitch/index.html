@@ -489,9 +489,9 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>EAS 프리디플로이</td><td><span class="quiet">Ethereum Attestation Service — 증명 기록 표준. GIWA 기본 탑재</span><br>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
     <tr><td>도장 Verified Address</td><td><span class="quiet">도장 = GIWA 의 온체인 신원 인증</span><br>「누가 말했는가」의 근거 <span class="quiet">— 연동 완료. 받아 본 것은 파우셋 발급분, KYC 경로는 미검증</span></td></tr>
     <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
-    <tr><td>도장 Verified Balance</td><td><span class="quiet">머클 증명 = 전체 공개 없이 「그 안에 있다」만 증명</span><br>잔고를 밝히지 않고 보유를 증명 <span class="s-lab">(아직 쓰지 않음)</span></td></tr>
+    <tr><td>도장 Verified Balance</td><td><span class="quiet">머클 증명 = 남의 원장은 가린 채 「그 안에 있다」만 증명</span><br>「그때 무엇을 들고 있었나」의 근거 <span class="s-lab">(미사용 · 잔고 값은 공개)</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가는 연동했고, 그때 무엇을 들고 있었는가는 Verified Balance 로 붙일 수 있다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, GIWA 의 <strong>보자기</strong>가 공개되면 스키마를 바꾸지 않고 얹을 수 있다.</p>
+  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가는 연동했고, 무엇을 들고 있었는가는 Verified Balance 로 붙는다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, <strong>보자기</strong>가 공개되면 <strong>술어를 숨기는 경로</strong>가 열린다 — 증명 검증 설계는 따로 필요하다.</p>
 </section>
 
 <!-- 8 ─────────────────────────────────────── -->
@@ -654,10 +654,10 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>2단계 <span class="quiet">9월</span></td><td><span class="hot">실행 정합성</span> — 「말한 대로 했나」. 체결 내역과 결정을 대조한다</td><td class="hot">거래소 Open API 읽기 권한 <span class="quiet">(업비트에 요청할 것 — GASOK 소관 아님)</span></td></tr>
     <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">(GASOK 에 요청 — 19쪽)</span></td></tr>
     <tr><td>3단계 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">없음 — 자체 구현</td></tr>
-    <tr><td>4단계 <span class="quiet">이후</span></td><td>ZK 술어 — 잔고·포지션을 밝히지 않고 조건 충족만 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(GASOK 에 요청 — 19쪽)</span></td></tr>
+    <tr><td>4단계 <span class="quiet">이후</span></td><td>ZK 술어 — 술어를 숨긴 채 사전 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(GASOK 에 요청 — 19쪽)</span></td></tr>
   </table></div>
   <p class="lede eave">검증된 판단이 쌓이면 <strong>그 위에 제품이 올라간다.</strong> 배포된 컨트랙트를 <em>읽기만</em> 하면 되는 것들이다 — 새 온체인 구조가 필요 없다는 뜻이지, <strong>만들었다는 뜻이 아니다.</strong></p>
-  <p class="src"><b>용어</b> — <b>up.id</b> GIWA 의 온체인 아이디 · <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>ZK 술어</b> 값을 밝히지 않고 「조건을 만족한다」만 증명하는 방식<br><br><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 잔고를 밝히지 않고 도장 Verified Balance 머클 증명으로 자격만 대는 <b>보유 증명 커뮤니티</b> · 리서치 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
+  <p class="src"><b>용어</b> — <b>up.id</b> GIWA 의 온체인 아이디 · <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>ZK 술어</b> 값을 밝히지 않고 「조건을 만족한다」만 증명하는 방식<br><br><b>무엇이 가능해지나 (전부 미구현)</b> — 검증된 판단이 흐르는 <b>피드</b> · 「<code>MATCH</code> N건 이상」인 사람만 보는 <b>조건부 열람</b> · 검증된 보유량으로 자격을 가르는 <b>보유 증명 커뮤니티</b> · 리서치 발행물에 검증 링크를 붙이는 <b>B2B</b></p>
 </section>
 
 <!-- 12 ────────────────────────────────────── -->
