@@ -647,9 +647,9 @@ body[data-path] .slide:not([data-key]){display:none!important}
 <!-- 로드맵 ─────────────────────────────────── -->
 <section class="slide">
   <div class="tag">// 16 <b>로드맵</b></div>
-  <h2>무엇으로 끝났다고 하는가</h2>
+  <h2>5개월 일정과 <em>출시 판단 기준</em></h2>
   <figure>
-  <svg viewBox="0 0 900 224" role="img" aria-label="0단계부터 5단계까지의 로드맵과 출시 판단 게이트">
+  <svg viewBox="0 0 900 224" role="img" aria-label="0단계부터 5단계까지의 5개월 일정과 출시 판단 기준">
     <text class="s-lab" x="40" y="24">2026</text>
     <line class="s-line" x1="40" y1="38" x2="860" y2="38"/>
     <g><text class="s-lab" x="106" y="60" text-anchor="middle">~7/31</text>
@@ -686,32 +686,37 @@ body[data-path] .slide:not([data-key]){display:none!important}
        <text class="s-lab" x="793" y="157" text-anchor="middle">출시 판단</text></g>
 
     <path d="M727 70 L727 186" class="s-line" stroke="var(--gold)" stroke-dasharray="3 5"/>
-    <text class="s-lab" x="719" y="200" text-anchor="end" fill="var(--gold)">게이트 — 아래 수치를 넘어야 올린다</text>
+    <text class="s-lab" x="719" y="200" text-anchor="end" fill="var(--gold)">출시 기준 — 아래 수치를 넘어야 올린다</text>
   </svg>
   <figcaption><b>GASOK 일정 참조</b> — Phase 3 Productize(8–9월) · <b>데모데이 KBW 10월</b> · Phase 4 Growth(KPI)<br>
-  <b>게이트 미달 시</b> — 출시 보류 · 사유 공개. 등록률 미달 = 미발행 노출이 이득이 아니라 위협으로 작동 → 설계 재검토</figcaption>
+  <b>기준 미달 시</b> — 출시 보류 · 사유 공개. 등록률 미달 = 미발행 노출이 이득이 아니라 위협으로 작동 → 설계 재검토</figcaption>
   </figure>
   <div class="stats">
     <div class="stat"><span class="n">5종</span><span class="k">지표를 정의 문서 해시로 <b>frozen</b> 등록</span><span class="s">1단계 · 현재 2종</span></div>
     <div class="stat"><span class="n">30건</span><span class="k">사용자 10명이 각 3건 이상, <b>30일 안에</b></span><span class="s">4단계</span></div>
-    <div class="stat"><span class="n">15건</span><span class="k">그중 구간 종료 후 <b>결과가 등록되는가</b></span><span class="s">5단계 게이트</span></div>
-    <div class="stat"><span class="n">1회</span><span class="k">외부 보안 감사 <b>수령·조치 완료</b></span><span class="s">5단계 게이트</span></div>
+    <div class="stat"><span class="n">15건</span><span class="k">그중 구간 종료 후 <b>결과가 등록되는가</b></span><span class="s">출시 기준</span></div>
+    <div class="stat"><span class="n">1회</span><span class="k">외부 보안 감사 <b>수령·조치 완료</b></span><span class="s">출시 기준</span></div>
   </div>
 </section>
 
 <!-- 로드맵 ② 단계 ───────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 17 <b>무엇에 의존하나</b></div>
-  <h2>어디서 <em>남의 열쇠</em>가 필요한가</h2>
+  <div class="tag">// 17 <b>외부 협조</b></div>
+  <h2>직접 만들 것과 <em>요청할 것</em></h2>
   <div class="tblwrap"><table>
-    <tr><th>단계</th><th>열리는 것</th><th>막고 있는 것</th></tr>
-    <tr><td>1단계 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 크로스체인 해석</td><td class="no">없음 — 자체 구현</td></tr>
-    <tr><td>2단계 <span class="quiet">9월</span></td><td><span class="hot">실행 정합성</span> — 「말한 대로 했나」. 체결 내역과 결정을 대조한다</td><td class="hot">거래소 Open API 읽기 권한 <span class="quiet">(업비트에 요청할 것 — GASOK 소관 아님)</span></td></tr>
-    <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">(GASOK 에 요청 — 20쪽)</span></td></tr>
-    <tr><td>3단계 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">없음 — 자체 구현</td></tr>
-    <tr><td>4단계 <span class="quiet">이후</span></td><td>ZK 술어 — 술어를 숨긴 채 사전 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">(GASOK 에 요청 — 20쪽)</span></td></tr>
+    <tr><th>단계</th><th>해야 할 일</th><th>필요한 외부 협조</th></tr>
+    <tr><td>1단계 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 를 다른 체인에서도 읽기</td><td class="no">자체 개발</td></tr>
+    <tr><td>2단계 <span class="quiet">9월</span></td><td><span class="hot">체결 내역과 결정을 대조</span> — 「말한 대로 했나」</td><td class="hot">업비트 Open API 읽기 권한 <span class="quiet">— 업비트에 별도 신청</span></td></tr>
+    <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">— GASOK 요청 (20쪽)</span></td></tr>
+    <tr><td>3단계 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">자체 개발</td></tr>
+    <tr><td>4단계 <span class="quiet">이후</span></td><td>조건을 숨긴 채 미리 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">— GASOK 요청 (20쪽)</span></td></tr>
   </table></div>
-  <p class="lede eave">위 다섯 줄 중 <strong>둘은 우리가 못 연다.</strong> 하나는 업비트, 둘은 GASOK 쪽이다 — <em>그래서 20쪽의 요청이 두 건이다.</em></p>
+  <div class="tblwrap"><table>
+    <tr><th colspan="2">대응</th></tr>
+    <tr><td>업비트 Open API</td><td>8월 중 별도 신청. <b>GASOK 소관이 아니라 요청 목록에서 뺐다</b></td></tr>
+    <tr><td>Upbit Oracle · 보자기 문서</td><td>GASOK 에 요청한다 <span class="quiet">(20쪽)</span></td></tr>
+    <tr><td>셋 다 지연될 경우</td><td><b>1·3단계는 자체 개발이라 일정대로 간다</b> — 로드맵 전체가 멈추지 않는다</td></tr>
+  </table></div>
   <p class="src"><b>용어</b> — <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>up.id</b> GIWA 의 온체인 아이디</p>
 </section>
 
@@ -767,7 +772,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>B2B 조회 API</td><td><span class="quiet">리서치 기관 · 운용사</span><br>발행물에 검증 링크를 붙인다. 건당 과금 <span class="s-lab">3단계</span></td></tr>
     <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증한다. <b>개인정보를 직접 보관하지 않아도 된다</b> <span class="s-lab">확장 · 20쪽</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 그 기준은 <b>16쪽 게이트</b>에 수치로 적어 두었다.</p>
+  <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 그 기준은 <b>16쪽 출시 기준</b>에 수치로 적어 두었다.</p>
 </section>
 
 <!-- 14 ────────────────────────────────────── -->
