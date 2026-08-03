@@ -494,24 +494,49 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가는 연동했고, 무엇을 들고 있었는가는 Verified Balance 로 붙는다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, <strong>보자기</strong>가 공개되면 <strong>술어를 숨기는 경로</strong>가 열린다 — 증명 검증 설계는 따로 필요하다.</p>
 </section>
 
-<!-- 8 ─────────────────────────────────────── -->
+<!-- 경쟁 지형 ──────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// 10 <b>경쟁</b></div>
-  <h2>진짜 대안은 “EAS로 직접 만드는 것”</h2>
-  <div class="tblwrap">  <table>
-    <tr><th></th><th>인간지표 <span class="quiet">국내</span></th><th>TipRanks <span class="quiet">해외</span></th><th>EAS 직접 구축</th><th>POI</th></tr>
-    <tr><td>방식</td><td class="no">제3자 관찰</td><td class="no">제3자 관찰</td><td>—</td><td class="hot">본인이 사전 고정</td></tr>
-    <tr><td>기준을 누가 정하나</td><td class="no">관찰자<br><span class="quiet">발언일 +1거래일 종가</span></td><td class="no">관찰자</td><td>설계자</td><td class="hot">본인이 커밋 전에</td></tr>
-    <tr><td>누가 들어가나</td><td class="no">관찰자가 고른 19명</td><td class="no">추적 가능한 매체만</td><td class="no">—</td><td class="hot">누구나</td></tr>
-    <tr><td>관측 구간 소급 차단</td><td class="no">✗</td><td class="no">✗</td><td>직접 설계해야</td><td class="yes">✓ I4</td></tr>
-    <tr><td>판정 주체</td><td class="no">운영자</td><td class="no">운영자</td><td>설계자</td><td class="hot">컨트랙트 I17</td></tr>
-    <tr><td>미발행 노출 · 이의</td><td class="no">✗</td><td class="no">✗</td><td>직접 설계해야</td><td class="yes">✓</td></tr>
-    <tr><td>성과 랭킹</td><td class="yes">✓ 핵심</td><td class="yes">✓ 핵심</td><td class="no">자유</td><td class="hot">✗ 의도적 배제</td></tr>
+  <div class="tag">// <b>경쟁 지형</b></div>
+  <h2>다들 <em>사후에 관찰</em>한다</h2>
+  <div class="tblwrap"><table>
+    <tr><th></th><th>무엇을 재나</th><th>방식</th><th>규모</th></tr>
+    <tr><td><b>TipRanks</b> <span class="quiet">해외</span></td><td>애널리스트 정확도</td><td class="no">공개 의견을 <b>긁는다</b> — 사후 관찰</td><td>ARR $20~30M<br><span class="quiet">2024년 $200M 인수</span></td></tr>
+    <tr><td><b>Kaito</b> <span class="quiet">크립토</span></td><td>관심도(mindshare)</td><td class="no">X API 의존 → <b>2026-01 차단으로 주력 종료</b></td><td>—</td></tr>
+    <tr><td><b>Cookie3</b> <span class="quiet">크립토</span></td><td>온체인 어트리뷰션</td><td class="no">캠페인 성과 — <b>정확도는 안 잰다</b></td><td>—</td></tr>
+    <tr><td><b>인간지표</b> <span class="quiet">국내</span></td><td>유튜버 발언</td><td class="no">제3자 관찰 · 스스로 <b>「가상·재미」</b>라 밝힘</td><td>678건<br><span class="quiet">사업 아님</span></td></tr>
+    <tr><td class="hot"><b>POI</b></td><td class="hot">본인이 사전에 고정한 판단</td><td class="hot">본인 커밋 · <b>컨트랙트 판정</b></td><td>—</td></tr>
   </table></div>
-  <p class="lede eave"><strong>카테고리는 이미 검증됐다.</strong> TipRanks 는 전문가 96,000명+ 를 2009년부터, 국내 <strong>인간지표</strong>는 경제 유튜버 19명·668건을 검증한다. <em>수요는 실재한다.</em></p>
-  <p class="lede">다만 둘 다 <strong>밖에서 관찰</strong>한다. 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없다.</strong> 인간지표는 스스로 결과가 <em>「가상·재미」</em>라고 밝힌다.</p>
-  <p class="lede"><strong>EAS로 직접 만들면 이 전부를 구현할 수 있다.</strong> 차별점은 기술 장벽이 아니라 <em>어떤 불변식을 고르고 무엇을 금지했는가</em>다 — 랭킹을 넣는 순간 목적이 무너진다.</p>
+  <p class="lede eave"><strong>카테고리는 이미 사업이 됐다</strong> — TipRanks 가 증명했다. <em>그런데 전부 밖에서 본다.</em> 밖에서 보면 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없고, 무엇보다 지운 사람과 안 지운 사람을 구별하지 못한다.</strong></p>
 </section>
+
+<!-- 차별점 ──────────────────────────────────── -->
+<section class="slide dense">
+  <div class="tag">// <b>차별점</b></div>
+  <h2>사전에 고정하고, <em>플랫폼에 기대지 않는다</em></h2>
+  <div class="cols">
+    <div>
+      <h3>① 사후 관찰 → 사전 고정</h3>
+      <p class="quiet">관찰형은 「이 사람이 그때 뭐라고 했나」를 <b>나중에 주워 담는다.</b> 지운 글은 없는 글이 되고, 기준은 관찰자가 정한다.</p>
+      <p>POI 는 <strong>본인이 결과를 알기 전에 스스로 고정</strong>한다. 무엇을 볼지도 그때 선언하고, 나중에 바꿀 수 없다.</p>
+      <h3>② 플랫폼 비의존</h3>
+      <p class="quiet">Kaito 는 2026년 1월 <b>X 가 API 접근을 차단</b>하면서 주력 제품 Yaps 를 종료했다. 남의 플랫폼 위에 세운 측정은 그 플랫폼이 문을 닫으면 같이 닫힌다.</p>
+      <p><strong>POI 에는 끊길 API 가 없다.</strong> 사용자가 스스로 온체인에 커밋하고, 판정은 컨트랙트가 한다.</p>
+    </div>
+    <div>
+      <h3>정직하게 — 기술 장벽은 낮다</h3>
+      <p class="quiet">같은 것을 만드는 데 특별한 기술이 필요하지 않다. 차별은 기술이 아니라 <b>무엇을 금지했는가</b>에 있다.</p>
+      <div class="tblwrap"><table>
+        <tr><td>성과 랭킹</td><td class="hot">✗ 의도적 배제</td></tr>
+        <tr><td>수익률 공개</td><td class="hot">✗</td></tr>
+        <tr><td>배지 개수 정렬</td><td class="hot">✗</td></tr>
+      </table></div>
+      <p class="quiet">완전성을 보장하지 못하는데 순위를 세우면 <b>순위 자체가 거짓말</b>이 된다. 랭킹을 넣는 순간 목적이 무너지므로, 넣을 수 있어도 넣지 않는다.</p>
+      <h3>해자는 시간이 만든다</h3>
+      <p class="quiet">기록은 <b>쌓인 뒤에 대체 불가</b>해진다. 「3년치 사전 커밋 이력」은 나중에 만들 수 없다. <b>초기에는 해자가 없다</b> — 그래서 공급 확보가 첫 6개월의 유일한 목표다.</p>
+    </div>
+  </div>
+</section>
+
 
 <!-- 9 ─────────────────────────────────────── -->
 <section class="slide" data-key>
