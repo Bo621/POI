@@ -140,6 +140,25 @@ pre i{color:var(--seal);font-style:normal}
 .cover .claim{margin-top:clamp(1.6rem,3vw,2.6rem);font:400 clamp(1.05rem,2.1vw,1.7rem)/1.5 var(--body);max-width:26ch;color:var(--ink)}
 
 a{color:var(--seal);text-decoration-thickness:1px;text-underline-offset:3px}
+
+/* ── 표지 목차 ─────────────────────────────── */
+.toc{position:absolute;right:clamp(2rem,7vw,9rem);top:50%;transform:translateY(-50%);
+  width:min(28rem,34vw);display:flex;flex-direction:column;gap:.1rem}
+@media(max-width:1100px){.toc{position:static;transform:none;width:auto;max-width:26rem;margin-top:clamp(1.4rem,2.6vw,2rem)}}
+.toc div{display:flex;align-items:baseline;gap:.8rem;padding:.5rem 0;border-bottom:1px solid var(--rule);font-size:.92rem;color:var(--ink-soft)}
+.toc span{width:2.2rem;flex:none;color:var(--seal);font-weight:700;font-size:.82rem}
+.toc b{margin-left:auto;color:var(--ink-faint);font-weight:600;font-size:.82rem}
+
+/* ── 개조식 ────────────────────────────────── */
+.bul{margin-top:clamp(1rem,2vw,1.5rem);max-width:min(100%,68rem);display:flex;flex-direction:column;gap:.62rem}
+.bul li{list-style:none;position:relative;padding-left:1.05rem;line-height:1.62;color:var(--ink)}
+.bul li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--seal)}
+.bul li b{font-weight:700}
+.bul li .d{display:block;margin-top:.18rem;color:var(--ink-soft);font-size:.9em;line-height:1.6}
+.bul li .d b{color:var(--ink);font-weight:600}
+.note{margin-top:clamp(.9rem,1.8vw,1.3rem);padding:.75rem .95rem;background:var(--seal-dim);border-radius:10px;
+  color:var(--ink-soft);font-size:.87em;line-height:1.6;max-width:min(100%,68rem)}
+.note b{color:var(--seal-deep);font-weight:700}
 .tblwrap{max-width:100%}
 /* 표가 많은 슬라이드만 밀도를 올린다 (p10 왜GIWA② · p11 경쟁) */
 .slide.dense table{font-size:.87em;margin-top:clamp(.9rem,1.8vw,1.4rem)}
@@ -288,13 +307,20 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <div class="sub">Proof of Insight</div>
   <p class="claim">투자 판단을 <em>결과가 나오기 전에</em> 온체인에 고정하고, 누구나 나중에 검증한다.</p>
   <div class="meta">테스트넷에서 전 경로가 동작합니다 · 지갑 없이 열립니다<br>2026.08</div>
+  <div class="toc">
+    <div><span>요약</span>한 장으로 보는 POI<b>02</b></div>
+    <div><span>Ⅰ</span>문제와 시장<b>03</b></div>
+    <div><span>Ⅱ</span>해법<b>07</b></div>
+    <div><span>Ⅲ</span>경쟁<b>10</b></div>
+    <div><span>Ⅳ</span>제품<b>12</b></div>
+    <div><span>Ⅴ</span>사업모델<b>18</b></div>
+    <div><span>Ⅵ</span>팀과 실행<b>21</b></div>
+  </div>
 </section>
-
-<!-- 2 ── 한 장으로 보는 POI ───────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">02 <b>한 장으로 보는 POI</b></div>
+  <div class="tag">요약 <b>한 장으로 보는 POI</b></div>
   <h2>판단을 <em>결과가 나오기 전에</em> 잠근다</h2>
-  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제한다. <span class="quiet">관측값 자체의 진실성은 보장하지 않는다 — 7쪽 「무엇이 강제되나」.</span></p>
+  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제한다. <span class="quiet">관측값 자체의 진실성은 보장하지 않는다 — 8쪽 「무엇을 못 하게 만드나」.</span></p>
   <div class="steps">
     <div class="step" data-n="STEP 01">
       <h4>판단을 적고 잠근다</h4>
@@ -314,10 +340,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="src"><b>이 예시는 지금 체인에 있는 실제 기록이다.</b> 결정 <code>0xe7fe5923…fc2da0</code> · 정산 <code>0x29da3820…69cb8d</code> — GIWA Sepolia 에서 지갑 없이 열어 볼 수 있다.</p>
 </section>
-
-<!-- 3 ─────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">03 <b>문제</b></div>
+  <div class="tag">Ⅰ. 문제와 시장 <b>문제</b></div>
   <h2>남는 건 거래 기록이지 <em>판단</em>이 아니다</h2>
   <p class="lede">거래는 거래소에 남고 수익률도 남는다. <strong>“왜 그렇게 판단했는가”는 아무 데도 남지 않는다.</strong></p>
   <p class="lede">그래서 결과를 본 뒤에 이렇게 말할 수 있다 — <em>“나는 그럴 줄 알았다.”</em></p>
@@ -327,10 +351,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>리더보드</td><td class="no">성과만 보고 판단은 안 본다</td></tr>
   </table></div>
 </section>
-
-<!-- 4 ── 시장 ────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">04 <b>시장</b></div>
+  <div class="tag">Ⅰ. 문제와 시장 <b>시장</b></div>
   <h2>신뢰는 개인에게 옮겨갔는데, <em>검증 수단은 없다</em></h2>
   <p class="lede">제도권 리서치를 떠난 투자자가 <strong>개인 발신자</strong>에게 옮겨갔다. 이건 한 나라의 현상이 아니다. 그리고 어디에서도 <strong>거기서 한 말이 맞았는지 확인할 방법이 없다.</strong></p>
   <div class="stats">
@@ -342,32 +364,41 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="lede" style="margin-top:1.4rem"><strong>규제는 이미 전 세계가 움직였다. 그런데 전부 사후 단속이다.</strong> 벌어진 뒤에 광고를 내리고 사람을 잡는다 — 2026년 4월 공동 단속에서만 광고 1,267건이 적발됐고 그중 66%가 이미 경고 목록에 오른 곳이었다. <em>말하기 전에 고정시키는 쪽은 비어 있다.</em></p>
   <p class="src"><b>출처</b> FINRA Foundation 2024 National Financial Capability Study · FINRA Foundation 「Finfluencer Followers and Social Media Scrollers」 2026.03 · FCA 2026.04.20 international week of action · 금융감독원 유사투자자문 민원 집계</p>
 </section>
-
-<!-- 5 ── 사용자 이야기 ────────────────────────── -->
+<section class="slide dense">
+  <div class="tag">Ⅰ. 문제와 시장 <b>시장 크기</b></div>
+  <h2>카테고리는 이미 <em>사업이 됐다</em></h2>
+  <div class="tblwrap"><table>
+    <tr><th>근거</th><th>수치</th><th>무엇을 뜻하나</th></tr>
+    <tr><td><b>Substack</b></td><td>유료 구독 <b>500만</b><br>작가 수익 <b>$450M/년</b></td><td>글로벌은 판단에 돈을 낸다. <b>최고가 4개 중 3개가 금융</b> — Citrini Research 연 $1,200</td></tr>
+    <tr><td><b>TipRanks</b></td><td>연매출 추정 <b>$20~30M</b><br>MAU 5,000만 · 2024.08 <b>$200M</b> 밸류 인수</td><td>「누가 맞히나」를 파는 회사가 실재한다. 수익은 <b>확인하는 쪽</b>에서 나온다 — 구독 + Nasdaq·Robinhood·Morgan Stanley</td></tr>
+    <tr><td><b>크립토 KOL</b></td><td class="hot">정확도를 재는 곳이 없다</td><td>Kaito 는 관심도, Cookie3 는 어트리뷰션을 잰다. <b>「이 사람 말이 맞았나」는 아무도 안 잰다</b></td></tr>
+  </table></div>
+  <p class="lede eave">빈칸은 하나다 — <strong>사전에 고정된 판단.</strong> 기존 서비스는 전부 <em>사후에 관찰</em>하고, 그래서 지운 사람과 안 지운 사람을 구별하지 못한다.</p>
+  <p class="src"><b>왜 국내가 아니라 글로벌인가</b> — 국내는 유료 뉴스레터 시장이 아직 얕고(롱블랙 월 4,900원), <b>거래소 약관이 서브파티 접근을 금지</b>해 실행 정합성이 열리지 않는다. 해외 거래소는 가능하다.<br><b>출처</b> — Substack 2025 지표 · Calcalist·Finance Magnates 2024.08(TipRanks 인수) · 매출은 <b>외부 추정치</b> · Kaito·Cookie3 공식 문서</p>
+</section>
 <section class="slide">
-  <div class="tag">05 <b>사용자</b></div>
-  <h2>리서치를 쓰는 사람에게 <em>무엇이 달라지는가</em></h2>
-  <p class="lede">유료 뉴스레터를 운영하는 <strong>A</strong>. 구독자는 “이 사람 말이 맞았나”를 묻고, A 는 증명할 방법이 없다.</p>
-  <div class="ba">
-    <div class="b4">
-      <h4>지금</h4>
-      <p>3월에 “반도체 조정 온다”고 썼다. <strong>맞았다.</strong> 그런데 구독자에게 보여줄 게 지난 메일 캡처뿐이다.</p>
-      <p>경쟁자는 틀린 회차를 조용히 지운다. <strong>지운 사람과 안 지운 사람이 화면에서 구별되지 않는다.</strong></p>
-      <p>새 구독자는 결국 “요즘 잘 맞힌다더라”는 <strong>평판</strong>으로 고른다.</p>
+  <div class="tag">Ⅰ. 문제와 시장 <b>타겟 · 시장</b></div>
+  <h2>누구를 <em>먼저 만나나</em></h2>
+  <div class="cols">
+    <div>
+      <h3>첫 대상은 영어권 크립토 KOL 이다</h3>
+      <p><strong>팔로워 1만~10만 중견층.</strong> 초대형은 이미 평판이 있어 증명이 필요 없고 연락도 닿지 않는다. 신진은 대표성이 없다. <em>가운데가 평판을 쌓는 중이라 증명 수단이 실제로 필요하다.</em></p>
+      <p class="quiet">시장 규모와 규제 근거는 <b>4쪽</b>에, 왜 국내가 아닌지는 <b>5쪽</b>에 있다.</p>
     </div>
-    <div class="af">
-      <h4>POI 이후</h4>
-      <p>발행 전에 판단을 커밋한다. <strong>내용은 해시로만 올라가</strong> 미리 스포일러가 되지 않는다.</p>
-      <p>구간이 끝나면 결과를 등록한다. <strong>안 올리면 「기한초과」로 남는다</strong> — 골라 기록하는 것이 화면에 드러난다.</p>
-      <p>구독자에게 <strong>링크 하나</strong>를 준다. 제3자가 직접 대조하고, 틀렸다고 보면 <strong>이의를 온체인에 남긴다.</strong></p>
+    <div>
+      <h3>왜 이 사람들이 먼저인가</h3>
+      <p>세 조건이 이미 갖춰져 있다 — <strong>숫자와 기한이 있는 전망을 낸다.</strong> 지갑을 이미 쓴다. 그리고 <strong>영어권이라 거래소 약관이 막지 않는다.</strong></p>
+      <p class="quiet">선별 기준이 하나 더 있다 — <b>틀린 것도 지우지 않고 남기는 사람.</b> 지우는 사람은 애초에 이 제품을 쓰지 않는다.</p>
     </div>
   </div>
-  <p class="src">A 는 특정 인물이 아니라 <b>타겟을 설명하기 위한 인물상</b>이다. 실제 사용자 확보는 3개월 게이트에서 검증한다.<br><b>왜 이게 가능한 문제인가</b> — 자본시장연구원은 투자의견이 “주관적 기준에 따른 정성적 정보라 <b>사후적인 검증이나 비교가 매우 어렵다</b>”고 지적한다. 검증을 어렵게 만드는 것은 데이터가 아니라 <b>판단을 결과 뒤에 고칠 수 있는 구조</b>다.</p>
+  <div class="tblwrap"><table>
+    <tr><td>판단을 파는 쪽</td><td><span class="quiet">영어권 크립토 KOL · 유료 뉴스레터 · 리서치 작성자</span><br>이미 사후 검증 압력을 받고 있고, <b>자기를 구별할 반박 수단이 없다</b> <span class="s-lab">1차 · 지금</span></td></tr>
+    <tr><td>판단을 읽는 쪽</td><td><span class="quiet">유료 구독자 · 커뮤니티</span><br>「그때 뭐라고 했는지」를 <b>링크 하나로 직접 확인한다</b> <span class="s-lab">2차 · 3단계</span></td></tr>
+    <tr><td>판단을 사는 쪽</td><td><span class="quiet">Web3 프로젝트 · KOL 마케팅 에이전시 · 리서치 기관</span><br>섭외 전에 <b>이력을 확인한다.</b> 지금은 확인할 방법 자체가 없다 <span class="s-lab">3차 · 첫 수익원</span></td></tr>
+  </table></div>
 </section>
-
-<!-- 6 ─────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">06 <b>해법</b></div>
+  <div class="tag">Ⅱ. 해법 <b>해법</b></div>
   <h2>결과를 알기 전에 잠근다</h2>
   <figure>
   <svg viewBox="0 0 900 210" role="img" aria-label="t0 커밋, t1 관측 구간 종료, t2 결과 등록으로 이어지는 타임라인">
@@ -399,10 +430,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <figcaption>결정은 철회할 수 없다. 정산과 이의는 정정할 수 있고, 그 이력이 화면에 남는다.</figcaption>
   </figure>
 </section>
-
-<!-- 무엇이 강제되나 ────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">07 <b>무엇을 못 하게 만드나</b></div>
+  <div class="tag">Ⅱ. 해법 <b>무엇을 못 하게 만드나</b></div>
   <h2>무엇을 <em>못 하게 만들었나</em></h2>
   <div class="tblwrap"><table>
     <tr><th>막는 것</th><th>그래서 못 하는 일</th></tr>
@@ -424,36 +453,28 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="lede eave"><strong>보장하지 못하는 것을 숨기지 않는 것</strong>이 이 제품의 태도다. 화면의 모든 목록에 「조회된 것이 전부라는 보장은 없습니다」를 표시하고, <em>건수를 세지 않는다.</em></p>
 </section>
-
-<!-- 왜 GIWA ────────────────────────────────── -->
-<section class="slide dense">
-  <div class="tag">08 <b>왜 GIWA 위에 지었나</b></div>
-  <h2>비용이 <em>기록의 빈도</em>를 정한다</h2>
-  <div class="cols">
-    <div>
-      <h3>① 커밋 1건에 얼마인가</h3>
-      <div class="tblwrap"><table>
-        <tr><td>GIWA</td><td class="hot"><b>1.21원</b></td><td class="quiet">연 36건 = 44원</td></tr>
-        <tr><td>이더리움 L1</td><td>850원</td><td class="quiet">연 36건 = 30,600원</td></tr>
-      </table></div>
-      <p class="quiet">약 <b>702배</b> 차이다 (실측 · 영수증 기준). 커밋이 수천 원이면 사람들은 <b>중요한 판단만 가끔</b> 남긴다. 그러면 「판단을 반복해서 남기는가」라는 질문 자체를 물을 수 없다.</p>
-      <p><strong>비용이 빈도를 정하고, 빈도가 기록의 해상도를 정한다.</strong></p>
+<section class="slide">
+  <div class="tag">Ⅱ. 해법 <b>사용자</b></div>
+  <h2>리서치를 쓰는 사람에게 <em>무엇이 달라지는가</em></h2>
+  <p class="lede">유료 뉴스레터를 운영하는 <strong>A</strong>. 구독자는 “이 사람 말이 맞았나”를 묻고, A 는 증명할 방법이 없다.</p>
+  <div class="ba">
+    <div class="b4">
+      <h4>지금</h4>
+      <p>3월에 “반도체 조정 온다”고 썼다. <strong>맞았다.</strong> 그런데 구독자에게 보여줄 게 지난 메일 캡처뿐이다.</p>
+      <p>경쟁자는 틀린 회차를 조용히 지운다. <strong>지운 사람과 안 지운 사람이 화면에서 구별되지 않는다.</strong></p>
+      <p>새 구독자는 결국 “요즘 잘 맞힌다더라”는 <strong>평판</strong>으로 고른다.</p>
     </div>
-    <div>
-      <h3>② 새 신뢰 축을 세우지 않는다</h3>
-      <div class="tblwrap"><table>
-        <tr><td>증명 기록 표준</td><td>GIWA 에 <b>기본 탑재</b>된 EAS 를 그대로 쓴다<br><span class="quiet">스키마·발급·철회·참조를 재구현하지 않는다</span></td></tr>
-        <tr><td>신원</td><td>GIWA <b>도장</b>의 검증 지갑을 붙인다 <span class="s-lab">연동 완료</span><br><span class="quiet">받아 본 것은 파우셋 발급분 · KYC 경로는 미검증</span></td></tr>
-      </table></div>
-      <p class="quiet">「누가 말했는가」를 우리가 새로 인증하지 않는다. <b>이미 있는 인증 위에 얹는다.</b></p>
+    <div class="af">
+      <h4>POI 이후</h4>
+      <p>발행 전에 판단을 커밋한다. <strong>내용은 해시로만 올라가</strong> 미리 스포일러가 되지 않는다.</p>
+      <p>구간이 끝나면 결과를 등록한다. <strong>안 올리면 「기한초과」로 남는다</strong> — 골라 기록하는 것이 화면에 드러난다.</p>
+      <p>구독자에게 <strong>링크 하나</strong>를 준다. 제3자가 직접 대조하고, 틀렸다고 보면 <strong>이의를 온체인에 남긴다.</strong></p>
     </div>
   </div>
-  <p class="lede eave">GIWA 는 두나무가 만든 L2 다. <strong>업비트 사용자와 같은 생태계에서 시작할 수 있다는 것</strong>이, 판단을 남길 사람이 실제로 있는 곳에서 검증한다는 뜻이다.</p>
+  <p class="src">A 는 특정 인물이 아니라 <b>타겟을 설명하기 위한 인물상</b>이다. 실제 사용자 확보는 3개월 게이트에서 검증한다.<br><b>왜 이게 가능한 문제인가</b> — 자본시장연구원은 투자의견이 “주관적 기준에 따른 정성적 정보라 <b>사후적인 검증이나 비교가 매우 어렵다</b>”고 지적한다. 검증을 어렵게 만드는 것은 데이터가 아니라 <b>판단을 결과 뒤에 고칠 수 있는 구조</b>다.</p>
 </section>
-
-<!-- 경쟁 지형 ──────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">09 <b>경쟁 지형</b></div>
+  <div class="tag">Ⅲ. 경쟁 <b>경쟁 지형</b></div>
   <h2>지금 있는 서비스는 <em>어떻게 하나</em></h2>
   <div class="tblwrap"><table>
     <tr><th></th><th>무엇을 재나</th><th>방식</th><th>규모</th></tr>
@@ -466,10 +487,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <p class="lede eave"><strong>카테고리는 이미 사업이 됐다</strong> — TipRanks 가 증명했다. <em>그런데 전부 밖에서 본다.</em> 밖에서 보면 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없고, 무엇보다 지운 사람과 안 지운 사람을 구별하지 못한다.</strong></p>
 </section>
-
-<!-- 차별점 ──────────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">10 <b>차별점</b></div>
+  <div class="tag">Ⅲ. 경쟁 <b>차별점</b></div>
   <h2>사전에 고정하고, <em>플랫폼에 기대지 않는다</em></h2>
   <div class="cols">
     <div>
@@ -494,11 +513,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
     </div>
   </div>
 </section>
-
-
-<!-- 9 ─────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">11 <b>MVP 현황</b></div>
+  <div class="tag">Ⅳ. 제품 <b>MVP 현황</b></div>
   <h2>어디까지 만들어져 있나</h2>
   <div class="tblwrap">  <table>
     <tr><th>무엇이 되나</th><th>무엇으로 확인하나</th></tr>
@@ -511,10 +527,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <pre><a href="https://poi-static-production.up.railway.app" target="_blank" rel="noopener"><b>https://poi-static-production.up.railway.app</b></a>  <span style="color:var(--ink-faint)">← 지갑 없이 열립니다</span></pre>
 </section>
-
-<!-- 10 ────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">12 <b>실제 화면 ①</b></div>
+  <div class="tag">Ⅳ. 제품 <b>실제 화면 ①</b></div>
   <h2>결과를 안 올리면 <em>그대로 드러난다</em></h2>
   <p class="lede">예상 결과를 선언해 놓고 결과를 올리지 않으면 인장이 <em>「기한초과」</em>로 바뀐다. <strong>숨길 자리가 없다.</strong></p>
   <div class="shots">
@@ -544,10 +558,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="src"><b>지금 열립니다</b> — poi-static-production.up.railway.app · 결정 <code>0x3f592f21…e16938</code></p>
 </section>
-
-<!-- 실제 화면 ② ─────────────────────────────── -->
 <section class="slide">
-  <div class="tag">13 <b>실제 화면 ②</b></div>
+  <div class="tag">Ⅳ. 제품 <b>실제 화면 ②</b></div>
   <h2>제3자가 <em>이의를 온체인에</em> 남긴다</h2>
   <p class="lede">관측값이 틀렸다고 보면 누구나 이의를 발행한다. <strong>발행자가 지울 수 없다.</strong></p>
   <div class="shots-wide">
@@ -576,10 +588,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="src"><b>철회 이력도 남습니다</b> — 정산을 철회하고 정정하면 「이전 결과 등록(철회됨)」이 펼쳐진다. 결정 <code>0xb1e46283…683b21</code></p>
 </section>
-
-<!-- 무엇이 외부에 걸려 있나 ─────────────────── -->
 <section class="slide dense">
-  <div class="tag">14 <b>아직 안 되는 것</b></div>
+  <div class="tag">Ⅳ. 제품 <b>아직 안 되는 것</b></div>
   <h2>무엇이 <em>아직 안 되나</em></h2>
   <div class="tblwrap"><table>
     <tr><th></th><th>무엇을 증명하나</th><th>지금</th><th>무엇이 있어야 채워지나</th></tr>
@@ -601,10 +611,32 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="lede eave">①②는 <strong>남의 허락 없이 오늘 돌고 있다.</strong> ③이 안 열려도 제품은 「말한 것」까지 증명하는 형태로 남는다 — <em>로드맵 전체가 남의 손에 걸려 있지 않다.</em></p>
 </section>
-
-<!-- 로드맵 ─────────────────────────────────── -->
+<section class="slide dense">
+  <div class="tag">Ⅳ. 제품 <b>왜 GIWA 위에 지었나</b></div>
+  <h2>비용이 <em>기록의 빈도</em>를 정한다</h2>
+  <div class="cols">
+    <div>
+      <h3>① 커밋 1건에 얼마인가</h3>
+      <div class="tblwrap"><table>
+        <tr><td>GIWA</td><td class="hot"><b>1.21원</b></td><td class="quiet">연 36건 = 44원</td></tr>
+        <tr><td>이더리움 L1</td><td>850원</td><td class="quiet">연 36건 = 30,600원</td></tr>
+      </table></div>
+      <p class="quiet">약 <b>702배</b> 차이다 (실측 · 영수증 기준). 커밋이 수천 원이면 사람들은 <b>중요한 판단만 가끔</b> 남긴다. 그러면 「판단을 반복해서 남기는가」라는 질문 자체를 물을 수 없다.</p>
+      <p><strong>비용이 빈도를 정하고, 빈도가 기록의 해상도를 정한다.</strong></p>
+    </div>
+    <div>
+      <h3>② 새 신뢰 축을 세우지 않는다</h3>
+      <div class="tblwrap"><table>
+        <tr><td>증명 기록 표준</td><td>GIWA 에 <b>기본 탑재</b>된 EAS 를 그대로 쓴다<br><span class="quiet">스키마·발급·철회·참조를 재구현하지 않는다</span></td></tr>
+        <tr><td>신원</td><td>GIWA <b>도장</b>의 검증 지갑을 붙인다 <span class="s-lab">연동 완료</span><br><span class="quiet">받아 본 것은 파우셋 발급분 · KYC 경로는 미검증</span></td></tr>
+      </table></div>
+      <p class="quiet">「누가 말했는가」를 우리가 새로 인증하지 않는다. <b>이미 있는 인증 위에 얹는다.</b></p>
+    </div>
+  </div>
+  <p class="lede eave">GIWA 는 두나무가 만든 L2 다. <strong>업비트 사용자와 같은 생태계에서 시작할 수 있다는 것</strong>이, 판단을 남길 사람이 실제로 있는 곳에서 검증한다는 뜻이다.</p>
+</section>
 <section class="slide">
-  <div class="tag">15 <b>로드맵</b></div>
+  <div class="tag">Ⅳ. 제품 <b>로드맵</b></div>
   <h2>12개월 계획</h2>
   <figure>
   <svg viewBox="0 0 900 224" role="img" aria-label="0단계부터 5단계까지 12개월 일정과 각 단계의 의존 관계">
@@ -649,48 +681,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <b>출시 여부를 판단할 숫자는 지금 못 박지 않는다.</b> 4단계 30일 공개 실험의 실사용 데이터를 보고 정한다.</figcaption>
   </figure>
 </section>
-
-
-<!-- 12 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">16 <b>타겟 · 시장</b></div>
-  <h2>누구를 <em>먼저 만나나</em></h2>
-  <div class="cols">
-    <div>
-      <h3>첫 대상은 영어권 크립토 KOL 이다</h3>
-      <p><strong>팔로워 1만~10만 중견층.</strong> 초대형은 이미 평판이 있어 증명이 필요 없고 연락도 닿지 않는다. 신진은 대표성이 없다. <em>가운데가 평판을 쌓는 중이라 증명 수단이 실제로 필요하다.</em></p>
-      <p class="quiet">시장 규모와 규제 근거는 <b>4쪽</b>에, 왜 국내가 아닌지는 <b>17쪽</b>에 있다.</p>
-    </div>
-    <div>
-      <h3>왜 이 사람들이 먼저인가</h3>
-      <p>세 조건이 이미 갖춰져 있다 — <strong>숫자와 기한이 있는 전망을 낸다.</strong> 지갑을 이미 쓴다. 그리고 <strong>영어권이라 거래소 약관이 막지 않는다.</strong></p>
-      <p class="quiet">선별 기준이 하나 더 있다 — <b>틀린 것도 지우지 않고 남기는 사람.</b> 지우는 사람은 애초에 이 제품을 쓰지 않는다.</p>
-    </div>
-  </div>
-  <div class="tblwrap"><table>
-    <tr><td>판단을 파는 쪽</td><td><span class="quiet">영어권 크립토 KOL · 유료 뉴스레터 · 리서치 작성자</span><br>이미 사후 검증 압력을 받고 있고, <b>자기를 구별할 반박 수단이 없다</b> <span class="s-lab">1차 · 지금</span></td></tr>
-    <tr><td>판단을 읽는 쪽</td><td><span class="quiet">유료 구독자 · 커뮤니티</span><br>「그때 뭐라고 했는지」를 <b>링크 하나로 직접 확인한다</b> <span class="s-lab">2차 · 3단계</span></td></tr>
-    <tr><td>판단을 사는 쪽</td><td><span class="quiet">Web3 프로젝트 · KOL 마케팅 에이전시 · 리서치 기관</span><br>섭외 전에 <b>이력을 확인한다.</b> 지금은 확인할 방법 자체가 없다 <span class="s-lab">3차 · 첫 수익원</span></td></tr>
-  </table></div>
-</section>
-
-<!-- 시장 크기 ─────────────────────────────── -->
-<section class="slide dense">
-  <div class="tag">17 시장 <b>크기</b></div>
-  <h2>카테고리는 이미 <em>사업이 됐다</em></h2>
-  <div class="tblwrap"><table>
-    <tr><th>근거</th><th>수치</th><th>무엇을 뜻하나</th></tr>
-    <tr><td><b>Substack</b></td><td>유료 구독 <b>500만</b><br>작가 수익 <b>$450M/년</b></td><td>글로벌은 판단에 돈을 낸다. <b>최고가 4개 중 3개가 금융</b> — Citrini Research 연 $1,200</td></tr>
-    <tr><td><b>TipRanks</b></td><td>연매출 추정 <b>$20~30M</b><br>MAU 5,000만 · 2024.08 <b>$200M</b> 밸류 인수</td><td>「누가 맞히나」를 파는 회사가 실재한다. 수익은 <b>확인하는 쪽</b>에서 나온다 — 구독 + Nasdaq·Robinhood·Morgan Stanley</td></tr>
-    <tr><td><b>크립토 KOL</b></td><td class="hot">정확도를 재는 곳이 없다</td><td>Kaito 는 관심도, Cookie3 는 어트리뷰션을 잰다. <b>「이 사람 말이 맞았나」는 아무도 안 잰다</b></td></tr>
-  </table></div>
-  <p class="lede eave">빈칸은 하나다 — <strong>사전에 고정된 판단.</strong> 기존 서비스는 전부 <em>사후에 관찰</em>하고, 그래서 지운 사람과 안 지운 사람을 구별하지 못한다.</p>
-  <p class="src"><b>왜 국내가 아니라 글로벌인가</b> — 국내는 유료 뉴스레터 시장이 아직 얕고(롱블랙 월 4,900원), <b>거래소 약관이 서브파티 접근을 금지</b>해 실행 정합성이 열리지 않는다. 해외 거래소는 가능하다.<br><b>출처</b> — Substack 2025 지표 · Calcalist·Finance Magnates 2024.08(TipRanks 인수) · 매출은 <b>외부 추정치</b> · Kaito·Cookie3 공식 문서</p>
-</section>
-
-<!-- 13 ────────────────────────────────────── -->
-<section class="slide">
-  <div class="tag">18 <b>목표 비즈니스 모델</b></div>
+  <div class="tag">Ⅴ. 사업모델 <b>목표 비즈니스 모델</b></div>
   <h2>증명을 <em>확인하는 쪽</em>이 낸다</h2>
   <figure>
   <svg viewBox="0 0 900 114" role="img" aria-label="판단을 남기는 쪽은 무료, 확인하는 쪽이 지불하는 구조">
@@ -718,10 +710,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 판단이 쌓이는 속도를 보고 정한다.</p>
 </section>
-
-<!-- 수익화 순서 ─────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">19 수익화 <b>순서</b></div>
+  <div class="tag">Ⅴ. 사업모델 <b>수익화 순서</b></div>
   <h2>공급을 먼저 열고, <em>확인하는 쪽</em>에 판다</h2>
   <div class="tblwrap"><table>
     <tr><th>시점</th><th>무엇을 하나</th><th>누가 내나</th><th>있어야 하는 것</th></tr>
@@ -732,10 +722,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <p class="lede eave"><strong>발행자에게 팔지 않는다.</strong> 국내 유사투자자문업자 2,000곳 전부가 월 10만원을 낸다 해도 연 25억이고, 현실 침투율이면 사업이 되지 않는다. <em>돈은 증명을 확인하는 쪽에 있다</em> — TipRanks 가 그렇게 벌고 있다.</p>
 </section>
-
-<!-- BEP ─────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">20 <b>BEP</b></div>
+  <div class="tag">Ⅴ. 사업모델 <b>BEP</b></div>
   <h2>언제 손익분기에 닿는가</h2>
   <div class="cols">
     <div>
@@ -760,10 +748,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="lede eave"><strong>목표 12~18개월.</strong> 전제는 하나다 — <em>6개월 안에 공급 100명.</em> 이게 안 되면 뒤의 모든 숫자가 무의미하므로, <strong>가장 먼저 검증한다.</strong></p>
 </section>
-
-<!-- 팀 ─────────────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">21 <b>팀</b></div>
+  <div class="tag">Ⅵ. 팀과 실행 <b>팀</b></div>
   <h2>한 번 부딪혀 보고 <em>방향을 바꿨다</em></h2>
   <div class="cols">
     <div>
@@ -784,10 +770,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </div>
   <p class="lede eave">컨트랙트 · 프론트엔드 · 오프체인 검증기 · 문서를 <strong>1인이 전부 만들었다.</strong> 지금 공개 URL 에서 지갑 없이 확인할 수 있는 것이 그 결과다.</p>
 </section>
-
-<!-- 왜 이 사람인가 ─────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">22 <b>왜 이 사람인가</b></div>
+  <div class="tag">Ⅵ. 팀과 실행 <b>왜 이 사람인가</b></div>
   <h2>정산과 원장 정합성을 <em>10년간 제품으로</em> 만들어 왔다</h2>
   <p class="lede">POI 는 「발행자가 낸 값과 결과가 어긋나지 못하게 하고, 기준을 나중에 못 바꾸게 한다」는 제품이다. 이 두 문장이 커리어와 겹친다.</p>
   <div class="tblwrap"><table>
@@ -799,10 +783,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <p class="lede eave"><strong>1인이 어떻게 여기까지 만들었나</strong> — 기획을 문서로 먼저 확정하고, 구현과 리뷰를 분리하고, 테스트를 게이트로 뒀다. 그 체계가 실제로 잡아낸 것들이 있다 — 화면의 조건 기호 6개가 전부 틀리게 표시되던 것, 심사자가 실행하면 실패했을 검증 명령, 길이를 유지한 payload 변조. <em>앞의 둘은 단위 테스트가 통과하는 동안 살아 있었다.</em></p>
 </section>
-
-<!-- 자금 사용 계획 ───────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">23 <b>자금 사용 계획</b></div>
+  <div class="tag">Ⅵ. 팀과 실행 <b>자금 사용 계획</b></div>
   <h2>돈을 쓰는 곳은 <em>병목 하나</em>다</h2>
   <p class="lede">POI 의 다음 병목은 컨트랙트가 아니라 <strong>오프체인</strong>이다. 검증기를 상시 서비스로 만들고, 외부 조회 API 를 열고, 인덱서로 RPC 조회 한계를 넘는 일. <em>그 API 가 첫 수익 경로(B2B 검증 API)의 전제다.</em></p>
   <div class="tblwrap"><table>
@@ -814,10 +796,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <p class="lede eave">채용은 인원 보강이 아니라 <strong>매출 경로를 여는 비용</strong>이다. 조회 API 가 없으면 6~12개월 차 B2B 수익이 시작되지 않는다.</p>
 </section>
-
-<!-- 검증 마일스톤 ───────────────────────────── -->
 <section class="slide">
-  <div class="tag">24 <b>검증 마일스톤</b></div>
+  <div class="tag">Ⅵ. 팀과 실행 <b>검증 마일스톤</b></div>
   <h2>무엇이 되면 계속하고, <em>무엇이 안 되면 멈추는가</em></h2>
   <p class="lede">직전 제품에서 없었던 것은 기술이 아니라 <strong>멈추는 기준</strong>이었다. 이번에는 먼저 정하고 들어간다.</p>
   <div class="tblwrap"><table>
@@ -829,10 +809,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </table></div>
   <p class="lede eave"><strong>10명과 100명은 성격이 다른 숫자다.</strong> 앞의 10명은 직접 찾아가 설득하는 수라 노력으로 채울 수 있다. <em>100명은 그 10명이 남을 데려와야 나오는 수다</em> — 그래서 3개월에 10명이 안 되면 6개월 100명은 물어볼 필요도 없다. 커밋 비용이 건당 1.21원이라 이 확인에 드는 돈은 거의 없다.</p>
 </section>
-
-<!-- 14 ────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">25 <b>확장</b></div>
+  <div class="tag">Ⅵ. 팀과 실행 <b>확장</b></div>
   <h2>같은 구조로 <em>무엇을 더 할 수 있나</em></h2>
   <p class="lede">POI 가 하는 일은 <strong>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인한다」</strong> 이다. 컨트랙트는 <strong>고정된 내용이 무엇인지 보지 않는다</strong> — 해시와 구간, 산술만 검사한다. 그래서 <strong>고정할 내용만 바꾸면 다른 것도 같은 방식으로 증명된다.</strong></p>
   <div class="tblwrap"><table>
