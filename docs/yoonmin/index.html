@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>POI — Proof of Insight · GASOK</title>
+<title>POI — Proof of Insight</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -50,7 +50,7 @@ body{
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.slide{animation:none}}
 
-/* 절 라벨 — GASOK 의 // 모티프 */
+/* 절 라벨 */
 .tag{
   font:500 clamp(.7rem,.82vw,.8rem)/1 var(--mono);
   letter-spacing:.18em;text-transform:uppercase;
@@ -272,7 +272,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 1 ─────────────────────────────────────── -->
 <section class="slide cover" data-on data-key>
-  <div class="tag">// GASOK · TRACK 03 GIWA-NATIVE IDEAS</div>
+  <div class="tag">// 윤민창의투자재단 굿스타터 20기</div>
   <h1>POI</h1>
   <div class="sub">Proof of Insight</div>
   <p class="claim">투자 판단을 <em>결과가 나오기 전에</em> 온체인에 고정하고, 누구나 나중에 검증한다.</p>
@@ -283,7 +283,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 <section class="slide" data-key>
   <div class="tag">// 01 <b>한 장으로 보는 POI</b></div>
   <h2>판단을 <em>결과가 나오기 전에</em> 잠근다</h2>
-  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제한다. <span class="quiet">관측값 자체의 진실성은 보장하지 않는다 — 6쪽 신뢰 경계.</span></p>
+  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제한다. <span class="quiet">관측값 자체의 진실성은 보장하지 않는다 — 6쪽 「무엇이 강제되나」.</span></p>
   <div class="steps">
     <div class="step" data-n="STEP 01">
       <h4>판단을 적고 잠근다</h4>
@@ -389,114 +389,60 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </figure>
 </section>
 
-<!-- 4 ─────────────────────────────────────── -->
-<section class="slide" data-key>
-  <div class="tag">// 06 <b>신뢰 경계</b></div>
-  <h2>무엇을 보장하고 무엇을 보장하지 않는가</h2>
-  <figure>
-  <svg viewBox="0 0 900 250" role="img" aria-label="컨트랙트 강제, 소유자 제출, 미보장의 3층 구조">
-    <rect x="20" y="14" width="860" height="72" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1.5"/>
-    <text class="s-lab" x="40" y="40" fill="var(--seal)">컨트랙트가 강제 — 어기면 트랜잭션이 되돌아간다</text>
-    <text class="s-txt" x="40" y="66" font-size="13">관측 구간이 커밋 이후 (I4) · 정산 산술이 관측값과 일치 (I17) · 결정 간 선후 관계 (I2) · 지표 정의가 고정(frozen)</text>
-
-    <rect x="20" y="96" width="860" height="62" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
-    <text class="s-lab" x="40" y="122">소유자가 제출 — 제3자가 재현·이의 가능</text>
-    <text class="s-txt" x="40" y="146" font-size="13">관측값 자체</text>
-
-    <rect x="20" y="168" width="860" height="62" fill="none" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <text class="s-lab" x="40" y="194">보장하지 않음</text>
-    <text class="s-txt" x="40" y="218" font-size="13" fill="var(--ink-faint)">관측값의 진실성 · 이유의 진실성 · 실제 거래와의 정합성 · 기록의 완전성</text>
-  </svg>
-  <figcaption><b>I4·I17·I2 는 컨트랙트에 박힌 불변식 번호다 — 어기면 발행 자체가 실패한다(7쪽).</b><br><b>commitment</b> 는 원문을 숨긴 채 「이것을 그때 정했다」만 남기는 해시다. <b>frozen</b> 은 한 번 정하면 바꿀 수 없다는 뜻이다.<br>원문은 <strong>네 개의 commitment</strong>(결정·트리거·근거·이유)로 남고, 관측 조건과 구간은 평문으로 남는다. 나중에 <b>원문을 공개</b>하면 그것이 그 해시의 원본이 맞는지 누구나 대조할 수 있다 — 공개 전에는 “무언가가 고정됐다”까지, 공개 후에는 “이 내용이 그때 고정됐다”까지다.</figcaption>
-  </figure>
-</section>
-
-<!-- 5 ─────────────────────────────────────── -->
-<section class="slide">
-  <div class="tag">// 07 <b>강제</b></div>
-  <h2>세 줄의 코드가 사후 서사를 막는다</h2>
-  <pre><i>if</i> (d.windowStart &lt; attestTime) <b>revert WindowInPast();</b>      <i>// I4</i>
-<i>if</i> (p.time &gt;= a.time)           <b>revert ParentNotEarlier();</b>  <i>// I2</i>
-<i>if</i> (s.result != expect)         <b>revert ResultMismatch();</b>    <i>// I17</i></pre>
-  <div class="tblwrap">  <table>
-    <tr><td>I4</td><td>관측 구간을 과거로 못 잡는다 <span class="quiet">(예상 결과를 선언한 결정에 적용)</span></td></tr>
-    <tr><td>I2</td><td>부모 결정이 자식보다 엄격히 빨라야 한다</td></tr>
-    <tr><td>I17</td><td>관측값과 모순되는 결과를 기록할 수 없다 <span class="quiet">(산술 일치만 — 관측값의 진실성은 별개)</span></td></tr>
-  </table></div>
-  <p class="lede eave">그리고 <strong>지표 정의 문서의 바이트 해시</strong>가 온체인에 박혀 등록 즉시 <span class="mono">frozen</span>이다. 기준을 나중에 바꿀 수 없다.</p>
-</section>
-
-<!-- 6 ─────────────────────────────────────── -->
-<section class="slide" data-key>
-  <div class="tag">// 08 <b>왜 GIWA인가 ①</b></div>
-  <h2>비용이 시점 해상도를 정한다</h2>
-  <figure>
-  <svg viewBox="0 0 900 200" role="img" aria-label="GIWA 1.21원 대 이더리움 L1 850원 비용 비교">
-    <text class="s-lab" x="20" y="40">커밋 1건</text>
-    <text class="s-txt" x="150" y="42" font-weight="600">GIWA</text>
-    <rect x="230" y="28" width="4" height="18" fill="var(--seal)"/>
-    <text class="s-hot" x="248" y="42">1.21원</text>
-
-    <text class="s-txt" x="150" y="86" font-weight="600">이더리움 L1</text>
-    <rect x="230" y="72" width="620" height="18" fill="var(--rule)"/>
-    <text class="s-txt" x="248" y="86" font-size="13" fill="var(--ink)">850원</text>
-    <text class="s-hot" x="700" y="86" font-size="15" font-weight="700">약 702배</text>
-
-    <line class="s-line" x1="20" y1="118" x2="880" y2="118"/>
-    <text class="s-lab" x="20" y="148">결정 커밋 36건 / 년</text>
-    <text class="s-txt" x="230" y="150">GIWA <tspan class="s-hot">44원</tspan>　　　이더리움 L1 <tspan fill="var(--ink)">30,600원</tspan></text>
-    <text class="s-lab" x="20" y="182" fill="var(--ink-faint)">실측 — 영수증 gas 424,275 · GIWA 0.001 gwei · L1 0.734 gwei · 업비트 ETH 2,731,000원 (07-29 22:24 KST)</text>
-  </svg>
-  </figure>
-  <p class="lede eave">비용을 줄이려 커밋을 묶어도 <strong>절감은 기본가스뿐이라 약 17%에 그친다.</strong> 그리고 묶는 순간 <em>같은 배치 안의 결정 선후 관계를 잃는다</em> — EAS<span class="quiet">(Ethereum Attestation Service — GIWA 에 기본 탑재된 증명 기록 표준)</span>는 한 배치에 담긴 기록에 <b>모두 같은 시각</b>을 넣기 때문이다.</p>
-</section>
-
-<!-- 7 ─────────────────────────────────────── -->
+<!-- 무엇이 강제되나 ────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// 09 <b>왜 GIWA인가 ②</b></div>
-  <h2>새 신뢰 축을 세우지 않는다</h2>
-  <figure>
-  <svg viewBox="0 0 900 140" role="img" aria-label="사용자에서 EAS를 거쳐 POI 리졸버가 불변식을 검사하는 구조">
-    <g>
-      <rect x="20" y="42" width="140" height="52" fill="none" stroke="var(--rule)"/>
-      <text class="s-txt" x="90" y="73" text-anchor="middle">사용자</text>
-    </g>
-    <path d="M164 68 L246 68" class="s-line" marker-end="url(#a)"/>
-    <text class="s-lab" x="205" y="58" text-anchor="middle">attest()</text>
-    <g>
-      <rect x="250" y="42" width="200" height="52" fill="none" stroke="var(--ink-faint)"/>
-      <text class="s-txt" x="350" y="66" text-anchor="middle">EAS</text>
-      <text class="s-lab" x="350" y="84" text-anchor="middle">GIWA 프리디플로이</text>
-    </g>
-    <path d="M454 68 L536 68" class="s-line" marker-end="url(#a)"/>
-    <text class="s-lab" x="495" y="58" text-anchor="middle">onAttest</text>
-    <g>
-      <rect x="540" y="42" width="200" height="52" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1.5"/>
-      <text class="s-hot" x="640" y="66" text-anchor="middle">POI 리졸버</text>
-      <text class="s-lab" x="640" y="84" text-anchor="middle" fill="var(--seal)">불변식 검사</text>
-    </g>
-    <path d="M744 56 L826 30" class="s-line" marker-end="url(#a)"/>
-    <text class="s-lab" x="836" y="28">기록</text>
-    <path d="M744 80 L826 108" class="s-seal" marker-end="url(#b)"/>
-    <text class="s-lab" x="836" y="112" fill="var(--seal)">revert</text>
-    <defs>
-      <marker id="a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" fill="var(--ink-faint)"/></marker>
-      <marker id="b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7z" fill="var(--seal)"/></marker>
-    </defs>
-  </svg>
-  </figure>
-  <div class="tblwrap">  <table>
-    <tr><td>EAS 프리디플로이</td><td><span class="quiet">Ethereum Attestation Service — 증명 기록 표준. GIWA 기본 탑재</span><br>스키마·발급·철회·참조를 재구현하지 않는다</td></tr>
-    <tr><td>도장 Verified Address</td><td><span class="quiet">도장 = GIWA 의 온체인 신원 인증</span><br>「누가 말했는가」의 근거 <span class="quiet">— 연동 완료. 받아 본 것은 파우셋 발급분, KYC 경로는 미검증</span></td></tr>
-    <tr><td>저비용 L2</td><td>결정 단위 커밋의 경제성</td></tr>
-    <tr><td>도장 Verified Balance</td><td><span class="quiet">머클 증명 = 남의 원장은 가린 채 「그 안에 있다」만 증명</span><br>「그때 무엇을 들고 있었나」의 근거 <span class="s-lab">(미사용 · 잔고 값은 공개)</span></td></tr>
+  <div class="tag">// 06 <b>무엇이 강제되나</b></div>
+  <h2>못 하게 막는 것이 <em>세 가지</em>다</h2>
+  <div class="tblwrap"><table>
+    <tr><th>막는 것</th><th>그래서 못 하는 일</th></tr>
+    <tr><td><b>관측 구간을 과거로 못 잡는다</b></td><td>지나간 구간을 골라 「그때 맞혔다」고 할 수 없다. 커밋 시각보다 뒤여야 한다</td></tr>
+    <tr><td><b>정산 산술을 컨트랙트가 다시 계산한다</b></td><td>발행자가 결과를 정할 수 없다. 어긋난 값을 내면 <b>트랜잭션이 되돌아간다</b></td></tr>
+    <tr><td><b>지표 정의가 문서 해시로 고정돼 있다</b></td><td>무엇을 어떻게 잴지를 나중에 바꿀 수 없다</td></tr>
   </table></div>
-  <p class="lede eave"><strong>판단의 재료가 지갑에 있다.</strong> 누가 말했는가는 연동했고, 무엇을 들고 있었는가는 Verified Balance 로 붙는다. POI 가 조건을 적는 방식(<code>지표 · 부등호 · 기준값</code>)이 <strong>영지식 증명의 조건식과 같은 모양</strong>이라, <strong>보자기</strong>가 공개되면 <strong>술어를 숨기는 경로</strong>가 열린다 — 증명 검증 설계는 따로 필요하다.</p>
+  <div class="cols">
+    <div>
+      <h3>보장하는 것 / 보장하지 않는 것</h3>
+      <p class="quiet"><b>보장</b> — 위 세 가지 · 결정 간 선후 관계 · 결정은 철회 불가</p>
+      <p class="quiet"><b>미보장</b> — 관측값의 진실성 · 이유의 진실성 · 실제 거래와의 정합성 · <b>기록의 완전성</b></p>
+    </div>
+    <div>
+      <h3>그래서 어떻게 다루나</h3>
+      <p class="quiet">발행자에게 남는 자유는 <b>관측값 하나</b>다. 그 값이 참인지는 컨트랙트가 보장하지 않는다.</p>
+      <p class="quiet">대신 <b>공개 데이터로 재현</b>할 수 있게 만들고, 어긋나면 <b>제3자가 이의를 온체인에</b> 남기게 했다. 발행자가 그 이의를 지울 수 없다.</p>
+    </div>
+  </div>
+  <p class="lede eave"><strong>보장하지 못하는 것을 숨기지 않는 것</strong>이 이 제품의 태도다. 화면의 모든 목록에 「조회된 것이 전부라는 보장은 없습니다」를 표시하고, <em>건수를 세지 않는다.</em></p>
+</section>
+
+<!-- 왜 GIWA ────────────────────────────────── -->
+<section class="slide dense">
+  <div class="tag">// 07 <b>왜 GIWA 위에 지었나</b></div>
+  <h2>비용이 <em>기록의 빈도</em>를 정한다</h2>
+  <div class="cols">
+    <div>
+      <h3>① 커밋 1건에 얼마인가</h3>
+      <div class="tblwrap"><table>
+        <tr><td>GIWA</td><td class="hot"><b>1.21원</b></td><td class="quiet">연 36건 = 44원</td></tr>
+        <tr><td>이더리움 L1</td><td>850원</td><td class="quiet">연 36건 = 30,600원</td></tr>
+      </table></div>
+      <p class="quiet">약 <b>702배</b> 차이다 (실측 · 영수증 기준). 커밋이 수천 원이면 사람들은 <b>중요한 판단만 가끔</b> 남긴다. 그러면 「판단을 반복해서 남기는가」라는 질문 자체를 물을 수 없다.</p>
+      <p><strong>비용이 빈도를 정하고, 빈도가 기록의 해상도를 정한다.</strong></p>
+    </div>
+    <div>
+      <h3>② 새 신뢰 축을 세우지 않는다</h3>
+      <div class="tblwrap"><table>
+        <tr><td>증명 기록 표준</td><td>GIWA 에 <b>기본 탑재</b>된 EAS 를 그대로 쓴다<br><span class="quiet">스키마·발급·철회·참조를 재구현하지 않는다</span></td></tr>
+        <tr><td>신원</td><td>GIWA <b>도장</b>의 검증 지갑을 붙인다 <span class="s-lab">연동 완료</span><br><span class="quiet">받아 본 것은 파우셋 발급분 · KYC 경로는 미검증</span></td></tr>
+      </table></div>
+      <p class="quiet">「누가 말했는가」를 우리가 새로 인증하지 않는다. <b>이미 있는 인증 위에 얹는다.</b></p>
+    </div>
+  </div>
+  <p class="lede eave">GIWA 는 두나무가 만든 L2 다. <strong>업비트 사용자와 같은 생태계에서 시작할 수 있다는 것</strong>이, 판단을 남길 사람이 실제로 있는 곳에서 검증한다는 뜻이다.</p>
 </section>
 
 <!-- 경쟁 지형 ──────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// <b>경쟁 지형</b></div>
+  <div class="tag">// 08 <b>경쟁 지형</b></div>
   <h2>다들 <em>사후에 관찰</em>한다</h2>
   <div class="tblwrap"><table>
     <tr><th></th><th>무엇을 재나</th><th>방식</th><th>규모</th></tr>
@@ -511,7 +457,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 차별점 ──────────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// <b>차별점</b></div>
+  <div class="tag">// 09 <b>차별점</b></div>
   <h2>사전에 고정하고, <em>플랫폼에 기대지 않는다</em></h2>
   <div class="cols">
     <div>
@@ -540,7 +486,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 9 ─────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">// 11 <b>MVP 현황</b></div>
+  <div class="tag">// 10 <b>MVP 현황</b></div>
   <h2>어디까지 만들어져 있나</h2>
   <div class="tblwrap">  <table>
     <tr><td>컨트랙트</td><td>리졸버 4종 — <span class="yes">익스플로러 Verified</span></td></tr>
@@ -555,7 +501,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 10 ────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">// 12 <b>실제 화면 ①</b></div>
+  <div class="tag">// 11 <b>실제 화면 ①</b></div>
   <h2>미발행이 <em>그대로 드러난다</em></h2>
   <p class="lede">예상 결과를 선언해 놓고 결과를 올리지 않으면 인장이 <em>「기한초과」</em>로 바뀐다. <strong>숨길 자리가 없다.</strong></p>
   <div class="shots">
@@ -588,7 +534,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 실제 화면 ② ─────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 13 <b>실제 화면 ②</b></div>
+  <div class="tag">// 12 <b>실제 화면 ②</b></div>
   <h2>제3자가 <em>이의를 온체인에</em> 남긴다</h2>
   <p class="lede">관측값이 틀렸다고 보면 누구나 이의를 발행한다. <strong>발행자가 지울 수 없다.</strong></p>
   <div class="shots-wide">
@@ -618,46 +564,34 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="src"><b>철회 이력도 남습니다</b> — 정산을 철회하고 정정하면 「이전 결과 등록(철회됨)」이 펼쳐진다. 결정 <code>0xb1e46283…683b21</code></p>
 </section>
 
-<!-- 로드맵 ① 레이어 ───────────────────────────── -->
-<section class="slide">
-  <div class="tag">// 14 <b>여기서 무엇이 열리나</b></div>
-  <h2>거래소를 붙이면 <em>마지막 칸이 닫힌다</em></h2>
-  <p class="lede">지금 검증되는 것은 <strong>“무엇을 말했나”</strong>까지다. 남은 칸은 <strong>“말한 대로 했나”</strong> — 앞서 <em>보장하지 않는다</em>고 적은 바로 그 칸이다.</p>
-  <figure>
-  <svg viewBox="0 0 900 250" role="img" aria-label="선언·관측은 지금 검증되고, 실행 칸은 거래소 연동으로 채워진다는 3단 도식">
-    <text class="s-lab" x="16" y="30">LAYER</text>
-    <text class="s-lab" x="470" y="30">지금</text>
-    <text class="s-lab" x="640" y="30">거래소를 붙이면</text>
-
-    <rect x="16" y="46" width="430" height="52" fill="none" class="s-seal"/>
-    <text class="s-txt" x="34" y="70">① 말한 것 — 결정 커밋</text>
-    <text class="s-lab" x="34" y="88">commitment · 관측 구간 선언 · I4</text>
-    <text class="s-hot" x="470" y="78">✔ 검증됨</text>
-    <text class="s-txt" x="640" y="78" font-size="12">그대로</text>
-
-    <rect x="16" y="110" width="430" height="52" fill="none" class="s-seal"/>
-    <text class="s-txt" x="34" y="134">② 본 것 — 관측·정산</text>
-    <text class="s-lab" x="34" y="152">지표 해시 frozen · I17 산술 강제</text>
-    <text class="s-hot" x="470" y="142">✔ 검증됨</text>
-    <text class="s-txt" x="640" y="142" font-size="12">오라클이 관측값을 독립 증명</text>
-
-    <rect x="16" y="174" width="430" height="52" fill="none" stroke="var(--rule)" stroke-width="1" stroke-dasharray="5 4"/>
-    <text class="s-txt" x="34" y="198" fill="var(--ink-faint)">③ 한 것 — 실제 체결</text>
-    <text class="s-lab" x="34" y="216">지금은 비어 있다</text>
-    <text class="s-txt" x="470" y="206" fill="var(--ink-faint)" font-size="12">✕ 보장 안 함</text>
-    <text class="s-hot" x="640" y="206" font-size="12">체결 내역 대조로 채워진다</text>
-
-    <path d="M604 200 L628 200" class="s-line" stroke="var(--seal)" stroke-width="2" marker-end=""/>
-    <path d="M622 195 L630 200 L622 205" fill="none" stroke="var(--seal)" stroke-width="2"/>
-  </svg>
-  <figcaption>③ 이 닫히면 <b>「좋은 판단만 골라 기록한다」</b>는 반론도 같이 좁혀진다 — 거래가 있었는데 결정이 없으면 그것도 드러나기 때문이다.</figcaption>
-  </figure>
-  <p class="src"><b>지금은 가설이다.</b> 개인 거래내역에 접근할 권한이 없다 — 지금 쓰는 것은 업비트 <b>공개 시세 API</b> 뿐이다. 거래소 Open API 읽기 권한이 열려야 성립한다.</p>
+<!-- 무엇이 외부에 걸려 있나 ─────────────────── -->
+<section class="slide dense">
+  <div class="tag">// 13 <b>외부 의존</b></div>
+  <h2>세 칸 중 <em>하나가 비어 있다</em></h2>
+  <div class="tblwrap"><table>
+    <tr><th></th><th>무엇을 증명하나</th><th>지금</th><th>무엇이 있어야 채워지나</th></tr>
+    <tr><td><b>① 말한 것</b></td><td>결정을 결과 전에 고정했다</td><td class="yes">✓ 검증됨</td><td class="no">없음 — 오늘 이미 돈다</td></tr>
+    <tr><td><b>② 본 것</b></td><td>관측·정산이 산술로 맞다</td><td class="yes">✓ 검증됨</td><td>관측값의 <b>독립 증명</b>은 아직 — 제3자 오라클이 필요하다</td></tr>
+    <tr><td><b>③ 한 것</b></td><td>말한 대로 실제로 거래했다</td><td class="no">✕ 비어 있다</td><td class="hot">거래소 체결 내역 접근</td></tr>
+  </table></div>
+  <div class="cols">
+    <div>
+      <h3>③ 이 닫히면 무엇이 달라지나</h3>
+      <p class="quiet">가장 큰 반론이 좁혀진다 — <b>「좋은 판단만 골라 기록하면?」</b></p>
+      <p>거래가 있었는데 결정이 없으면 <strong>그것도 드러나기 때문이다.</strong> 완전성을 완전히 풀지는 못해도, 지금보다 훨씬 좁아진다.</p>
+    </div>
+    <div>
+      <h3>왜 아직 못 하나 — 직접 확인한 사실</h3>
+      <p class="quiet"><b>국내 거래소는 약관이 서브파티 접근을 금지</b>한다. 요청해서 되는 문제가 아니라 제도가 바뀌어야 하는 문제다. <em>직전 제품을 만들며 직접 부딪혀 확인했다.</em></p>
+      <p><strong>그래서 해외 거래소부터 연다.</strong> 해외는 읽기 전용 연동이 가능하고, POI 의 타겟도 글로벌이다. 국내는 열리면 붙인다.</p>
+    </div>
+  </div>
+  <p class="lede eave">①②는 <strong>남의 허락 없이 오늘 돌고 있다.</strong> ③이 안 열려도 제품은 「말한 것」까지 증명하는 형태로 남는다 — <em>로드맵 전체가 남의 손에 걸려 있지 않다.</em></p>
 </section>
 
 <!-- 로드맵 ─────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 15 <b>로드맵</b></div>
+  <div class="tag">// 14 <b>로드맵</b></div>
   <h2>5개월 일정</h2>
   <figure>
   <svg viewBox="0 0 900 224" role="img" aria-label="0단계부터 5단계까지의 5개월 일정과 출시 판단 기준">
@@ -702,37 +636,10 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </figure>
 </section>
 
-<!-- 로드맵 ② 단계 ───────────────────────────── -->
-<section class="slide">
-  <div class="tag">// 16 <b>외부 협조</b></div>
-  <h2>직접 만들 것과 <em>요청할 것</em></h2>
-  <div class="tblwrap"><table>
-    <tr><th>단계</th><th>해야 할 일</th><th>필요한 외부 협조</th></tr>
-    <tr><td>1단계 <span class="quiet">8월</span></td><td>지표 확대 · 공개 범위 제어 · up.id 를 다른 체인에서도 읽기</td><td class="no">자체 개발</td></tr>
-    <tr><td>2단계 <span class="quiet">9월</span></td><td><span class="hot">체결 내역과 결정을 대조</span> — 「말한 대로 했나」</td><td class="hot">업비트 Open API 읽기 권한 <span class="quiet">— 업비트에 별도 신청</span></td></tr>
-    <tr><td>2단계 <span class="quiet">9월</span></td><td><code>ORACLE_VERIFIED</code> — 관측값을 제3자가 독립 증명</td><td class="hot">Upbit Oracle 사양·일정 <span class="quiet">— GASOK 요청 (아래)</span></td></tr>
-    <tr><td>3단계 <span class="quiet">10월</span></td><td>외부 조회 API — 다른 제품이 검증 결과를 읽는다</td><td class="no">자체 개발</td></tr>
-    <tr><td>4단계 <span class="quiet">이후</span></td><td>조건을 숨긴 채 미리 고정 · 잔고 조건 증명</td><td class="hot">보자기 개발자 문서 <span class="quiet">— GASOK 요청 (아래)</span></td></tr>
-  </table></div>
-  <div class="cols">
-    <div>
-      <h3>GASOK 에 요청하는 것 — 둘</h3>
-      <p><em>① GIWA 월렛 탑재 규격</em></p>
-      <p class="quiet">판단의 재료가 지갑에 있다. 누가 말했는지(Verified Address)는 이미 연동했다. 임베드 방식, 라우팅 제약, 서명 UX, 딥링크 규격을 알려주시면 맞춘다. <b>규격 없이 만들면 추측이 코드가 된다.</b></p>
-    </div>
-    <div>
-      <h3>&nbsp;</h3>
-      <p><em>② 보자기 개발자 문서</em></p>
-      <p class="quiet">두나무는 <b>2026-02-27 하나금융 해외송금 PoC</b> 에서 보자기로 송금인·수취인을 가렸다. <b>기술은 이미 실증됐고 문서만 없다</b> — <code>/giwa-ecosystem/bojagi</code> 404.</p>
-      <p class="quiet"><b>업비트 Open API</b> 는 8월 중 별도 신청한다. 그 다음이 도장 스냅샷 주기, 그 다음이 Upbit Oracle 이다.</p>
-    </div>
-  </div>
-  <p class="src"><b>용어</b> — <b>보자기</b> GIWA 의 영지식 증명 기술 · <b><code>ORACLE_VERIFIED</code></b> 관측값을 제3자 오라클이 독립 증명했을 때 붙는 등급(아직 없음) · <b>up.id</b> GIWA 의 온체인 아이디</p>
-</section>
 
 <!-- 12 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 17 <b>타겟 · 시장</b></div>
+  <div class="tag">// 15 <b>타겟 · 시장</b></div>
   <h2>누구를 위해 만들었나</h2>
   <div class="cols">
     <div>
@@ -756,7 +663,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 시장 크기 ─────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// 시장 <b>크기</b></div>
+  <div class="tag">// 16 시장 <b>크기</b></div>
   <h2>카테고리는 이미 <em>사업이 됐다</em></h2>
   <div class="tblwrap"><table>
     <tr><th>근거</th><th>수치</th><th>무엇을 뜻하나</th></tr>
@@ -770,7 +677,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 13 ────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// 18 <b>목표 비즈니스 모델</b></div>
+  <div class="tag">// 17 <b>목표 비즈니스 모델</b></div>
   <h2>증명을 <em>확인하는 쪽</em>이 낸다</h2>
   <figure>
   <svg viewBox="0 0 900 114" role="img" aria-label="판단을 남기는 쪽은 무료, 확인하는 쪽이 지불하는 구조">
@@ -794,14 +701,14 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>B2C 구독</td><td><span class="quiet">판단을 읽는 쪽</span><br>저널 · 장기 리포트 · 외부 공유 프로필 <span class="s-lab">3단계</span></td></tr>
     <tr><td>검증 수수료</td><td><span class="quiet">제3자가 요청</span><br>정기 재검증 · 갱신 · 이의 대응 <span class="s-lab">3단계</span></td></tr>
     <tr><td>B2B 조회 API</td><td><span class="quiet">리서치 기관 · 운용사</span><br>발행물에 검증 링크를 붙인다. 건당 과금 <span class="s-lab">3단계</span></td></tr>
-    <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증한다. <b>개인정보를 직접 보관하지 않아도 된다</b> <span class="s-lab">확장 · 19쪽</span></td></tr>
+    <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증한다. <b>개인정보를 직접 보관하지 않아도 된다</b> <span class="s-lab">확장 · 24쪽</span></td></tr>
   </table></div>
   <p class="lede eave"><strong>지금 단계에서 수익화하지 않는다.</strong> 단가는 아직 정하지 않았다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 판단이 쌓이는 속도를 보고 정한다.</p>
 </section>
 
 <!-- 수익화 순서 ─────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// 수익화 <b>순서</b></div>
+  <div class="tag">// 18 수익화 <b>순서</b></div>
   <h2>공급을 먼저 열고, <em>확인하는 쪽</em>에 판다</h2>
   <div class="tblwrap"><table>
     <tr><th>시점</th><th>무엇을 하나</th><th>누가 내나</th><th>있어야 하는 것</th></tr>
@@ -815,7 +722,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- BEP ─────────────────────────────────────── -->
 <section class="slide">
-  <div class="tag">// <b>BEP</b></div>
+  <div class="tag">// 19 <b>BEP</b></div>
   <h2>언제 손익분기에 닿는가</h2>
   <div class="cols">
     <div>
@@ -843,7 +750,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 팀 ─────────────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// <b>팀</b></div>
+  <div class="tag">// 20 <b>팀</b></div>
   <h2>한 번 부딪혀 보고 <em>방향을 바꿨다</em></h2>
   <div class="cols">
     <div>
@@ -867,7 +774,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 왜 이 사람인가 ─────────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// <b>왜 이 사람인가</b></div>
+  <div class="tag">// 21 <b>왜 이 사람인가</b></div>
   <h2>정산과 원장 정합성을 <em>10년간 제품으로</em> 만들어 왔다</h2>
   <p class="lede">POI 는 「발행자가 낸 값과 결과가 어긋나지 못하게 하고, 기준을 나중에 못 바꾸게 한다」는 제품이다. 이 두 문장이 커리어와 겹친다.</p>
   <div class="tblwrap"><table>
@@ -882,7 +789,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 자금 사용 계획 ───────────────────────────── -->
 <section class="slide dense">
-  <div class="tag">// <b>자금 사용 계획</b></div>
+  <div class="tag">// 22 <b>자금 사용 계획</b></div>
   <h2>돈을 쓰는 곳은 <em>병목 하나</em>다</h2>
   <p class="lede">POI 의 다음 병목은 컨트랙트가 아니라 <strong>오프체인</strong>이다. 검증기를 상시 서비스로 만들고, 외부 조회 API 를 열고, 인덱서로 RPC 조회 한계를 넘는 일. <em>그 API 가 첫 수익 경로(B2B 검증 API)의 전제다.</em></p>
   <div class="tblwrap"><table>
@@ -897,7 +804,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 검증 마일스톤 ───────────────────────────── -->
 <section class="slide">
-  <div class="tag">// <b>검증 마일스톤</b></div>
+  <div class="tag">// 23 <b>검증 마일스톤</b></div>
   <h2>무엇이 되면 계속하고, <em>무엇이 안 되면 멈추는가</em></h2>
   <p class="lede">직전 제품에서 없었던 것은 기술이 아니라 <strong>멈추는 기준</strong>이었다. 이번에는 먼저 정하고 들어간다.</p>
   <div class="tblwrap"><table>
@@ -911,7 +818,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
 <!-- 14 ────────────────────────────────────── -->
 <section class="slide" data-key>
-  <div class="tag">// 19 <b>확장</b></div>
+  <div class="tag">// 24 <b>확장</b></div>
   <h2>확장성이 더 <em>열려 있다</em></h2>
   <p class="lede">POI 가 하는 일은 <strong>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인한다」</strong> 이다. 컨트랙트는 <strong>고정된 내용이 무엇인지 보지 않는다</strong> — 해시와 구간, 산술만 검사한다. 그래서 <strong>고정할 내용만 바꾸면 다른 것도 같은 방식으로 증명된다.</strong></p>
   <div class="tblwrap"><table>
