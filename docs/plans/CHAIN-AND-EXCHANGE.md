@@ -136,9 +136,49 @@ t2  대조
 **제3자가 재현할 수 있습니다.** 같은 공개 API 로 같은 값을 다시 구합니다.
 POI 서버를 믿을 필요가 없습니다 — 지금 관측값을 다루는 방식과 같습니다.
 
+### 실측 결과 — 2026-08-04 직접 호출
+
+**문서가 아니라 응답으로 확인했습니다.** 재현 스크립트: `scripts/hyperliquid-probe.py`
+
+```
+POST https://api.hyperliquid.xyz/info      인증 헤더 없음 (API 키·서명·쿠키 전부 없음)
+
+meta                    HTTP 200 · 232개 종목
+recentTrades            HTTP 200 · 체결 10건
+                        ← users 필드에 양쪽 지갑 주소가 그대로 들어 있다
+userFills               HTTP 200 · 527건
+userFillsByTime         HTTP 200 · 지정 구간 45건
+                        ← startTime/endTime 이 POI 의 관측 구간과 그대로 맞는다
+임의 주소 2건            42건 · 2,000건 — 아무 주소나 조회된다
+```
+
+**술어 판정까지 실제로 됐습니다.**
+
+```
+구간 6시간 · 체결 47건
+dir 분포   Open Long 4 · Open Short 19 · Close Long 2 · Close Short 22
+
+술어 「BTC 롱을 열었다」 → 판정 맞음
+     Open Long 4건 · 수량 0.02339 · VWAP 63,570.6
+
+재현  2차 호출에서 동일한 값  ✅
+```
+
+**온체인에 올릴 것과 올리지 않을 것도 실제 크기로 확인했습니다.**
+
+```
+올린다      방향 · 건수 · 수량 · VWAP · 구간을 정규화한 요약  189바이트
+            해시 0x4d868740…95e8e9
+안 올린다   개별 체결 47건 · 잔고 · 손익
+```
+
+**「dir」 필드가 결정적입니다.** `Open Long / Close Short` 처럼 방향과 개폐가
+구분돼 있어, 「이 구간에 롱을 열었다」 같은 술어를 **그대로 판정**할 수 있습니다.
+지금 정산 산술을 컨트랙트가 재계산하는 방식과 같은 구조로 얹힙니다.
+
 | 후보 | 상태 |
 |---|---|
-| **Hyperliquid** | 온체인 체결 · 공개 API · 지갑 단위 조회 — **검색으로 확인** |
+| **Hyperliquid** | ✅ **실측 완료** — 인증 없이 지갑 단위 체결·구간 조회·술어 판정·재현성 |
 | GMX · dYdX · Jupiter | 같은 성격으로 보이나 **개별 확인 필요** |
 
 ---
@@ -207,10 +247,10 @@ Reclaim Protocol 도 같은 계열(프록시 모델)입니다.
 ```
 □ Base 커밋 1건 실측 비용 (GIWA 1.21원과 같은 방식으로)
 □ Coinbase Verifications 발급 절차 — 실제로 받아 볼 것. 도장 때와 같은 실수를 피한다
-□ Hyperliquid API 로 지갑 단위 체결 조회 실제 호출 — 문서가 아니라 응답을 볼 것
+☑ Hyperliquid API 실제 호출 — 2026-08-04 완료. scripts/hyperliquid-probe.py
 □ GMX · dYdX · Jupiter 개별 확인
 □ zkTLS 경로의 거래소 약관 검토 (법률)
 □ Solana Attestation Service 현황
 ```
 
-**「확인했다」와 「문서에서 봤다」를 구분합니다.** 지금 이 문서는 전부 후자입니다.
+**「확인했다」와 「문서에서 봤다」를 구분합니다.** Hyperliquid 만 전자이고 나머지는 후자입니다.
