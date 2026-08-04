@@ -183,6 +183,32 @@ Codex 가 만든 것은 Claude 가 전부 읽고 검증한다
 
 ## 진행 기록
 
+### 8/4
+
 ```
-8/4  계획 수립
+계획 수립
+1.1 ✅ 지표 정의 문서 — Codex 작성 · Claude 검토
+    검토에서 구현과 어긋난 4건을 찾아 코드를 문서에 맞췄다
+      경계 [start,end) → [start,end] · 반올림 방식 · aggregateByTime · 잘림 방어
+1.2 ✅ 해시 산출 · manifest 등재
+      metricId       0x6c02f2a1…3edff5
+      definitionHash 0x13b91bb8…92d026
+      기존 지표 2종으로 방법을 먼저 검증한 뒤 계산 · cast keccak 교차 확인
+1.6 ✅ 관측기 scripts/hl-observe.py — 재현성·근거 해시·잘림 방어 포함
+      실측 0.07149 qty → 관측값 7149000 · 2차 호출 일치
+      30일 구간에서 2,000건 상한 방어 작동 확인
+1.3 ✅ contracts/script/AddHLMetric.s.sol — 컴파일 통과
+```
+
+**역할을 뒤집었다.** Codex 가 1.3 에서 네 번째로 멈춰(응답 0바이트) 마감을 고려해
+Claude 가 쓰고 Codex 에 리뷰를 맡기는 쪽으로 바꿨다. 1.1 은 Codex 가 성공적으로
+작성했고 그 결과는 좋았다 — 긴 프롬프트에서만 멈춘다.
+
+### 다음 — 브로드캐스트 (키 필요)
+
+```
+1.4  지표 등록      POI_METRIC_REGISTRY 주소를 .env 에 넣고 실행
+1.5  결정 커밋      구간을 지금+5분 ~ +65분 정도로
+1.6  관측          구간 종료 후 hl-observe.py
+1.7  정산          관측값으로 브로드캐스트
 ```
