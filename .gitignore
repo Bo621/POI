@@ -11,6 +11,7 @@ secrets/
 salt-backup*
 # --- 개인정보 (공개 저장소다. 절대 커밋 금지) ---
 submit/PRIVATE_*
+submit-yoonmin/PRIVATE_*
 docs/submission/PRIVATE_*
 *_개인정보*
 
