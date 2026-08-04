@@ -204,10 +204,51 @@ Codex 가 만든 것은 Claude 가 전부 읽고 검증한다
 Claude 가 쓰고 Codex 에 리뷰를 맡기는 쪽으로 바꿨다. 1.1 은 Codex 가 성공적으로
 작성했고 그 결과는 좋았다 — 긴 프롬프트에서만 멈춘다.
 
-### 다음 — 브로드캐스트 (키 필요)
+### 1.4 — Safe 경로로 확정. 대표 승인 1회만 남았다
+
+레지스트리 주소를 `.env` 에서 못 찾아 배포 문서에서 찾고 **온체인으로 검증**했다.
 
 ```
-1.4  지표 등록      POI_METRIC_REGISTRY 주소를 .env 에 넣고 실행
+레지스트리   0x0f25917176a405bb9022e5b417e0d57348b30f89
+             POIDecisionResolver 가 겸한다 (DEPLOYMENT.md)
+검증         기존 지표 BTC_PRICE_KRW_AT_END 조회 → definitionHash 가 매니페스트와 일치
+```
+
+> ⚠️ **`.env.verifier` 의 주소는 쓰면 안 된다.** `0xe7f1725e…`·`0xcf7ed3ac…` 는
+> 로컬 anvil 기본 주소다. GIWA 의 EAS 는 predeploy `0x4200…0021` 인데 거기엔
+> anvil 주소가 적혀 있다 — 로컬 테스트용 파일이다.
+
+**owner 가 배포 지갑이 아니라 Safe 였다.**
+
+```
+Safe        0x215253B830D51df7f8364fF6dA32140006E4DCE1  v1.4.1 · 2-of-2 · nonce 4
+소유자 ①    0x77E8DFC44Da9A9eaF71D341c9285ad6BA3C2dfaa  키가 저장소에 없다
+소유자 ②    0xA1Cb5CbC9D7a0B7164a1bFE4B19bfe1Bf38BF310  = 배포 지갑, .env 에 있다
+```
+
+`.env` 의 `CHALLENGER_PRIVATE_KEY` 는 `0xca89C0F2…` 로 **Safe 소유자가 아니다.**
+그래서 서명 하나만 만들 수 있다.
+
+**준비 완료 — `scripts/safe-add-hl-metric.sh`**
+
+```
+check     지금 상태만 본다 (트랜잭션 없음)
+approve   ← 대표가 두 번째 지갑으로 1회. approveHash 를 보낸다
+execute   승인 확인 후 배포 지갑 서명과 합쳐 execTransaction
+```
+
+```
+safeTxHash  0x4dd353b8801acb884c1cc641ac0d9467977148dca90c59d6f1e959effbc7349b
+콜데이터     디코딩으로 되돌려 확인함 — (true, 8, 0, 0x13b91bb8…, true)
+배포지갑 서명 복원 주소가 0xA1Cb…F310 과 일치 · v=28
+가스        Safe 잔고 0 이지만 value 0 이라 무관. 실행자가 가스를 낸다
+            0x77E8… 잔고 0.03 ETH — approveHash 에 충분
+```
+
+### 다음
+
+```
+1.4  대표 승인 → execute
 1.5  결정 커밋      구간을 지금+5분 ~ +65분 정도로
 1.6  관측          구간 종료 후 hl-observe.py
 1.7  정산          관측값으로 브로드캐스트
