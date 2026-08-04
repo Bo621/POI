@@ -5,11 +5,15 @@ price_name="BTC_PRICE_KRW_AT_END"
 price_doc="docs/metrics/BTC_PRICE_KRW_AT_END.md"
 drawdown_name="BTC_MAX_DRAWDOWN_IN_WINDOW"
 drawdown_doc="docs/metrics/BTC_MAX_DRAWDOWN_IN_WINDOW.md"
+hl_name="HL_PERP_OPEN_LONG_QTY"
+hl_doc="docs/metrics/HL_PERP_OPEN_LONG_QTY.md"
 
 price_metric_id="$(cast keccak "$price_name")"
 price_definition_hash="$(cast keccak "0x$(xxd -p -c 999999 <"$price_doc" | tr -d '\n')")"
 drawdown_metric_id="$(cast keccak "$drawdown_name")"
 drawdown_definition_hash="$(cast keccak "0x$(xxd -p -c 999999 <"$drawdown_doc" | tr -d '\n')")"
+hl_metric_id="$(cast keccak "$hl_name")"
+hl_definition_hash="$(cast keccak "0x$(xxd -p -c 999999 <"$hl_doc" | tr -d '\n')")"
 
 {
   printf '{\n'

@@ -19,6 +19,15 @@
       "decimals": 1,
       "kind": 0,
       "unit": "percent"
+    },
+    {
+      "name": "HL_PERP_OPEN_LONG_QTY",
+      "metricId": "0x6c02f2a190b1aaf8d2b9f33160683a9878bb3a46fb71b06bf389d9d2ac3edff5",
+      "doc": "docs/metrics/HL_PERP_OPEN_LONG_QTY.md",
+      "definitionHash": "0x13b91bb8b4d6a2705c580e9e3cfb317c85aa132875df1630eae82993ec92d026",
+      "decimals": 8,
+      "kind": 0,
+      "unit": "qty"
     }
   ]
 }
