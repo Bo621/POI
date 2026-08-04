@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POI — Proof of Insight</title>
+<meta name="description" content="Lock a market call on-chain before the outcome. It cannot be edited or deleted afterward.">
+<style>
+  :root{
+    --seal:#1B4FD8; --seal-dim:#E8EDF9; --seal-deep:#123AA8; --ok:#0E7A55;
+    --ink:#161A22; --ink-soft:#49505F; --ink-faint:#798296;
+    --paper:#F6F8FC; --card:#fff; --rule:#E2E7F0;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --shadow:0 1px 2px rgba(22,26,34,.04),0 6px 20px rgba(27,79,216,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);
+    font:400 16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:clamp(3rem,9vw,6rem) 1.4rem 5rem}
+  .eyebrow{font-size:.76rem;font-weight:700;letter-spacing:.14em;color:var(--seal);margin-bottom:1rem}
+  h1{font-size:clamp(2rem,5.4vw,3.1rem);line-height:1.16;font-weight:800;letter-spacing:-.035em}
+  h1 em{font-style:normal;color:var(--seal)}
+  .lede{margin-top:1.2rem;font-size:clamp(1rem,2vw,1.15rem);color:var(--ink-soft);max-width:46rem}
+  .cta{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:2.2rem}
+  .btn{display:inline-block;font-size:.95rem;font-weight:600;padding:.85rem 1.35rem;border-radius:10px;
+    border:1px solid var(--rule);background:var(--card);color:var(--ink);text-decoration:none;transition:.15s}
+  .btn:hover{border-color:var(--seal);color:var(--seal)}
+  .btn.go{background:var(--seal);border-color:var(--seal);color:#fff}
+  .btn.go:hover{filter:brightness(1.1);color:#fff}
+
+  section{margin-top:clamp(3rem,7vw,4.5rem)}
+  h2{font-size:1.15rem;font-weight:800;letter-spacing:-.02em;margin-bottom:1.1rem}
+  .cards{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))}
+  .card{background:var(--card);border-radius:14px;padding:1.2rem 1.3rem;box-shadow:var(--shadow)}
+  .card h3{font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+  .card p{font-size:.9rem;color:var(--ink-soft);line-height:1.6}
+  .step{counter-increment:s;position:relative;padding-left:2.1rem;margin-bottom:1rem}
+  .step::before{content:counter(s);position:absolute;left:0;top:.05em;width:1.5rem;height:1.5rem;
+    display:grid;place-items:center;border-radius:50%;background:var(--seal-dim);color:var(--seal-deep);
+    font:700 .72rem/1 inherit}
+  ol.steps{counter-reset:s;list-style:none}
+  .step b{font-weight:700}
+  .step span{display:block;color:var(--ink-soft);font-size:.9rem;margin-top:.15rem}
+
+  .honest{background:var(--seal-dim);border-radius:12px;padding:1.1rem 1.25rem;font-size:.92rem;color:var(--ink-soft)}
+  .honest b{color:var(--seal-deep)}
+  form{margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap}
+  input[type=email]{flex:1 1 18rem;font:inherit;font-size:.95rem;padding:.8rem 1rem;border-radius:10px;
+    border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+  input[type=email]:focus{outline:2px solid var(--seal);outline-offset:1px}
+  .mono{font-family:var(--mono);font-size:.82rem;word-break:break-all}
+  footer{margin-top:4rem;padding-top:1.3rem;border-top:1px solid var(--rule);
+    color:var(--ink-faint);font-size:.82rem}
+  a{color:var(--seal)}
+  #msg{margin-top:.7rem;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">POI · PROOF OF INSIGHT</div>
+  <h1>Lock your market call <em>before</em> the outcome.</h1>
+  <p class="lede">
+    Write down what you think will happen, and fix it on-chain while the answer is still unknown.
+    When the window closes, a smart contract decides whether you were right — not you.
+    You cannot edit it. You cannot delete it. <b>Being wrong stays on the record too.</b>
+  </p>
+
+  <div class="cta">
+    <a class="btn go" href="https://poi-static-production.up.railway.app" target="_blank" rel="noopener">See a real record</a>
+    <a class="btn" href="#notify">Get notified</a>
+  </div>
+
+  <section>
+    <h2>Why this is hard to fake</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>The window can't be backdated</h3>
+        <p>The observation window must start after you commit. You cannot pick a period that already happened and claim you called it.</p>
+      </div>
+      <div class="card">
+        <h3>You don't decide the result</h3>
+        <p>The contract recomputes the outcome from the observed value. If your submission disagrees with the arithmetic, the transaction reverts.</p>
+      </div>
+      <div class="card">
+        <h3>Silence is visible</h3>
+        <p>Declare an outcome and never post the result, and the record shows <b>overdue</b>. There is no quiet way out.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li class="step"><b>Commit</b><span>Your reasoning goes up as a hash. What you'll measure — metric, threshold, window — is declared in the open, right then.</span></li>
+      <li class="step"><b>The window closes</b><span>The observed value is derived from public data, so anyone can recompute it independently.</span></li>
+      <li class="step"><b>The contract settles it</b><span>Right or wrong is arithmetic, not opinion. A third party can dispute the observation on-chain, and you cannot erase that dispute.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Where it stands today</h2>
+    <div class="honest">
+      <p><b>This is a testnet prototype, and it has no users yet.</b> One person built it. What exists is real
+      and verifiable — deployed contracts with verified source, a public interface that opens without a wallet,
+      and on-chain records you can inspect right now, including a settled call and a third-party dispute.
+      What does not exist yet is anyone using it besides the author.</p>
+      <p style="margin-top:.7rem">If that sounds interesting rather than disqualifying, leave an email. You'll hear from us
+      when there's something worth your time — not before.</p>
+    </div>
+  </section>
+
+  <section id="notify">
+    <h2>Get notified</h2>
+    <form id="f">
+      <input type="email" id="e" placeholder="you@example.com" required autocomplete="email">
+      <button class="btn go" type="submit">Notify me</button>
+    </form>
+    <div id="msg"></div>
+    <p style="margin-top:1rem;font-size:.86rem;color:var(--ink-faint)">
+      We store the address and nothing else. No newsletter, no sharing.
+    </p>
+  </section>
+
+  <footer>
+    <p>Built on an OP-Stack testnet using the Ethereum Attestation Service.
+       Public interface: <a href="https://poi-static-production.up.railway.app" target="_blank" rel="noopener">poi-static-production.up.railway.app</a></p>
+    <p style="margin-top:.5rem">VESTAT · <a href="mailto:bo@vestat.io">bo@vestat.io</a></p>
+  </footer>
+</div>
+
+<script>
+// 폼 제출 — 백엔드가 붙기 전까지는 mailto 로 넘긴다.
+// 없는 기능을 있는 것처럼 보이게 하지 않는다.
+document.getElementById('f').addEventListener('submit', function (ev) {
+  ev.preventDefault();
+  var email = document.getElementById('e').value.trim();
+  if (!email) return;
+  var msg = document.getElementById('msg');
+  msg.innerHTML = 'Opening your mail client so you can send it — ' +
+    'we have no server collecting this yet, and we would rather say so than pretend.';
+  window.location.href = 'mailto:bo@vestat.io' +
+    '?subject=' + encodeURIComponent('POI — notify me') +
+    '&body=' + encodeURIComponent(email);
+});
+</script>
+</body>
+</html>
