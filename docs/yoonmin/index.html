@@ -338,7 +338,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <div class="ex">결과 <b>맞음</b> — 발행자가<br>정할 수 없습니다</div>
     </div>
   </div>
-  <p class="src"><b>이 예시는 지금 체인에 있는 실제 기록입니다.</b> 결정 <code>0xe7fe5923…fc2da0</code> · 정산 <code>0x29da3820…69cb8d</code> — GIWA Sepolia 에서 지갑 없이 열어 볼 수 있습니다.</p>
+  <p class="src"><b>이 예시는 지금 체인에 있는 실제 기록입니다.</b> 결정 <code>0xe7fe5923…fc2da0</code> · 정산 <code>0x29da3820…69cb8d</code> — 테스트넷에서 <b>지갑 없이</b> 열어 볼 수 있습니다.</p>
 </section>
 <section class="slide" data-key>
   <div class="tag">Ⅰ. 문제와 시장 <b>문제</b></div>
@@ -591,51 +591,56 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <p class="src"><b>철회 이력도 남습니다</b> — 정산을 철회하고 정정하면 「이전 결과 등록(철회됨)」이 펼쳐집니다. 결정 <code>0xb1e46283…683b21</code></p>
 </section>
 <section class="slide dense">
-  <div class="tag">Ⅳ. 제품 <b>아직 안 되는 것</b></div>
-  <h2><em>실제 거래와의 대조</em>만 남았습니다</h2>
+  <div class="tag">Ⅳ. 제품 <b>실행 정합성</b></div>
+  <h2>세 칸 중 <em>둘이 검증됐고, 셋째가 열렸습니다</em></h2>
   <div class="tblwrap"><table>
-    <tr><th></th><th>무엇을 증명하나</th><th>지금</th><th>무엇이 있어야 채워지나</th></tr>
-    <tr><td><b>① 말한 것</b></td><td>결정을 결과 전에 고정했습니다</td><td class="yes">✓ 검증됨</td><td class="no">없음 — 오늘 이미 돈다</td></tr>
-    <tr><td><b>② 본 것</b></td><td>관측·정산이 산술로 맞다</td><td class="yes">✓ 검증됨</td><td>관측값의 <b>독립 증명</b>은 아직 — 제3자 오라클이 필요합니다</td></tr>
-    <tr><td><b>③ 한 것</b></td><td>말한 대로 실제로 거래했습니다</td><td class="no">✕ 비어 있습니다</td><td class="hot">거래소 체결 내역 접근</td></tr>
+    <tr><th></th><th>무엇을 증명하나</th><th>지금</th><th>남은 것</th></tr>
+    <tr><td><b>① 말한 것</b></td><td>결정을 결과 전에 고정했습니다</td><td class="yes">✓ 검증됨</td><td class="no">없음 — 오늘 이미 돕니다</td></tr>
+    <tr><td><b>② 본 것</b></td><td>관측·정산이 산술로 맞습니다</td><td class="yes">✓ 검증됨</td><td>관측값의 <b>독립 증명</b>은 아직 — 제3자 오라클</td></tr>
+    <tr class="me"><td class="hot"><b>③ 한 것</b></td><td class="hot">말한 대로 실제로 거래했습니다</td><td class="hot">경로 확인</td><td class="hot">온체인 거래소는 <b>허락이 필요 없습니다</b></td></tr>
   </table></div>
   <div class="cols">
     <div>
-      <h3>③ 이 닫히면 무엇이 달라지나</h3>
-      <p class="quiet">가장 큰 반론이 좁혀집니다 — <b>「좋은 판단만 골라 기록하면?」</b></p>
-      <p>거래가 있었는데 결정이 없으면 <strong>그것도 드러나기 때문입니다.</strong> 완전성을 완전히 풀지는 못해도, 지금보다 훨씬 좁아집니다.</p>
+      <h3>2026-08-04 직접 호출해 확인했습니다</h3>
+      <ul class="bul">
+        <li><b>인증 없이 지갑 단위 체결이 조회됩니다</b><span class="d">API 키·서명·쿠키를 하나도 보내지 않았습니다. 임의 주소도 조회됩니다</span></li>
+        <li><b>구간 지정이 그대로 맞습니다</b><span class="d">시작·종료 시각으로 조회 — POI 의 관측 구간과 같은 모델입니다</span></li>
+        <li><b>술어 판정까지 됐습니다</b><span class="d">「이 구간에 BTC 롱을 열었다」 → 판정 맞음 · 4건 · 수량 0.02339</span></li>
+        <li><b>제3자가 재현합니다</b><span class="d">2차 호출에서 동일한 값. 우리 서버를 믿을 필요가 없습니다</span></li>
+      </ul>
     </div>
     <div>
-      <h3>왜 아직 못 하나 — 직접 확인한 사실</h3>
-      <p class="quiet"><b>국내 거래소는 약관이 서브파티 접근을 금지</b>합니다. 요청해서 되는 문제가 아니라 제도가 바뀌어야 하는 문제입니다. <em>직전 제품을 만들며 직접 부딪혀 확인했습니다.</em></p>
-      <p><strong>그래서 해외 거래소부터 연다.</strong> 해외는 읽기 전용 연동이 가능하고, POI 의 타겟도 글로벌입니다. 국내는 열리면 붙입니다.</p>
+      <h3>가장 큰 반론이 좁아집니다</h3>
+      <p class="quiet"><b>「좋은 판단만 골라 기록하면?」</b></p>
+      <p>선언한 지갑에서는 <strong>그 지갑의 모든 거래가 보입니다.</strong> 거래는 있는데 결정이 없으면 그것도 드러납니다.</p>
+      <p class="quiet">다른 지갑을 쓰면 여전히 빠져나갑니다. 완전히 풀리지는 않습니다. 다만 <b>「선언한 지갑 안에서의 완전성」</b>은 증명됩니다 — 지금은 그것조차 없습니다.</p>
+      <div class="note"><b>중앙화 거래소</b>는 사용자가 자기 세션에서 증명을 만드는 방식(zkTLS)을 검토 중입니다. API 키를 받지 않으므로 서브파티 접근이 아닙니다. <b>약관 검토 전까지는 계획에 넣지 않습니다.</b></div>
     </div>
   </div>
-  <p class="lede eave">①②는 <strong>남의 허락 없이 오늘 돌고 있습니다.</strong> ③이 안 열려도 제품은 「말한 것」까지 증명하는 형태로 남습니다 — <em>로드맵 전체가 남의 손에 걸려 있지 않다.</em></p>
+  <p class="src"><b>실측</b> — 공개 API 로 지갑 단위 체결·구간 조회·술어 판정·재현성을 확인했습니다. 온체인에 올리는 것은 방향·건수·수량·평균가를 정규화한 <b>189바이트 요약</b>이고, 개별 체결과 잔고는 올리지 않습니다.</p>
 </section>
 <section class="slide dense">
-  <div class="tag">Ⅳ. 제품 <b>왜 GIWA 위에 지었나</b></div>
+  <div class="tag">Ⅳ. 제품 <b>왜 이 구조인가</b></div>
   <h2>기록 비용이 <em>1/702</em> 라 판단을 자주 남길 수 있습니다</h2>
   <div class="cols">
     <div>
       <h3>① 커밋 1건에 얼마인가</h3>
       <div class="tblwrap"><table>
-        <tr><td>GIWA</td><td class="hot"><b>1.21원</b></td><td class="quiet">연 36건 = 44원</td></tr>
+        <tr><td>L2 (현재)</td><td class="hot"><b>1.21원</b></td><td class="quiet">연 36건 = 44원</td></tr>
         <tr><td>이더리움 L1</td><td>850원</td><td class="quiet">연 36건 = 30,600원</td></tr>
       </table></div>
-      <p class="quiet">약 <b>702배</b> 차입니다 (실측 · 영수증 기준). 커밋이 수천 원이면 사람들은 <b>중요한 판단만 가끔</b> 남깁니다. 그러면 「판단을 반복해서 남기는가」라는 질문 자체를 물을 수 없습니다.</p>
+      <p class="quiet">약 <b>702배</b> 차이입니다 (실측 · 영수증 기준). 커밋이 수천 원이면 사람들은 <b>중요한 판단만 가끔</b> 남깁니다. 그러면 「판단을 반복해서 남기는가」라는 질문 자체를 물을 수 없습니다.</p>
       <p><strong>비용이 빈도를 정하고, 빈도가 기록의 해상도를 정합니다.</strong></p>
     </div>
     <div>
       <h3>② 새 신뢰 축을 세우지 않습니다</h3>
-      <div class="tblwrap"><table>
-        <tr><td>증명 기록 표준</td><td>GIWA 에 <b>기본 탑재</b>된 EAS 를 그대로 쓴다<br><span class="quiet">스키마·발급·철회·참조를 재구현하지 않습니다</span></td></tr>
-        <tr><td>신원</td><td>GIWA <b>도장</b>의 검증 지갑을 붙입니다 <span class="s-lab">연동 완료</span><br><span class="quiet">받아 본 것은 파우셋 발급분 · KYC 경로는 미검증</span></td></tr>
-      </table></div>
-      <p class="quiet">「누가 말했는가」를 우리가 새로 인증하지 않습니다. <b>이미 있는 인증 위에 얹습니다.</b></p>
+      <ul class="bul">
+        <li><b>증명 기록 표준을 만들지 않습니다</b><span class="d">체인에 기본 탑재된 EAS 를 그대로 씁니다. 스키마·발급·철회·참조를 재구현하지 않습니다</span></li>
+        <li><b>신원을 우리가 인증하지 않습니다</b><span class="d">이미 있는 검증 지갑을 붙입니다 — 「누가 말했는가」를 남의 인증 위에 얹습니다</span></li>
+      </ul>
+      <div class="note"><b>이 논거는 특정 체인에 묶이지 않습니다.</b> 지금은 테스트넷에서 돌고 있고, 메인넷은 같은 조건 — <b>EAS 기본 탑재 + 신원 증명 발급처</b> — 을 갖춘 곳 중에서 고릅니다. 현재 <b>Base</b> 를 우선 검토 중입니다. Coinbase 가 발행하는 계정·국가 증명이 같은 방식으로 붙고, 국가 증명은 규제 대응에도 쓸 수 있습니다.</div>
     </div>
   </div>
-  <p class="lede eave">GIWA 는 두나무가 만든 L2 다. <strong>업비트 사용자와 같은 생태계에서 시작할 수 있다는 것</strong>이, 판단을 남길 사람이 실제로 있는 곳에서 검증한다는 뜻입니다.</p>
 </section>
 <section class="slide">
   <div class="tag">Ⅳ. 제품 <b>로드맵</b></div>
@@ -654,7 +659,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 
     <rect x="40"  y="76" width="132" height="20" fill="var(--seal)"/>
     <rect x="178" y="76" width="132" height="20" fill="none" stroke="var(--rule)" stroke-width="1"/>
-    <rect x="316" y="76" width="132" height="20" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1"/>
+    <rect x="316" y="76" width="132" height="20" fill="none" stroke="var(--rule)" stroke-width="1"/>
     <rect x="453" y="76" width="132" height="20" fill="none" stroke="var(--rule)" stroke-width="1"/>
     <rect x="590" y="76" width="132" height="20" fill="var(--seal-dim)" stroke="var(--seal)" stroke-width="1"/>
     <rect x="727" y="76" width="133" height="20" fill="none" stroke="var(--gold)" stroke-width="1"/>
@@ -666,8 +671,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
        <text class="s-txt" x="244" y="139" text-anchor="middle" font-size="12">수요 검증 · 영입</text>
        <text class="s-lab" x="244" y="157" text-anchor="middle">자체</text></g>
     <g><text class="s-txt" x="382" y="120" text-anchor="middle">2단계</text>
-       <text class="s-txt" x="382" y="139" text-anchor="middle" font-size="12">해외 거래소 · 오라클</text>
-       <text class="s-lab" x="382" y="157" text-anchor="middle" fill="var(--seal)">외부 의존</text></g>
+       <text class="s-txt" x="382" y="139" text-anchor="middle" font-size="12">실행 정합성 · 오라클</text>
+       <text class="s-lab" x="382" y="157" text-anchor="middle">자체 구현</text></g>
     <g><text class="s-txt" x="519" y="120" text-anchor="middle">3단계</text>
        <text class="s-txt" x="519" y="139" text-anchor="middle" font-size="12">메인넷 · 조회 API</text>
        <text class="s-lab" x="519" y="157" text-anchor="middle">자체 · 과금 개시</text></g>
@@ -679,7 +684,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
        <text class="s-lab" x="793" y="157" text-anchor="middle">BEP 판단</text></g>
 
   </svg>
-  <figcaption><b>각 단계 끝에 멈출 수 있는 지점을 뒀습니다.</b> 3·6·12·18개월 게이트를 넘지 못하면 그 시점에서 멈춥니다 — 기준은 <b>검증 마일스톤</b> 장에 있습니다.<br>
+  <figcaption><b>외부에 걸린 단계는 4단계 하나뿐입니다.</b> 실행 정합성은 온체인 거래소로 <b>허락 없이</b> 엽니다 — 15쪽에 실측 근거가 있습니다.<br><b>각 단계 끝에 멈출 수 있는 지점을 뒀습니다.</b> 3·6·12·18개월 게이트를 넘지 못하면 그 시점에서 멈춥니다 — 기준은 <b>검증 마일스톤</b> 장에 있습니다.<br>
   <b>출시 여부를 판단할 숫자는 지금 못 박지 않습니다.</b> 4단계 30일 공개 실험의 실사용 데이터를 보고 정합니다.</figcaption>
   </figure>
 </section>
