@@ -7,11 +7,28 @@
 submit-yoonmin/
   README.md                이 파일 — 제출 절차와 점검표
   latest -> v3.1_2026-08-04
-  v3.1_2026-08-04/
+
+  v3.1_2026-08-04/         ← 실제로 제출하는 것
     FORM_TEXT.txt          온라인 지원서 24문항 붙여넣기용 원문
     POI_사업계획서_v3.1_2026-08-04.pdf   25쪽 · 4.3MB
     SHA256SUMS.txt
+
+  source/                  제출물을 만드는 원본
+    deck.html              사업계획서 소스 (여기서 PDF 를 뽑는다)
+    landing.html           소개 페이지 소스 — 배포본은 bo621.github.io/calledit
+    shots/                 화면 캡처
+
+  guide/                   작성 근거와 절차
+    YOONMIN-FORM.md        문항별 판단 근거와 주의점
+    YOONMIN-APPLICATION.md 덱을 어떻게 만들었나
+    FINAL-5DAY.md          마감 5일 실행 계획과 진행 기록
+
+  v1.0 ~ v3.0/             이전 제출본 (이력)
 ```
+
+> **이름** — 사업계획서와 프로토콜은 **POI**, 소개 페이지의 제품명은 **Calledit** 입니다.
+> `poi.decision.v1` 같은 온체인 스키마가 이미 박혀 있어 프로토콜 이름은 바꿀 수 없고,
+> 제품명만 분리했습니다. 25쪽에 그 관계를 적어 두었습니다.
 
 `FORM_TEXT.txt` 는 **┌ 와 └ 사이만** 폼에 붙여넣습니다. 나머지 줄은 메모입니다.
 
@@ -82,7 +99,7 @@ submit-yoonmin/
 □ 4-3 대표 줄에 나이를 추가했는가 (항목이 나이를 요구함)
 □ 5-2 5-3 에서 베스탯과 POI 를, 「현재」와 「계획」을 구분했는가
 □ 3-3 3-4 를 인터뷰 결과로 갱신했는가
-□ 사업계획서 PDF 를 첨부했는가 (ac9b268b…)
+□ 사업계획서 PDF 를 첨부했는가 (bb570cb3…)
 □ 제출 후 접수 확인 메일을 받았는가
 ```
 
@@ -92,10 +109,10 @@ submit-yoonmin/
 
 | | |
 |---|---|
-| [지원서 작성 가이드](../docs/plans/YOONMIN-FORM.md) | 문항별 판단 근거와 주의점 |
+| [지원서 작성 가이드](guide/YOONMIN-FORM.md) | 문항별 판단 근거와 주의점 |
 | [접촉 계획](../docs/plans/OUTREACH-6DAY.md) | 6일 안에 무엇을 할 수 있나 |
 | [인터뷰 질문지](../docs/plans/DEMAND-INTERVIEW.md) | 진짜 수요와 예의를 가르는 기준 |
-| [진행 기록](../docs/plans/YOONMIN-APPLICATION.md) | 덱을 어떻게 만들었나 |
+| [진행 기록](guide/YOONMIN-APPLICATION.md) | 덱을 어떻게 만들었나 |
 
 ---
 
