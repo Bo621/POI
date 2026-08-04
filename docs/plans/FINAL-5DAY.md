@@ -245,11 +245,41 @@ safeTxHash  0x4dd353b8801acb884c1cc641ac0d9467977148dca90c59d6f1e959effbc7349b
             0x77E8… 잔고 0.03 ETH — approveHash 에 충분
 ```
 
+### 1.4 · 1.5 완료 — 온체인 기록이 생겼다
+
+```
+1.4  지표 등록
+     tx      0xeb500224fe440fb9936103735a473f254fd3ce5ae367ebfdedd99718259e5219
+     블록    32473689 · status 1
+     조회    allowed true · decimals 8 · kind 0 · frozen true
+     대표가 크롬 지갑으로 approveHash 승인 → Claude 가 execTransaction 실행
+
+1.5  결정 커밋
+     tx      0x4be0cbc75242ffc8fead4d0e1c87bc7b6e359069c82d1d4d6c3a24b8047e0a71
+     UID     0xc4aeba55a2e812b92d65e6843f8a065b990def7a41dc8bf34f1dc5bb7126dd9d
+     블록    32473806 · status 1
+     구간    1785819208 ~ 1785822808  (60분)
+     술어    HL_PERP_OPEN_LONG_QTY > 0
+```
+
+> ### ⚠️ 이 결정이 증명하는 것과 아닌 것 — 정확히 적는다
+>
+> 우리는 그 지갑을 통제하지 않는다. 그래서 「내가 말한 대로 내가 거래했다」가
+> **아니다.** payload 에도 그렇게 적었다 — `third-party prediction, not self-execution`.
+>
+> ```
+> ✅ 증명됨   온체인 거래 데이터를 POI 의 지표로 쓸 수 있다
+>            결과 전에 술어를 고정하고 컨트랙트가 판정한다
+>            제3자가 공개 API 로 같은 값을 재현한다
+> ⬜ 아직     실행 정합성 — 본인 지갑 바인딩. 지갑 소유 증명이 남은 조각이다
+> ```
+>
+> 사업계획서에도 이 구분을 그대로 쓴다. 「실행 정합성을 해냈다」고 쓰면 방문평가에서
+> 무너진다.
+
 ### 다음
 
 ```
-1.4  대표 승인 → execute
-1.5  결정 커밋      구간을 지금+5분 ~ +65분 정도로
-1.6  관측          구간 종료 후 hl-observe.py
-1.7  정산          관측값으로 브로드캐스트
+1.6  관측   구간 종료 후 scripts/hl-observe.py
+1.7  정산   관측값으로 브로드캐스트 → 화면에서 「맞음」 확인
 ```
