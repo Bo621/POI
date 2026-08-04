@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Safe 승인 — HL_PERP_OPEN_LONG_QTY 지표 등록</title>
+<style>
+  :root{
+    --seal:#1B4FD8; --seal-dim:#E8EDF9; --ok:#0E7A55; --warn:#B0770C;
+    --ink:#161A22; --ink-soft:#49505F; --ink-faint:#798296;
+    --paper:#F6F8FC; --card:#fff; --rule:#E2E7F0;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);
+    font:400 15px/1.65 -apple-system,"Pretendard",system-ui,sans-serif;
+    padding:2.5rem 1.5rem;display:flex;justify-content:center}
+  main{width:min(100%,720px)}
+  h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.3rem}
+  .sub{color:var(--ink-soft);margin-bottom:1.8rem}
+  .card{background:var(--card);border-radius:14px;padding:1.3rem 1.4rem;
+    box-shadow:0 1px 2px rgba(22,26,34,.04),0 6px 20px rgba(27,79,216,.06);margin-bottom:1rem}
+  .card h2{font-size:.78rem;font-weight:700;letter-spacing:.1em;color:var(--seal);margin-bottom:.9rem}
+  dl{display:grid;grid-template-columns:8.5rem 1fr;gap:.55rem 1rem}
+  dt{color:var(--ink-faint);font-size:.86rem}
+  dd{font-family:var(--mono);font-size:.78rem;word-break:break-all;line-height:1.55}
+  dd.plain{font-family:inherit;font-size:.9rem}
+  button{font:600 .95rem/1 inherit;padding:.85rem 1.4rem;border-radius:10px;border:1px solid var(--rule);
+    background:var(--card);color:var(--ink);cursor:pointer;transition:.15s}
+  button:hover:not(:disabled){border-color:var(--seal);color:var(--seal)}
+  button.go{background:var(--seal);color:#fff;border-color:var(--seal)}
+  button.go:hover:not(:disabled){filter:brightness(1.1);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+  #log{margin-top:1rem;font-family:var(--mono);font-size:.78rem;line-height:1.7;white-space:pre-wrap}
+  .ok{color:var(--ok);font-weight:600}
+  .bad{color:#C0392B;font-weight:600}
+  .warn{color:var(--warn);font-weight:600}
+  .note{background:var(--seal-dim);border-radius:10px;padding:.8rem 1rem;font-size:.87rem;
+    color:var(--ink-soft);margin-top:.9rem}
+  .note b{color:var(--seal);font-weight:700}
+  a{color:var(--seal)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Safe 승인 한 번</h1>
+  <p class="sub">지표 <b>HL_PERP_OPEN_LONG_QTY</b> 를 레지스트리에 등록합니다. 2-of-2 중 한 표입니다.</p>
+
+  <div class="card">
+    <h2>무엇을 보내나</h2>
+    <dl>
+      <dt>보내는 곳</dt><dd id="to"></dd>
+      <dt>함수</dt><dd class="plain">approveHash(bytes32) — 이 해시를 승인한다는 뜻입니다</dd>
+      <dt>승인할 해시</dt><dd id="txhash"></dd>
+      <dt>보내는 값</dt><dd class="plain">0 ETH (가스만 듭니다)</dd>
+      <dt>보낼 주소</dt><dd id="need"></dd>
+    </dl>
+    <div class="note">
+      이 승인 자체로는 <b>아무 일도 일어나지 않습니다.</b> Safe 에 「이 트랜잭션에 동의한다」를
+      기록할 뿐이고, 실제 등록은 두 표가 모인 뒤 별도로 실행됩니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>승인되면 실행될 내용</h2>
+    <dl>
+      <dt>대상</dt><dd id="reg"></dd>
+      <dt>호출</dt><dd class="plain">addMetric(metricId, spec)</dd>
+      <dt>metricId</dt><dd id="mid"></dd>
+      <dt>definitionHash</dt><dd id="def"></dd>
+      <dt>spec</dt><dd class="plain">allowed true · decimals 8 · kind 0 · frozen true</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>실행</h2>
+    <div class="row">
+      <button id="conn">지갑 연결</button>
+      <button id="go" class="go" disabled>승인 보내기</button>
+      <button id="chk">상태 새로고침</button>
+    </div>
+    <div id="log">지갑을 연결하세요.</div>
+  </div>
+</main>
+
+<script>
+const SAFE  = "0x215253B830D51df7f8364fF6dA32140006E4DCE1";
+const REG   = "0x0f25917176a405bb9022e5b417e0d57348b30f89";
+const NEED  = "0x77E8DFC44Da9A9eaF71D341c9285ad6BA3C2dfaa";   // 두 번째 소유자
+const TXH   = "0x4dd353b8801acb884c1cc641ac0d9467977148dca90c59d6f1e959effbc7349b";
+const MID   = "0x6c02f2a190b1aaf8d2b9f33160683a9878bb3a46fb71b06bf389d9d2ac3edff5";
+const DEF   = "0x13b91bb8b4d6a2705c580e9e3cfb317c85aa132875df1630eae82993ec92d026";
+const CHAIN = { chainId:"0x164CE", chainName:"GIWA Sepolia",
+  nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18},
+  rpcUrls:["https://sepolia-rpc.giwa.io/"], blockExplorerUrls:["https://sepolia-explorer.giwa.io"] };
+
+// approveHash(bytes32) 셀렉터 + 해시
+const DATA = "0xd4d9bdcd" + TXH.slice(2);
+
+for (const [id,v] of [["to",SAFE],["txhash",TXH],["need",NEED],["reg",REG],["mid",MID],["def",DEF]])
+  document.getElementById(id).textContent = v;
+
+const log = document.getElementById("log");
+const say = (h) => { log.innerHTML = h; };
+let acct = null;
+
+async function rpc(method, params) {
+  const r = await fetch(CHAIN.rpcUrls[0], {method:"POST",headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({jsonrpc:"2.0",id:1,method,params})});
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
+
+// approvedHashes(address,bytes32) 를 읽어 지금 승인 상태를 본다
+async function checkApproved() {
+  const sel = "0x7d832974";
+  const data = sel + NEED.slice(2).toLowerCase().padStart(64,"0") + TXH.slice(2);
+  const out = await rpc("eth_call", [{to:SAFE, data}, "latest"]);
+  return BigInt(out) === 1n;
+}
+async function checkRegistered() {
+  const sel = "0xdcaa79af"; // metrics(bytes32)
+  try {
+    const out = await rpc("eth_call", [{to:REG, data: sel + MID.slice(2)}, "latest"]);
+    return out !== "0x" && BigInt("0x"+out.slice(2,66)) === 1n;
+  } catch { return false; }
+}
+
+async function refresh() {
+  try {
+    const [a, r] = await Promise.all([checkApproved(), checkRegistered()]);
+    let s = a ? `<span class="ok">✅ 이미 승인돼 있습니다.</span> 다시 보낼 필요가 없습니다.`
+              : `⬜ 아직 승인 전입니다.`;
+    if (r) s += `\n<span class="ok">✅ 지표가 이미 등록됐습니다.</span> 이 페이지의 일은 끝났습니다.`;
+    say(s);
+    document.getElementById("go").disabled = !acct || a || r;
+  } catch (e) { say(`<span class="bad">상태 조회 실패</span> — ${e.message}`); }
+}
+
+document.getElementById("conn").onclick = async () => {
+  if (!window.ethereum) return say(`<span class="bad">지갑이 없습니다.</span> MetaMask 같은 확장을 설치하세요.`);
+  try {
+    const acc = await window.ethereum.request({method:"eth_requestAccounts"});
+    acct = acc[0];
+    try { await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:CHAIN.chainId}]}); }
+    catch (e) { if (e.code === 4902) await window.ethereum.request({method:"wallet_addEthereumChain",params:[CHAIN]}); else throw e; }
+
+    if (acct.toLowerCase() !== NEED.toLowerCase()) {
+      document.getElementById("go").disabled = true;
+      return say(`<span class="warn">계정이 다릅니다.</span>\n연결됨 ${acct}\n필요함 ${NEED}\n\n지갑에서 두 번째 소유자 계정으로 바꿔 주세요.`);
+    }
+    say(`<span class="ok">연결됨</span> ${acct}\n상태를 확인합니다…`);
+    await refresh();
+  } catch (e) { say(`<span class="bad">연결 실패</span> — ${e.message}`); }
+};
+
+document.getElementById("go").onclick = async () => {
+  document.getElementById("go").disabled = true;
+  try {
+    say("지갑에서 승인 창을 확인하세요…");
+    const tx = await window.ethereum.request({method:"eth_sendTransaction",
+      params:[{from:acct, to:SAFE, value:"0x0", data:DATA}]});
+    say(`보냈습니다.\n<a href="${CHAIN.blockExplorerUrls[0]}/tx/${tx}" target="_blank">${tx}</a>\n\n채굴을 기다립니다…`);
+    for (let i=0;i<60;i++) {
+      await new Promise(r=>setTimeout(r,2000));
+      const rec = await rpc("eth_getTransactionReceipt",[tx]);
+      if (rec) {
+        if (BigInt(rec.status) === 1n) {
+          say(`<span class="ok">✅ 승인 완료</span>\n<a href="${CHAIN.blockExplorerUrls[0]}/tx/${tx}" target="_blank">${tx}</a>\n\n이제 실행 단계로 넘어가면 됩니다.`);
+          await refresh();
+        } else {
+          say(`<span class="bad">되돌아갔습니다</span>\n${tx}`);
+        }
+        return;
+      }
+    }
+    say(`아직 채굴되지 않았습니다. 익스플로러에서 확인하세요.\n${tx}`);
+  } catch (e) {
+    say(`<span class="bad">실패</span> — ${e.message}`);
+    document.getElementById("go").disabled = false;
+  }
+};
+
+document.getElementById("chk").onclick = refresh;
+refresh();
+</script>
+</body>
+</html>
