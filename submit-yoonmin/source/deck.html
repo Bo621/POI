@@ -326,7 +326,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 <section class="slide" data-key>
   <div class="tag">요약 <b>한 장으로 보는 POI</b></div>
   <h2>결과를 알기 전에 고정하고, <em>선언한 기준대로 다시 계산합니다</em></h2>
-  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제합니다. <span class="quiet">관측값 자체의 진실성은 보장하지 않습니다 — 8쪽 「무엇을 못 하게 만드나」.</span></p>
+  <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제합니다. <span class="quiet">관측값이 참인지는 컨트랙트가 판정할 수 있는 영역 밖입니다 — 8쪽 「무엇을 못 하게 만드나」.</span></p>
   <div class="steps">
     <div class="step" data-n="STEP 01">
       <h4>판단을 적고 잠급니다</h4>
@@ -383,8 +383,8 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td><b>TipRanks</b></td><td>연매출 추정 <b>$20~30M</b><br>MAU 5,000만 · 2024.08 <b>$200M</b> 밸류 인수</td><td>「누가 맞히나」를 파는 회사가 실재합니다. 수익은 <b>확인하는 쪽</b>에서 나옵니다 — 구독 + Nasdaq·Robinhood·Morgan Stanley</td></tr>
     <tr><td><b>크립토 KOL</b></td><td>캠페인 예산 <b>월 $50k~500k</b><br>1만~10만 티어 <b>건당 $1,500~8,000</b></td><td class="hot"><b>돈은 도는데 정확도를 재는 곳이 없습니다.</b> Kaito 는 관심도, Cookie3 는 어트리뷰션을 잽니다 — 「이 사람 말이 맞았나」는 아무도 안 잽니다</td></tr>
   </table></div>
-  <p class="lede eave">빈칸은 하나입니다 — <strong>사전에 고정된 판단.</strong> 우리는 그 빈칸을 <b>크립토 KOL</b> 에서 먼저 채웁니다. 기존 서비스는 전부 <em>사후에 관찰</em>하고, 그래서 지운 사람과 안 지운 사람을 구별하지 못합니다.</p>
-  <p class="src"><b>왜 국내가 아니라 글로벌인가</b> — 국내는 유료 뉴스레터 시장이 아직 얕고(롱블랙 월 4,900원), <b>거래소 약관이 서브파티 접근을 금지</b>해 실행 정합성이 열리지 않습니다. 해외 거래소는 가능합니다.<br><b>출처</b> — Substack 2025 지표 · Calcalist·Finance Magnates 2024.08(TipRanks 인수) · 매출은 <b>외부 추정치</b> · KOL 단가는 <b>에이전시 공개 단가표</b>(cryptokolz·cointraffic 등)라 실거래가와 다를 수 있습니다 · Kaito·Cookie3 공식 문서</p>
+  <p class="lede eave">비어 있는 자리는 <strong>사전에 고정된 판단</strong>입니다. 우리는 그 자리를 <b>크립토 KOL</b> 에서 먼저 채웁니다. 기존 서비스는 전부 <em>사후에 관찰</em>하고, 그래서 지운 사람과 안 지운 사람을 구별하지 못합니다.</p>
+  <p class="src"><b>국내를 먼저 열지 않는 이유가 있습니다.</b> 유료 뉴스레터 시장이 아직 얕고(롱블랙 월 4,900원), <b>거래소 약관이 서브파티 접근을 금지</b>해 실행 정합성이 열리지 않습니다. 해외 거래소는 가능합니다.<br><b>출처</b> — Substack 2025 지표 · Calcalist·Finance Magnates 2024.08(TipRanks 인수) · 매출은 <b>외부 추정치</b> · KOL 단가는 <b>에이전시 공개 단가표</b>(cryptokolz·cointraffic 등)라 실거래가와 다를 수 있습니다 · Kaito·Cookie3 공식 문서</p>
 </section>
 <section class="slide">
   <div class="tag">Ⅰ. 문제와 시장 <b>타겟 · 시장</b></div>
@@ -456,7 +456,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
         <li><b>보장</b><span class="d">위 세 가지 · 결정 간 선후 관계 · 결정 철회 불가</span></li>
         <li><b>미보장</b><span class="d">관측값의 진실성 · 이유의 진실성 · 실제 거래와의 정합성 · <b>기록의 완전성</b></span></li>
       </ul>
-      <div class="note">발행자에게 남는 자유는 <b>관측값 하나</b>입니다. 그 값이 참인지는 컨트랙트가 보장하지 않습니다. 대신 <b>공개 데이터로 재현</b>할 수 있게 만들고, 어긋나면 <b>제3자가 이의를 온체인에</b> 남기게 했습니다 — 발행자가 그 이의를 지울 수 없습니다.</div>
+      <div class="note">발행자가 직접 정하는 값은 <b>관측값</b>뿐입니다. 그 값이 참인지는 컨트랙트 밖의 문제입니다. 대신 <b>공개 데이터로 재현</b>할 수 있게 만들고, 어긋나면 <b>제3자가 이의를 온체인에</b> 남기게 했습니다 — 발행자가 그 이의를 지울 수 없습니다.</div>
     </div>
   </div>
   <p class="lede eave"><strong>보장하지 못하는 것을 숨기지 않는 것</strong>이 이 제품의 태도입니다. 화면의 모든 목록에 「조회된 것이 전부라는 보장은 없습니다」를 표시하고, <em>건수를 세지 않습니다.</em></p>
@@ -479,7 +479,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <p>팔로워에게 <strong>링크 하나</strong>를 줍니다. 제3자가 직접 대조하고, 틀렸다고 보면 <strong>이의를 온체인에 남깁니다.</strong></p>
     </div>
   </div>
-  <p class="src"><b>실제 사용자 확보는 3개월 게이트에서 검증합니다.</b><br><b>왜 이게 가능한 문제인가</b> — 자본시장연구원은 투자의견이 “주관적 기준에 따른 정성적 정보라 <b>사후적인 검증이나 비교가 매우 어렵다</b>”고 지적합니다. 검증을 어렵게 만드는 것은 데이터가 아니라 <b>판단을 결과 뒤에 고칠 수 있는 구조</b>다.</p>
+  <p class="src"><b>실제 사용자 확보는 3개월 게이트에서 검증합니다.</b><br><b>이 문제가 풀릴 수 있다고 보는 근거가 있습니다.</b> 자본시장연구원은 투자의견이 “주관적 기준에 따른 정성적 정보라 <b>사후적인 검증이나 비교가 매우 어렵다</b>”고 지적합니다. 검증을 어렵게 만드는 것은 데이터가 아니라 <b>판단을 결과 뒤에 고칠 수 있는 구조</b>다.</p>
 </section>
 <section class="slide dense">
   <div class="tag">Ⅲ. 경쟁 <b>경쟁 지형</b></div>
@@ -493,7 +493,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td><b>예측시장</b> <span class="quiet">Polymarket 등</span></td><td>사건의 확률</td><td class="no">사전에 <b>포지션</b>은 고정됩니다 — 다만 <b>남이 연 시장</b>에 베팅이고, 판단·근거·기준은 남지 않습니다</td><td>—</td></tr>
     <tr class="me"><td class="hot"><b>POI</b></td><td class="hot">본인이 사전에 고정한 판단</td><td class="hot">본인 커밋 · <b>컨트랙트 판정</b></td><td>—</td></tr>
   </table></div>
-  <p class="lede eave"><strong>카테고리는 이미 사업이 됐다</strong> — TipRanks 가 증명했습니다. <em>그런데 전부 밖에서 봅니다.</em> 밖에서 보면 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없고, 무엇보다 지운 사람과 안 지운 사람을 구별하지 못합니다.</strong></p>
+  <p class="lede eave"><strong>카테고리는 이미 사업이 됐습니다.</strong> TipRanks 가 그걸 증명합니다. <em>그런데 전부 밖에서 봅니다.</em> 밖에서 보면 대상이 관찰자가 고른 사람으로 제한되고, <strong>기준을 대상자가 동의한 적이 없고, 무엇보다 지운 사람과 안 지운 사람을 구별하지 못합니다.</strong></p>
 </section>
 <section class="slide dense">
   <div class="tag">Ⅲ. 경쟁 <b>차별점</b></div>
@@ -517,7 +517,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       </table></div>
       <p class="quiet">완전성을 보장하지 못하는데 순위를 세우면 <b>순위 자체가 거짓말</b>이 됩니다. 랭킹을 넣는 순간 목적이 무너지므로, 넣을 수 있어도 넣지 않습니다.</p>
       <h3>해자는 시간이 만듭니다</h3>
-      <p class="quiet">기록은 <b>쌓인 뒤에 대체 불가</b>해집니다. 「3년치 사전 커밋 이력」은 나중에 만들 수 없습니다. <b>초기에는 해자가 없습니다</b> — 그래서 공급 확보가 첫 6개월의 유일한 목표입니다.</p>
+      <p class="quiet">기록은 <b>쌓인 뒤에 대체 불가</b>해집니다. 「3년치 사전 커밋 이력」은 나중에 만들 수 없습니다. <b>초기에는 해자가 없습니다.</b> 공급 확보를 첫 6개월의 유일한 목표로 잡은 이유입니다.</p>
     </div>
   </div>
 </section>
@@ -619,7 +619,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <h3>가장 큰 반론이 좁아집니다</h3>
       <p class="quiet"><b>「좋은 판단만 골라 기록하면?」</b></p>
       <p>선언한 지갑에서는 <strong>그 지갑의 모든 거래가 보입니다.</strong> 거래는 있는데 결정이 없으면 그것도 드러납니다.</p>
-      <p class="quiet">다른 지갑을 쓰면 빠져나갑니다. 다만 <b>「선언한 지갑 안에서의 완전성」</b>은 증명됩니다 — 지금은 그것조차 없습니다.</p>
+      <p class="quiet">다른 지갑을 쓰면 빠져나갑니다. 다만 <b>「선언한 지갑 안에서의 완전성」</b>은 증명됩니다. 지금은 그것조차 없는 상태입니다.</p>
       <div class="note"><b>중앙화 거래소</b>는 사용자가 자기 세션에서 증명을 만드는 방식(zkTLS)을 검토 중입니다. API 키를 받지 않으므로 서브파티 접근이 아닙니다. <b>약관 검토 전까지는 계획에 넣지 않습니다.</b></div>
     </div>
   </div>
@@ -644,7 +644,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
         <li><b>증명 기록 표준을 만들지 않습니다</b><span class="d">체인에 기본 탑재된 EAS 를 그대로 씁니다. 스키마·발급·철회·참조를 재구현하지 않습니다</span></li>
         <li><b>신원을 우리가 인증하지 않습니다</b><span class="d">이미 있는 검증 지갑을 붙입니다 — 「누가 말했는가」를 남의 인증 위에 얹습니다</span></li>
       </ul>
-      <div class="note"><b>이 논거는 특정 체인에 묶이지 않습니다.</b> 지금은 테스트넷에서 돌고 있고, 메인넷은 같은 조건 — <b>EAS 기본 탑재 + 신원 증명 발급처</b> — 을 갖춘 곳 중에서 고릅니다. 현재 <b>Base</b> 를 우선 검토 중입니다. Coinbase 가 발행하는 계정·국가 증명이 같은 방식으로 붙고, 국가 증명은 규제 대응에도 쓸 수 있습니다.</div>
+      <div class="note"><b>이 논거는 특정 체인에 묶이지 않습니다.</b> 지금은 테스트넷에서 돌고 있고, 메인넷은 <b>EAS 기본 탑재와 신원 증명 발급처</b>라는 같은 조건을 갖춘 곳 중에서 고릅니다. 현재 <b>Base</b> 를 우선 검토 중입니다. Coinbase 가 발행하는 계정·국가 증명이 같은 방식으로 붙고, 국가 증명은 규제 대응에도 쓸 수 있습니다.</div>
     </div>
   </div>
 </section>
@@ -690,7 +690,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
        <text class="s-lab" x="793" y="157" text-anchor="middle">BEP 판단</text></g>
 
   </svg>
-  <figcaption><b>외부에 걸린 단계는 4단계 하나뿐입니다.</b> 실행 정합성은 온체인 거래소로 <b>허락 없이</b> 엽니다 — 15쪽에 실측 근거가 있습니다.<br><b>각 단계 끝에 멈출 수 있는 지점을 뒀습니다.</b> 3·6·12·18개월 게이트를 넘지 못하면 그 시점에서 멈춥니다 — 기준은 <b>검증 마일스톤</b> 장에 있습니다.<br>
+  <figcaption><b>외부에 걸린 단계는 4단계 한 곳입니다.</b> 실행 정합성은 온체인 거래소로 <b>허락 없이</b> 엽니다 — 15쪽에 실측 근거가 있습니다.<br><b>각 단계 끝에 멈출 수 있는 지점을 뒀습니다.</b> 3·6·12·18개월 게이트를 넘지 못하면 그 시점에서 멈춥니다 — 기준은 <b>검증 마일스톤</b> 장에 있습니다.<br>
   <b>출시 여부를 판단할 숫자는 지금 못 박지 않습니다.</b> 4단계 30일 공개 실험의 실사용 데이터를 보고 정합니다.</figcaption>
   </figure>
 </section>
@@ -721,7 +721,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>검증 수수료</td><td><span class="quiet">후속 가설 · 제3자가 요청</span><br>정기 재검증 · 갱신 · 이의 대응</td></tr>
     <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증합니다. <b>개인정보를 직접 보관하지 않아도 됩니다</b> <span class="s-lab">확장 가설 · 25쪽</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>지금 단계에서 수익화하지 않습니다.</strong> 단가는 아직 정하지 않았습니다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 판단이 쌓이는 속도를 보고 정합니다.</p>
+  <p class="lede eave"><strong>지금 단계에서 수익화하지 않습니다.</strong> 단가는 아직 정하지 않았습니다. <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 쌓이는 속도를 보고 정하려 합니다.</p>
 </section>
 <section class="slide dense">
   <div class="tag">Ⅴ. 사업모델 <b>수익화 순서</b></div>
@@ -734,7 +734,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td><b>12~24개월</b></td><td>B2C 구독</td><td>구독자<br><span class="quiet">검증된 판단이 모이는 피드</span></td><td class="hot">피드는 이미 있습니다 — 남은 것은 판단 밀도</td></tr>
     <tr><td><b>확장</b></td><td>증명 인프라</td><td>RWA 발행사 · 금융기관<br><span class="quiet">투자자 증명을 검증합니다</span></td><td>토큰증권 <b>2027-02-04</b> 시행</td></tr>
   </table></div>
-  <div class="note"><b>왜 이력 증명을 먼저 여는가</b> — 사전 커밋은 <b>새 행동</b>을 요구합니다. 「내가 왜 스스로 족쇄를 차나」가 가장 큰 장벽입니다. 이력 증명은 <b>이미 한 거래</b>를 증명하므로 행동 변화가 없고, <b>같은 인프라를 씁니다.</b> 이걸로 모으고 그 위에 사전 커밋을 얹습니다.</div>
+  <div class="note"><b>이력 증명을 먼저 여는 이유는 채택 장벽입니다.</b> 사전 커밋은 <b>새 행동</b>을 요구합니다. 「내가 왜 스스로 족쇄를 차나」가 가장 큰 장벽입니다. 이력 증명은 <b>이미 한 거래</b>를 증명하므로 행동 변화가 없고, <b>같은 인프라를 씁니다.</b> 이걸로 모으고 그 위에 사전 커밋을 얹습니다.</div>
   <p class="lede eave"><strong>발행자에게 팔지 않습니다.</strong> 국내 유사투자자문업자 2,000곳 전부가 월 10만원을 냅니다 해도 연 25억이고, 현실 침투율이면 사업이 되지 않습니다. <em>돈은 증명을 확인하는 쪽에 있습니다</em> — TipRanks 가 그렇게 벌고 있습니다.</p>
 </section>
 <section class="slide">
@@ -762,7 +762,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <p class="quiet">글로벌 기준입니다. Substack 유료 구독자만 500만이고 금융이 최고가 카테고리라, 1,400명은 국내에서보다 도달 가능한 수다.</p>
     </div>
   </div>
-  <p class="lede eave"><strong>목표 12~18개월.</strong> 전제는 하나입니다 — <em>6개월 안에 공급 100명.</em> 이게 안 되면 뒤의 모든 숫자가 무의미하므로, <strong>가장 먼저 검증합니다.</strong></p>
+  <p class="lede eave"><strong>목표는 12~18개월입니다.</strong> 전제가 하나 있습니다 — <em>6개월 안에 공급 100명.</em> 이게 안 되면 뒤의 모든 숫자가 무의미하므로, <strong>가장 먼저 검증합니다.</strong></p>
 </section>
 <section class="slide dense">
   <div class="tag">Ⅵ. 팀과 실행 <b>팀</b></div>
@@ -772,7 +772,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <h3>직전에 만든 것 — 그리고 접은 이유</h3>
       <p><em>여러 거래소에 흩어진 자산을 한 화면에서 보는 서비스.</em> 6개 거래소를 연동했고, 국책 R&amp;D(창업성장기술개발 디딤돌) <b>1.2억 규모를 선정·수행 완료</b>했습니다.</p>
       <p class="quiet">그런데 <b>국내 거래소 약관이 서브파티 접근을 금지</b>한다는 것을 직접 확인했습니다. 기술이 아니라 약관이 막는 문제라 우리가 풀 수 없었고, 런칭을 접었습니다.</p>
-      <p><strong>VESTAT 은 남의 허락이 있어야 작동하는 구조였습니다.</strong> 약관 하나로 전부 멈췄습니다. 그래서 POI 는 <em>허락이 필요 없는 것부터</em> 만들었습니다 — 「말한 것」은 오늘 이미 돌고, 「한 것」도 온체인 거래소로 허락 없이 엽니다. <span class="quiet">로드맵에서 외부에 걸린 단계는 하나뿐입니다 (17쪽).</span></p>
+      <p><strong>VESTAT 은 남의 허락이 있어야 작동하는 구조였습니다.</strong> 약관 하나로 전부 멈췄습니다. 그래서 POI 는 <em>허락이 필요 없는 것부터</em> 만들었습니다 — 「말한 것」은 오늘 이미 돌고, 「한 것」도 온체인 거래소로 허락 없이 엽니다. <span class="quiet">로드맵에서 외부에 걸린 단계는 4단계 한 곳입니다 (17쪽).</span></p>
     </div>
     <div>
       <h3>지금 팀</h3>
@@ -781,7 +781,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
         <tr><td>법인</td><td>현재 개인사업자 · <b>법인 설립 예정</b></td></tr>
         <tr><td>합류 예정</td><td>백엔드 10년차 <span class="s-lab">확정 전 · 팀 역량으로 세지 않음</span><br><span class="quiet">스마트 컨트랙트 기반 경매 시스템 구축 경험</span></td></tr>
       </table></div>
-      <p class="quiet"><b>2인으로 글로벌을 어떻게 하나</b> — 첫 6개월은 <b>크립토 KOL 100명 확보</b> 하나에만 집중합니다. 온라인으로 되는 일이고, 그 뒤 단계는 그것이 된 다음에 판단합니다.</p>
+      <p class="quiet"><b>2인으로 글로벌을 감당하려면 범위를 좁혀야 합니다.</b> 첫 6개월은 <b>크립토 KOL 100명 확보</b>에만 집중합니다. 온라인으로 되는 일이고, 그 뒤 단계는 그것이 된 다음에 판단합니다.</p>
     </div>
   </div>
   <p class="lede eave">컨트랙트 · 프론트엔드 · 오프체인 검증기 · 문서를 <strong>1인이 전부 만들었습니다.</strong> 지금 공개 URL 에서 지갑 없이 확인할 수 있는 것이 그 결과입니다.</p>
@@ -798,7 +798,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td>거래소 이상거래 탐지 0→1</td><td>선점 · 다중지갑 · 복사 공격을 설계 단계에서 차단</td></tr>
     <tr><td><b>6개 거래소 API 연동 · 데이터 정규화</b><br><span class="quiet">직전 제품 (VESTAT)</span></td><td><b>실행 정합성 연동</b> — 온체인 거래소부터 <span class="quiet">(15쪽)</span> · 검증기 운영화와 조회 API <span class="quiet">(23쪽)</span></td></tr>
   </table></div>
-  <p class="lede eave"><strong>1인이 어떻게 여기까지 만들었나</strong> — 기획을 문서로 먼저 확정하고, 구현과 리뷰를 분리하고, 테스트를 게이트로 뒀습니다. 그 체계가 실제로 잡아낸 것들이 있습니다 — 화면의 조건 기호 6개가 전부 틀리게 표시되던 것, 심사자가 실행하면 실패했을 검증 명령, 길이를 유지한 payload 변조. <em>앞의 둘은 단위 테스트가 통과하는 동안 살아 있었습니다.</em></p>
+  <p class="lede eave"><strong>1인이 여기까지 만든 방법은 체계였습니다.</strong> 기획을 문서로 먼저 확정하고, 구현과 리뷰를 분리하고, 테스트를 게이트로 뒀습니다. 그 체계가 실제로 잡아낸 것들이 있습니다 — 화면의 조건 기호 6개가 전부 틀리게 표시되던 것, 심사자가 실행하면 실패했을 검증 명령, 길이를 유지한 payload 변조. <em>앞의 둘은 단위 테스트가 통과하는 동안 살아 있었습니다.</em></p>
 </section>
 <section class="slide dense">
   <div class="tag">Ⅵ. 팀과 실행 <b>자금 사용 계획</b></div>
@@ -811,7 +811,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
     <tr><td><b>15%</b></td><td>인프라 · 감사</td><td>RPC · 인덱서 · <b>소비자 앱 운영</b> · 외부 보안 감사 착수</td></tr>
     <tr><td><b>5%</b></td><td>법인 · 법무</td><td>법인 설립 · 글로벌 서비스 약관 검토</td></tr>
   </table></div>
-  <p class="lede eave">채용은 인원 보강이 아니라 <strong>매출 경로를 여는 비용</strong>입니다. 조회 API 가 없으면 6~12개월 차 B2B 수익이 시작되지 않습니다. <span class="quiet">그리고 처음 하는 일이 아닙니다 — 국책 과제 기간에 <b>직원 2명</b>과 함께 수행했고, 과제 종료 후 감당할 수 없게 되자 정리했습니다.</span></p>
+  <p class="lede eave">채용은 인원 보강이 아니라 <strong>매출 경로를 여는 비용</strong>입니다. 조회 API 가 없으면 6~12개월 차 B2B 수익이 시작되지 않습니다. <span class="quiet">그리고 처음 하는 일이 아닙니다. 국책 과제 기간에 <b>직원 2명</b>과 함께 수행했고, 과제 종료 후 감당할 수 없게 되자 정리했습니다.</span></p>
 </section>
 <section class="slide">
   <div class="tag">Ⅵ. 팀과 실행 <b>검증 마일스톤</b></div>
@@ -830,7 +830,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <div class="tag">Ⅵ. 팀과 실행 <b>확장</b></div>
   <h2>고정할 내용만 바꾸면 <em>같은 구조로 확장</em>됩니다</h2>
   <div class="note">아래 표에서 <b>「완료」가 아닌 항목은 현재 제품 범위가 아니라</b>, 핵심 가설을 검증한 뒤의 확장 가능성입니다. 12개월 로드맵과 자금 사용 계획에는 포함하지 않았습니다.</div>
-  <p class="lede">POI 가 하는 일은 <strong>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인합니다」</strong> 입니다. 컨트랙트는 <strong>고정된 내용이 무엇인지 보지 않습니다</strong> — 해시와 구간, 산술만 검사합니다. 그래서 <strong>고정할 내용만 바꾸면 다른 것도 같은 방식으로 증명됩니다.</strong> <em>아래 두 번째 줄이 실제로 해 본 기록입니다.</em></p>
+  <p class="lede">POI 가 하는 일은 <strong>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인합니다」</strong> 입니다. 컨트랙트는 <strong>고정된 내용이 무엇인지 보지 않습니다.</strong> 해시와 구간, 산술만 검사합니다. 그래서 <strong>고정할 내용만 바꾸면 다른 것도 같은 방식으로 증명됩니다.</strong> <em>아래 두 번째 줄이 실제로 해 본 기록입니다.</em></p>
   <div class="tblwrap"><table>
     <tr><th>무엇을</th><th>어떻게</th><th>무엇이 필요한가</th></tr>
     <tr><td>투자 판단</td><td>「이 판단을 그때 했습니다」 <span class="quiet">— 지금 하는 것</span></td><td class="no">완료</td></tr>
