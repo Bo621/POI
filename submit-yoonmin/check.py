@@ -61,6 +61,26 @@ def main():
         "6-1 첨부 표기가 실제 파일과 일치",
         f"표기 {m.group(0) if m else '없음'} · 실제 {pages}쪽 {mb:.1f}MB")
 
+    # 텍스트 레이어와 링크 — 스크린샷으로 만든 PDF 는 여기서 걸린다
+    def run(cmd):
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True, timeout=60).stdout
+        except Exception:
+            return None
+    txt = run(["pdftotext", pdf, "-"])
+    if txt is None:
+        print("  ⚠️  pdftotext 없음 — 텍스트 레이어를 검사하지 못했습니다")
+    else:
+        chk(len(txt) > 5000, f"텍스트 레이어 {len(txt):,}바이트",
+            "0 이면 이미지 PDF — 심사자가 검색·복사할 수 없습니다")
+    urls = run(["pdfinfo", "-url", pdf])
+    if urls is None:
+        print("  ⚠️  pdfinfo 없음 — 링크를 검사하지 못했습니다")
+    else:
+        found = {l.split()[-1] for l in urls.strip().split("\n")[1:] if l.strip()}
+        chk(any("railway.app" in u or "calledit" in u for u in found),
+            f"클릭 가능한 링크 {len(found)}종", " · ".join(sorted(found)[:2]))
+
     # 체크섬
     for line in open(os.path.join(LATEST, "SHA256SUMS.txt")).read().strip().split("\n"):
         h, name = line.split("  ", 1)

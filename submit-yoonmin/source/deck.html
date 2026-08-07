@@ -181,36 +181,42 @@ a{color:var(--seal);text-decoration-thickness:1px;text-underline-offset:3px}
    인쇄할 때는 18장이 전부 각각 한 페이지가 되어야 한다.
    이게 없으면 현재 보고 있는 슬라이드 하나만 인쇄된다. */
 @media print {
-  @page { size: 297mm 167mm; margin: 0; }   /* 16:9 가로 */
-  html, body { height: auto; overflow: visible; background: #F6F8FC; }
-  body { font-size: 11pt; }
+  /* 화면 조판을 그대로 종이에 옮긴다.
+     mm 로 잡으면 clamp(...vw) 가 다르게 풀려 한 장이 여러 쪽으로 쪼개진다.
+     화면과 같은 1600x900 px 로 고정하면 vw 기준이 같아져 1장=1쪽이 된다. */
+  @page { size: 1600px 900px; margin: 0; }
+  html, body { width: 1600px; height: auto; overflow: visible; background: var(--paper); }
 
   .deck { height: auto; }
   .slide,
   .slide[data-on] {
     display: flex !important;
+    flex-direction: column;      /* 화면의 .slide[data-on] 이 주던 값 — 없으면 가로로 눕는다 */
     position: relative;
     inset: auto;
-    min-height: 167mm;
-    padding: 14mm 18mm;
-    overflow: visible;
+    width: 1600px;
+    height: 900px;
+    overflow: hidden;
     animation: none;
-    justify-content: center;      /* 화면과 같이 세로 가운데 — 없으면 하단이 크게 빈다 */
+    justify-content: center;
     break-after: page;
     page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   .slide:last-child { break-after: auto; page-break-after: auto; }
-  /* 5분 경로 토글이 켜져 있어도 인쇄에는 전부 나온다 */
+  /* 발표 경로 토글이 켜져 있어도 인쇄에는 전부 나온다 */
   body[data-path] .slide:not([data-key]) { display: flex !important; }
 
-  .bar, .nav, .prog { display: none !important; }
-  figure, table, pre, .cols, .shots, .shot, .stats, .ba, .steps { break-inside: avoid; page-break-inside: avoid; }
-  svg { max-width: 100%; }
-  /* 캡처가 페이지를 넘기지 않도록 높이를 묶는다 — 넘치면 다음 쪽에 잔여물이 남는다 */
-  .shot img { max-height: 92mm; object-fit: cover; object-position: top; }
-  .shot-mini img { max-height: 26mm; object-fit: cover; object-position: top; }
+  .bar, .nav, .prog, #live { display: none !important; }
+  /* 마지막 장 뒤에 빈 쪽이 생기지 않게 — 컨테이너가 끝나는 지점을 못 박는다 */
+  main.deck > .slide:last-of-type { break-after: auto !important; page-break-after: auto !important; }
+  figure, table, pre, .cols, .shots, .shot, .stats, .ba, .steps,
+  .bul, .note, .toc { break-inside: avoid; page-break-inside: avoid; }
   a { text-decoration: none; }
   a[href^="http"]::after { content: ""; }   /* URL 중복 출력 방지 */
+  /* 배경·그림자를 인쇄에서도 유지 — printBackground 와 함께 쓴다 */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 @media(max-width:760px){
@@ -319,7 +325,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 <section class="slide" data-key>
   <div class="tag">요약 <b>한 장으로 보는 POI</b></div>
-  <h2>결과를 알기 전에 고정하고, <em>컨트랙트가 판정합니다</em></h2>
+  <h2>결과를 알기 전에 고정하고, <em>선언한 기준대로 다시 계산합니다</em></h2>
   <p class="lede">투자 판단 하나를 온체인에 고정하고, 구간이 끝나면 <strong>발행자가 낸 관측값과 결과가 어긋나지 못하게</strong> 컨트랙트가 산술로 강제합니다. <span class="quiet">관측값 자체의 진실성은 보장하지 않습니다 — 8쪽 「무엇을 못 하게 만드나」.</span></p>
   <div class="steps">
     <div class="step" data-n="STEP 01">
@@ -385,14 +391,14 @@ body[data-path] .slide:not([data-key]){display:none!important}
   <h2><em>영어권 크립토 KOL 중견층</em>부터 시작합니다</h2>
   <div class="cols">
     <div>
-      <h3>첫 대상 — 영어권 크립토 KOL</h3>
+      <h3>첫 검증 대상 — 영어권 크립토 KOL</h3>
       <ul class="bul">
         <li><b>팔로워 1만~10만 중견층</b><span class="d">평판을 쌓는 중이라 증명 수단이 실제로 필요합니다. <b>섭외 단가가 건당 $1,500~8,000</b> 이라 프로젝트도 잘못 고르면 손실이 큽니다</span></li>
         <li>초대형(50만+) 제외<span class="d">이미 평판이 있어 필요가 없고, 연락도 닿지 않습니다</span></li>
         <li>신진(1천~1만) 보조<span class="d">대표성이 부족합니다</span></li>
         <li><b>틀린 것도 지우지 않는 사람만</b><span class="d">지우는 사람은 애초에 이 제품을 쓰지 않습니다</span></li>
       </ul>
-      <p class="quiet">시장 규모와 규제 근거는 <b>4쪽</b>, 왜 국내가 아닌지는 <b>5쪽</b>에 있습니다.</p>
+      <p class="quiet">시장 규모와 규제 근거는 <b>4쪽</b>, 왜 국내가 아닌지는 <b>5쪽</b>에 있습니다.<br><b>이 타겟 적합성은 3개월 안에 사전 커밋 10명으로 검증합니다.</b></p>
     </div>
   </div>
   <div class="tblwrap"><table>
@@ -436,7 +442,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 <section class="slide dense">
   <div class="tag">Ⅱ. 해법 <b>무엇을 못 하게 만드나</b></div>
-  <h2>결과를 보고 나서는 <em>아무것도 바꿀 수 없습니다</em></h2>
+  <h2>결과 뒤에는 <em>커밋·구간·판정 기준을 바꿀 수 없습니다</em></h2>
   <div class="tblwrap"><table>
     <tr><th>막는 것</th><th>그래서 못 하는 일</th></tr>
     <tr><td><b>관측 구간을 과거로 못 잡습니다</b></td><td>지나간 구간을 골라 「그때 맞혔다」고 할 수 없습니다. 커밋 시각보다 뒤여야 합니다</td></tr>
@@ -491,7 +497,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 <section class="slide dense">
   <div class="tag">Ⅲ. 경쟁 <b>차별점</b></div>
-  <h2>사전에 고정하고, <em>플랫폼에 기대지 않습니다</em></h2>
+  <h2>사전에 고정하고, <em>소셜 플랫폼 API 에 기대지 않습니다</em></h2>
   <div class="cols">
     <div>
       <h3>① 사후 관찰 → 사전 고정</h3>
@@ -499,7 +505,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <p>POI 는 <strong>본인이 결과를 알기 전에 스스로 고정</strong>합니다. 무엇을 볼지도 그때 선언하고, 나중에 바꿀 수 없습니다.</p>
       <h3>② 플랫폼 비의존 — 가설이 아니라 실증</h3>
       <p class="quiet">Kaito 는 2026년 1월 <b>X 가 API 접근을 차단</b>하면서 주력 제품 Yaps 를 종료했습니다. <strong>15.7만 명이 모여 있던 커뮤니티가 함께 사라졌습니다.</strong> 남의 플랫폼 위에 세운 측정은 그 플랫폼이 문을 닫으면 같이 닫힙니다.</p>
-      <p><strong>POI 에는 끊길 API 가 없습니다.</strong> 사용자가 스스로 온체인에 커밋하고, 판정은 컨트랙트가 합니다.</p>
+      <p><strong>POI 의 핵심 기록은 <b>소셜 플랫폼 API 없이</b> 남습니다. <span class="quiet">관측 데이터·RPC·인덱서에는 의존하지만, 그건 갈아 끼울 수 있습니다.</span></strong> 사용자가 스스로 온체인에 커밋하고, 판정은 컨트랙트가 합니다.</p>
     </div>
     <div>
       <h3>정직하게 — 기술 장벽은 낮다</h3>
@@ -710,10 +716,10 @@ body[data-path] .slide:not([data-key]){display:none!important}
   </svg>
   </figure>
   <div class="tblwrap"><table>
-    <tr><td>B2C 구독</td><td><span class="quiet">판단을 읽는 쪽</span><br>저널 · 장기 리포트 · 외부 공유 프로필 <span class="s-lab">3단계</span></td></tr>
-    <tr><td>검증 수수료</td><td><span class="quiet">제3자가 요청</span><br>정기 재검증 · 갱신 · 이의 대응 <span class="s-lab">3단계</span></td></tr>
-    <tr><td>B2B 조회 API</td><td><span class="quiet">리서치 기관 · 운용사</span><br>발행물에 검증 링크를 붙입니다. 건당 과금 <span class="s-lab">3단계</span></td></tr>
-    <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증합니다. <b>개인정보를 직접 보관하지 않아도 됩니다</b> <span class="s-lab">확장 · 25쪽</span></td></tr>
+    <tr class="me"><td class="hot">B2B 조회 API</td><td class="hot"><b>첫 수익 가설</b> <span class="s-lab">6~12개월</span><br><span class="quiet">KOL 에이전시 · Web3 프로젝트 · 리서치 기관</span> — 섭외 전에 이력을 확인합니다. 건당 또는 연 라이선스</td></tr>
+    <tr><td>B2C 구독</td><td><span class="quiet">후속 가설 · 12개월~ · 판단을 읽는 쪽</span><br>저널 · 장기 리포트 · 외부 공유 프로필</td></tr>
+    <tr><td>검증 수수료</td><td><span class="quiet">후속 가설 · 제3자가 요청</span><br>정기 재검증 · 갱신 · 이의 대응</td></tr>
+    <tr><td>증명 인프라</td><td><span class="quiet">RWA 발행사 · 금융기관</span><br>투자자 증명을 검증합니다. <b>개인정보를 직접 보관하지 않아도 됩니다</b> <span class="s-lab">확장 가설 · 25쪽</span></td></tr>
   </table></div>
   <p class="lede eave"><strong>지금 단계에서 수익화하지 않습니다.</strong> 단가는 아직 정하지 않았습니다 — <em>먼저 확인할 것은 판단이 쌓이는가</em>이고, 판단이 쌓이는 속도를 보고 정합니다.</p>
 </section>
@@ -733,7 +739,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 <section class="slide">
   <div class="tag">Ⅴ. 사업모델 <b>BEP</b></div>
-  <h2><em>12~18개월</em>에 손익분기에 닿습니다</h2>
+  <h2>공급 100명을 넘으면 <em>12~18개월 BEP</em> 를 검증합니다</h2>
   <div class="cols">
     <div>
       <h3>월 고정비 — 2인 기준</h3>
@@ -747,7 +753,7 @@ body[data-path] .slide:not([data-key]){display:none!important}
       <p class="quiet"><b>인건비는 추정이 아닙니다.</b> 국책 과제 기간에 <b>3인(대표+2명)</b> 급여를 실제로 집행해 봤고, 그 규모를 알고 잡은 숫자입니다.</p>
     </div>
     <div>
-      <h3>BEP 조건 — 셋 중 하나</h3>
+      <h3>BEP 시나리오 — 셋 중 하나 <span class="quiet">(확정 가격 아님)</span></h3>
       <div class="tblwrap"><table>
         <tr><td>B2B</td><td>연 <b>$20,000</b> 라이선스 × <b>5곳</b><br><span class="quiet">KOL 캠페인 예산이 월 $50k~500k 라 연 $20k 는 한 달 예산의 일부입니다</span></td></tr>
         <tr><td>건당 과금</td><td>검증 <b>$1</b> × 월 <b>7,000건</b></td></tr>
@@ -809,20 +815,21 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 <section class="slide">
   <div class="tag">Ⅵ. 팀과 실행 <b>검증 마일스톤</b></div>
-  <h2><em>3·6·12·18개월</em>에 멈출 기준을 먼저 정했습니다</h2>
+  <h2><em>3·6·12·18개월</em> 검증 게이트를 먼저 정했습니다</h2>
   <p class="lede">직전 제품에서 없었던 것은 기술이 아니라 <strong>멈추는 기준</strong>이었습니다. <span class="quiet">국책 과제로 2명을 고용해 완수했지만, 과제가 끝나고 급여를 감당할 수 없어 정리했습니다.</span> 이번에는 <em>먼저 정하고 들어갑니다.</em></p>
   <div class="tblwrap"><table>
     <tr><th>시점</th><th>넘어야 하는 것</th><th>미달이면</th></tr>
     <tr><td><b>3개월</b></td><td>이력 증명 <b>30명</b> · 그중 사전 커밋 <b>10명</b><br><span class="s">이력 증명은 행동 변화가 없어 더 넓게 잡습니다</span></td><td class="hot">공급이 안 모이는 것 — 대상을 바꿔 재시도</td></tr>
     <tr><td><b>6개월</b></td><td>발행자 <b>100명</b> · 유료 의사를 밝힌 기관 <b>1곳</b><br><span class="s">10명이 소개와 공개로 번지는 수</span></td><td class="hot">공급이 안 늘거나 돈이 안 보이는 것 — 사업 지속을 재검토</td></tr>
     <tr><td><b>12개월</b></td><td>MRR <b>100만원</b></td><td class="hot">BEP 경로가 없는 것</td></tr>
-    <tr><td><b>18개월</b></td><td>월 <b>950만원</b> — 손익분기</td><td class="hot">구조가 안 되는 것 — 접습니다</td></tr>
+    <tr><td><b>18개월</b></td><td>월 <b>950만원</b> — 손익분기</td><td class="hot">구조가 안 되는 것 — 추가 투자를 중단하고 종료를 결정합니다</td></tr>
   </table></div>
   <p class="lede eave"><strong>이력 증명과 사전 커밋은 다른 숫자입니다.</strong> 이력 증명은 이미 한 거래를 증명하는 것이라 설득이 거의 필요 없고, 사전 커밋은 새 행동이라 설득이 듭니다. <em>100명은 그 10명이 남을 데려와야 나오는 수다</em> — 그래서 3개월에 10명이 안 되면 6개월 100명은 물어볼 필요도 없습니다. 커밋 비용이 건당 1.21원이라 이 확인에 드는 돈은 거의 없습니다.</p>
 </section>
 <section class="slide dense" data-key>
   <div class="tag">Ⅵ. 팀과 실행 <b>확장</b></div>
   <h2>고정할 내용만 바꾸면 <em>같은 구조로 확장</em>됩니다</h2>
+  <div class="note">아래 표에서 <b>「완료」가 아닌 항목은 현재 제품 범위가 아니라</b>, 핵심 가설을 검증한 뒤의 확장 가능성입니다. 12개월 로드맵과 자금 사용 계획에는 포함하지 않았습니다.</div>
   <p class="lede">POI 가 하는 일은 <strong>「결과가 나오기 전에 고정하고, 나중에 제3자가 확인합니다」</strong> 입니다. 컨트랙트는 <strong>고정된 내용이 무엇인지 보지 않습니다</strong> — 해시와 구간, 산술만 검사합니다. 그래서 <strong>고정할 내용만 바꾸면 다른 것도 같은 방식으로 증명됩니다.</strong> <em>아래 두 번째 줄이 실제로 해 본 기록입니다.</em></p>
   <div class="tblwrap"><table>
     <tr><th>무엇을</th><th>어떻게</th><th>무엇이 필요한가</th></tr>
