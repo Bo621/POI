@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>마루 — 공개 버전 기획 화면</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* 마루(~/Maru/src/styles.css)의 토큰을 그대로 쓴다 — 같은 제품으로 읽혀야 한다 */
+  :root{
+    --ink:oklch(.235 .035 248); --ink-soft:oklch(.43 .028 248); --ink-faint:oklch(.58 .022 248);
+    --paper:oklch(.965 .018 82); --paper-raised:oklch(.985 .012 84); --paper-deep:oklch(.925 .028 78);
+    --seal:oklch(.55 .195 29); --seal-dark:oklch(.42 .16 29);
+    --ok:oklch(.52 .12 155); --wait:oklch(.62 .11 75);
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif:"Gowun Batang",serif;
+    --body:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font:400 14px/1.6 var(--body);
+    width:1640px;padding:30px;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+
+  .win{background:var(--paper-raised);border:1px solid var(--paper-deep);border-radius:14px;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:9px;padding:11px 15px;background:var(--paper-deep);
+    border-bottom:1px solid rgba(0,0,0,.06)}
+  .dot{width:9px;height:9px;border-radius:50%;background:rgba(0,0,0,.14)}
+  .url{margin-left:9px;font:400 11px var(--mono);color:var(--ink-faint)}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:15px 22px;
+    border-bottom:1px solid var(--paper-deep)}
+  .logo{display:flex;align-items:center;gap:9px}
+  .mark{width:22px;height:22px;border:2.5px solid var(--seal)}
+  .logo b{font:700 16px var(--body);letter-spacing:-.02em}
+  .logo span{font:500 9px var(--mono);color:var(--ink-faint);letter-spacing:.14em;display:block;margin-top:1px}
+  nav{display:flex;gap:17px;font:600 12px var(--body);color:var(--ink-soft)}
+  nav .on{color:var(--seal);border-bottom:2px solid var(--seal);padding-bottom:2px}
+
+  .pad{padding:20px 22px}
+  .eyebrow{font:600 9.5px var(--mono);letter-spacing:.16em;color:var(--ink-faint);margin-bottom:8px}
+  h1{font:700 25px/1.2 var(--body);letter-spacing:-.03em}
+  .sub{margin-top:7px;color:var(--ink-soft);font-size:12.5px;max-width:44ch}
+
+  .tabs{display:flex;gap:7px;margin:16px 0 6px}
+  .tab{font:600 11.5px var(--body);padding:5px 13px;border-radius:999px;border:1px solid var(--paper-deep);
+    color:var(--ink-soft);background:var(--paper)}
+  .tab.on{border-color:var(--seal);color:var(--seal);background:transparent}
+
+  .card{border:1px solid var(--paper-deep);border-radius:11px;padding:14px 16px;margin-top:11px;background:var(--paper-raised)}
+  .who{display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--paper-deep),var(--seal)/.2);
+    border:1px solid var(--paper-deep)}
+  .handle{font-weight:700}
+  .badge{font:600 9.5px var(--mono);letter-spacing:.06em;padding:2px 7px;border-radius:5px;
+    border:1px solid currentColor}
+  .b-ok{color:var(--ok)} .b-none{color:var(--ink-faint)}
+  .when{margin-left:auto;font:400 11px var(--mono);color:var(--ink-faint)}
+  .call{margin-top:10px;font:400 16.5px/1.45 var(--serif);letter-spacing:-.01em}
+  .win-row{margin-top:9px;font:400 11px var(--mono);color:var(--ink-faint)}
+  .foot{margin-top:11px;padding-top:10px;border-top:1px dashed var(--paper-deep);
+    display:flex;align-items:center;gap:9px}
+  .stamp{font:700 11px var(--body);padding:4px 11px;border:1.5px solid currentColor;border-radius:6px}
+  .s-ok{color:var(--ok)} .s-no{color:var(--seal)} .s-wait{color:var(--wait)}
+  .obs{font:400 11px var(--mono);color:var(--ink-soft)}
+  .open{margin-left:auto;font:600 11.5px var(--body);color:var(--seal)}
+
+  .note{margin-top:14px;font-size:11px;color:var(--ink-faint);line-height:1.6}
+  .note b{color:var(--ink-soft)}
+
+  /* 프로필 */
+  .phead{display:flex;align-items:flex-start;gap:14px}
+  .pav{width:52px;height:52px;border-radius:50%;background:var(--paper-deep);border:1px solid rgba(0,0,0,.08)}
+  .pname{font:700 20px var(--body);letter-spacing:-.02em}
+  .pmeta{margin-top:4px;font:400 11.5px var(--mono);color:var(--ink-faint)}
+  .share{margin-left:auto;font:600 11.5px var(--body);color:var(--seal);
+    border:1px solid var(--seal);border-radius:8px;padding:7px 13px}
+  .tl{margin-top:17px;border-left:2px solid var(--paper-deep);padding-left:16px}
+  .ev{position:relative;padding-bottom:15px}
+  .ev::before{content:"";position:absolute;left:-21px;top:5px;width:9px;height:9px;border-radius:50%;
+    background:var(--paper-raised);border:2px solid var(--ink-faint)}
+  .ev.ok::before{border-color:var(--ok)} .ev.no::before{border-color:var(--seal)}
+  .ev.wait::before{border-color:var(--wait)}
+  .ev .d{font:400 10.5px var(--mono);color:var(--ink-faint)}
+  .ev .t{margin-top:2px;font:400 14.5px/1.4 var(--serif)}
+  .ev .r{margin-top:4px;font:600 11px var(--body)}
+  .r-ok{color:var(--ok)} .r-no{color:var(--seal)} .r-wait{color:var(--wait)}
+</style>
+</head>
+<body>
+
+<!-- ─────────── 피드 ─────────── -->
+<div class="win">
+  <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i>
+    <span class="url">maru.xyz/feed</span></div>
+  <header>
+    <div class="logo"><i class="mark"></i><div><b>마루</b><span>MARU / POI SOCIAL</span></div></div>
+    <nav><a class="on">공개 피드</a><a>판단 작성</a><a>내 기록</a></nav>
+  </header>
+  <div class="pad">
+    <div class="eyebrow">PUBLIC DECISION FLOOR</div>
+    <h1>결과를 알기 전에 고정된 판단만 흐릅니다</h1>
+    <p class="sub">스크린샷이 아니라 온체인 기록을 직접 읽습니다. 틀린 판단도 지워지지 않고 그대로 남습니다.</p>
+
+    <div class="tabs"><span class="tab on">전체</span><span class="tab">팔로우</span><span class="tab">곧 결과 나옴</span></div>
+
+    <div class="card">
+      <div class="who"><i class="av"></i><span class="handle">@macro_marcus</span>
+        <span class="badge b-ok">검증된 지갑</span><span class="when">3시간 전</span></div>
+      <p class="call">“BTC 가 이 구간 끝에 9,000만 원을 넘는다”</p>
+      <div class="win-row">관측 구간 07-31 08:22 → 08:32 UTC · 업비트 1분봉</div>
+      <div class="foot"><span class="stamp s-ok">맞음</span>
+        <span class="obs">관측 91,020,000</span><span class="open">결정 열기 ↗</span></div>
+    </div>
+
+    <div class="card">
+      <div class="who"><i class="av"></i><span class="handle">@onchain_dani</span>
+        <span class="badge b-none">미검증 지갑</span><span class="when">1일 전</span></div>
+      <p class="call">“이 지갑이 이 구간에 롱을 연다”</p>
+      <div class="win-row">관측 구간 08-04 04:53 → 05:53 UTC · 온체인 체결</div>
+      <div class="foot"><span class="stamp s-ok">맞음</span>
+        <span class="obs">롱 진입 4건 · 0.02570</span><span class="open">결정 열기 ↗</span></div>
+    </div>
+
+    <div class="card">
+      <div class="who"><i class="av"></i><span class="handle">@yield_jun</span>
+        <span class="badge b-ok">검증된 지갑</span><span class="when">2일 전</span></div>
+      <p class="call">“이번 주 안에 조정이 온다”</p>
+      <div class="win-row">관측 구간 종료 · 결과 미등록</div>
+      <div class="foot"><span class="stamp s-no">기한초과</span>
+        <span class="obs">발행자가 지우거나 감출 수 없습니다</span></div>
+    </div>
+
+    <div class="card">
+      <div class="who"><i class="av"></i><span class="handle">@macro_marcus</span>
+        <span class="badge b-ok">검증된 지갑</span><span class="when">방금</span></div>
+      <p class="call">“다음 구간 끝에 9,500만 원을 넘는다”</p>
+      <div class="win-row">관측 구간 진행 중 · 4시간 12분 남음</div>
+      <div class="foot"><span class="stamp s-wait">진행 중</span>
+        <span class="obs">결과가 붙기 전이라 아무도 결과를 모릅니다</span></div>
+    </div>
+
+    <p class="note"><b>순위나 성과 지표가 아닙니다.</b> 조회된 기록의 나열이고, 조회된 것이 전부라는 보장은 없습니다.</p>
+  </div>
+</div>
+
+<!-- ─────────── 발행자 프로필 ─────────── -->
+<div class="win">
+  <div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i>
+    <span class="url">maru.xyz/@macro_marcus</span></div>
+  <header>
+    <div class="logo"><i class="mark"></i><div><b>마루</b><span>MARU / POI SOCIAL</span></div></div>
+    <nav><a>공개 피드</a><a>판단 작성</a><a class="on">발행자</a></nav>
+  </header>
+  <div class="pad">
+    <div class="phead">
+      <i class="pav"></i>
+      <div>
+        <div class="pname">@macro_marcus</div>
+        <div class="pmeta">검증된 지갑 · 0xA1Cb…F310 · 2026-03 부터 기록</div>
+      </div>
+      <span class="share">공유 링크 복사</span>
+    </div>
+
+    <p class="sub" style="margin-top:14px">구독자에게 이 링크 하나를 줍니다. 여기 있는 판단은 <b>전부 결과가 나오기 전에</b> 고정된 것이고, 제3자가 같은 자료로 다시 확인할 수 있습니다.</p>
+
+    <div class="tl">
+      <div class="ev wait">
+        <div class="d">08-08 09:14 UTC · 진행 중</div>
+        <div class="t">“다음 구간 끝에 9,500만 원을 넘는다”</div>
+        <div class="r r-wait">결과 대기 · 4시간 12분 남음</div>
+      </div>
+      <div class="ev ok">
+        <div class="d">08-04 05:53 UTC · 종료</div>
+        <div class="t">“이 지갑이 이 구간에 롱을 연다”</div>
+        <div class="r r-ok">맞음 · 롱 진입 4건 0.02570</div>
+      </div>
+      <div class="ev no">
+        <div class="d">08-02 11:00 UTC · 종료</div>
+        <div class="t">“이번 주 안에 반등이 온다”</div>
+        <div class="r r-no">틀림 · 관측값이 조건에 못 미쳤습니다</div>
+      </div>
+      <div class="ev ok">
+        <div class="d">07-31 08:32 UTC · 종료</div>
+        <div class="t">“BTC 가 이 구간 끝에 9,000만 원을 넘는다”</div>
+        <div class="r r-ok">맞음 · 관측 91,020,000</div>
+      </div>
+      <div class="ev no">
+        <div class="d">07-28 14:30 UTC · 종료</div>
+        <div class="t">“이 구간에 신고가를 쓴다”</div>
+        <div class="r r-no">기한초과 · 결과를 올리지 않았습니다</div>
+      </div>
+    </div>
+
+    <div class="eyebrow" style="margin-top:20px">SHARED LINK PREVIEW</div>
+    <div style="border:1px solid var(--paper-deep);border-radius:11px;overflow:hidden;margin-top:8px">
+      <div style="padding:15px 17px;background:var(--paper)">
+        <div style="font:400 15px/1.4 var(--serif)">“BTC 가 이 구간 끝에 9,000만 원을 넘는다”</div>
+        <div style="margin-top:7px;display:flex;align-items:center;gap:8px">
+          <span class="stamp s-ok" style="font-size:10px;padding:3px 9px">맞음</span>
+          <span style="font:400 10.5px var(--mono);color:var(--ink-faint)">결과 전 고정 · 07-31 08:22 UTC</span>
+        </div>
+      </div>
+      <div style="padding:9px 17px;background:var(--paper-deep);font:400 10.5px var(--mono);color:var(--ink-soft)">
+        maru.xyz · @macro_marcus</div>
+    </div>
+    <p class="note" style="margin-top:8px">구독자가 링크를 붙이면 이 카드가 뜹니다. <b>결과를 알기 전에 고정했다는 사실이 미리보기에 그대로 실립니다.</b></p>
+
+    <p class="note"><b>적중률을 계산해 보여주지 않습니다.</b> 기록의 완전성을 보장하지 못하는데 그 위에 순위를 세우면 순위가 거짓말이 됩니다. 대신 <b>틀린 것과 안 올린 것을 지우지 않고 그대로</b> 둡니다.</p>
+  </div>
+</div>
+
+</body>
+</html>

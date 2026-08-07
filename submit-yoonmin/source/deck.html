@@ -255,6 +255,12 @@ body[data-path] .slide:not([data-key]){display:none!important}
 .mark h4{font:600 .96em/1.45 var(--body);color:var(--ink);margin-bottom:.3rem}
 .mark p{color:var(--ink-soft);font-size:.85em;line-height:1.6}
 .mark p b{color:var(--ink);font-weight:600}
+.shots-2{display:grid;gap:clamp(.8rem,1.6vw,1.3rem);grid-template-columns:minmax(0,38%) minmax(0,1fr);
+  margin-top:clamp(.6rem,1.2vw,.9rem);max-width:min(100%,78rem);align-items:start}
+.slide .shots-2 + .marks-2{margin-top:clamp(.7rem,1.4vw,1rem)}
+.shots-2 .shot img{max-height:29vh;object-fit:cover;object-position:top}
+.shot.mock{border-style:dashed;border-color:var(--ink-faint)}
+.cap-mock{background:var(--ink-faint)!important}
 .shots-wide{margin-top:clamp(.9rem,1.8vw,1.4rem);max-width:min(100%,50rem);display:flex;flex-direction:column;gap:.7rem}
 .marks-2{display:grid;gap:clamp(.8rem,1.6vw,1.2rem) clamp(1.6rem,3.4vw,3rem);
   grid-template-columns:repeat(auto-fit,minmax(21rem,1fr));margin-top:clamp(1rem,2vw,1.5rem);max-width:min(100%,76rem)}
@@ -567,34 +573,38 @@ body[data-path] .slide:not([data-key]){display:none!important}
 </section>
 
 <section class="slide dense" data-key>
-  <div class="tag">Ⅳ. 제품 <b>실제 화면 — 소비자 앱</b></div>
+  <div class="tag">Ⅳ. 제품 <b>소비자 앱 — 지금과 공개 시점</b></div>
   <h2>증명은 아래에, <em>사람이 보는 곳은 위에</em></h2>
-  <p class="lede">프로토콜만 있으면 쓸 이유가 없습니다. 그래서 <strong>검증된 판단이 흐르는 피드</strong>를 그 위에 올렸습니다. <span class="quiet">별도 저장소·별도 배포이고, 컨트랙트는 새로 배포하지 않고 읽기만 합니다.</span></p>
-  <div class="shots">
+  <p class="lede">프로토콜만 있으면 쓸 이유가 없습니다. 그래서 <strong>검증된 판단이 흐르는 피드</strong>를 그 위에 올렸습니다. <span class="quiet">별도 저장소·별도 배포이고 컨트랙트는 읽기만 합니다.</span></p>
+  <div class="shots-2">
     <figure class="shot">
-      <img src="shots/maru-feed.png" alt="마루 공개 피드. 검증된 판단이 시간 역순으로 흐르고, 각 카드에 발행자 주소·도장 검증·관측 구간·상태 인장이 붙는다.">
-      <figcaption>LIVE · 지갑 없이 열림</figcaption>
+      <img src="shots/maru-feed.png" alt="지금 돌고 있는 마루 공개 피드. 발행자 주소와 결정 UID, 상태 인장이 보인다.">
+      <figcaption>지금 · LIVE</figcaption>
     </figure>
-    <div class="marks">
-      <div class="mark" data-n="01">
-        <h4>스크린샷 대신 온체인을 읽습니다</h4>
-        <p>피드의 모든 카드가 <b>체인에서 직접 읽은 기록</b>입니다. 편집할 수 있는 자리가 없습니다.</p>
-      </div>
-      <div class="mark" data-n="02">
-        <h4>열람 조건을 독자가 겁니다</h4>
-        <p><b>도장 검증 지갑만</b> · <b>활성 정산이 있는 발행자만</b> — 독자가 필터를 정하고, 그 조건이 공유 링크에 담깁니다.</p>
-      </div>
-      <div class="mark" data-n="03">
-        <h4>맨 위가 오늘 올린 그 결정입니다</h4>
-        <p>오늘 프로토콜에 지표를 하나 등록하고 결정을 커밋했더니 <b>피드에 그대로 흘렀습니다.</b> UID <code>0xc4aeba55…26dd9d</code> — 두 층이 실제로 붙어 있다는 증거입니다.</p>
-      </div>
-      <div class="mark" data-n="04">
-        <h4>여기서도 한계를 먼저 말합니다</h4>
-        <p>「순위나 성과 지표가 아닙니다」 · 「조회된 것이 전부라는 보장은 없습니다」를 화면에 붙였습니다.</p>
-      </div>
+    <figure class="shot mock">
+      <img src="shots/maru-mockup.png" alt="공개 버전 기획 화면. 왼쪽은 판단이 사람 문장으로 흐르는 피드, 오른쪽은 발행자 프로필과 공유 카드 미리보기.">
+      <figcaption class="cap-mock">공개 버전 · 기획 화면</figcaption>
+    </figure>
+  </div>
+  <div class="marks-2">
+    <div class="mark" data-n="01">
+      <h4>맨 위가 오늘 올린 그 결정입니다</h4>
+      <p>프로토콜에 지표를 등록하고 결정을 커밋했더니 <b>피드에 그대로 흘렀습니다.</b> UID <code>0xc4aeba55…26dd9d</code> — 두 층이 붙어 있다는 증거입니다.</p>
+    </div>
+    <div class="mark" data-n="02">
+      <h4>공개 시점에 바꿀 것은 표현입니다</h4>
+      <p>구조는 그대로 두고 <b>주소를 핸들로, 술어를 사람 문장으로</b> 바꿉니다. 발행자 프로필이 「구독자에게 주는 링크 하나」가 됩니다.</p>
+    </div>
+    <div class="mark" data-n="03">
+      <h4>틀린 것과 안 올린 것을 그대로 둡니다</h4>
+      <p>기획 화면에도 <b>기한초과와 틀림</b>을 가운데 뒀습니다. 성공만 보이는 화면은 이 제품이 하려는 일과 반대입니다.</p>
+    </div>
+    <div class="mark" data-n="04">
+      <h4>적중률은 만들지 않습니다</h4>
+      <p>완전성을 보장하지 못하는데 순위를 세우면 <b>순위가 거짓말이 됩니다.</b></p>
     </div>
   </div>
-  <p class="src"><b>지금 열립니다</b> — maru-web-production-0407.up.railway.app · 현재 피드의 기록은 <b>시연용 데모 페르소나</b>의 판단이고 화면에 그렇게 표시됩니다.</p>
+  <p class="src"><b>지금 열립니다</b> — maru-web-production-0407.up.railway.app · 현재 피드의 기록은 <b>시연용 데모 페르소나</b>의 판단이고 화면에 그렇게 표시됩니다. 오른쪽은 <b>기획 화면이고 아직 구현하지 않았습니다.</b></p>
 </section>
 <section class="slide dense">
   <div class="tag">Ⅳ. 제품 <b>실행 정합성</b></div>
